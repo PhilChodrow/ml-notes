@@ -1,0 +1,143 @@
+/* css styles */
+
+
+td {
+    /* height: 50px; */
+    vertical-align: top;
+    border-width: 0px;
+    border-color: #ffffff;
+    border: none; 
+  }
+
+table {
+  border-collapse: collapse;
+  border-width: 0px;
+  border: none; 
+}
+
+.table>:not(caption)>*:not(:last-child)>* { 
+  border: none; 
+}
+
+.table>:not(:first-child) {
+  border: none;
+}
+
+.table {
+  border: none;
+}
+
+tr {
+  border: none;
+}
+
+.smaller { 
+    font-size: 0.8em;
+}
+
+.syllabus-date { 
+    font-size: 0.8em;
+    color: grey;
+}
+
+.syllabus-day-of-week { 
+    font-size: 1.5em;
+    text-align: center;
+    margin-top: 0;
+    padding-top: 0;       
+}
+
+.syllabus-date-pane {  
+    padding-right: 1em;
+    min-width:4em;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.syllabus-item-objective { 
+    margin-bottom: 2em;
+    margin-top: 1em;
+    padding-top: 0.5em;
+    padding-bottom: 2em; 
+    width: 20%;
+}
+
+.syllabus-item-readings { 
+  margin-bottom: 2em;
+  margin-top: 1em;
+  padding-top: 0.5em;
+  padding-bottom: 2em; 
+  width: 20%;
+}
+
+.syllabus-item-assignment { 
+  margin-bottom: 2em;
+  margin-top: 1em;
+  padding-top: 0.5em;
+  padding-bottom: 2em; 
+  width: 20%;
+}
+
+.syllabus-description-table-entry {
+    padding-bottom:1em;
+}
+
+.syllabus-description-table-header {
+    padding-right:1em; 
+    min-width:10em;
+}
+
+.syllabus-description-learning-objective {
+  padding-right:1em; 
+  min-width:10em;
+  color: #003F84;
+}
+
+.learning-objective {
+  font-weight: bold;
+  color: #003F84;
+}
+
+.assignment-goal {
+  font-weight: bold;
+  color: #c66600;
+}
+
+.supporting-reading {
+  font-style: italic;
+  color: #444444;
+}
+
+
+@media only screen and (max-width: 700px) {
+    .syllabus-description-table-header {
+      min-width: 5em;
+    }
+  }
+
+
+.float-left { 
+    float: left;
+    margin-right: 2rem;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+.img-profile {
+    float: left;
+    margin-right: 3%;
+    margin-top: 0%;
+    margin-bottom: 1%;
+  }
+.img-responsive {
+    width: 25%;
+}
+
+
+@media only screen and (max-width: 400px) {
+    .img-responsive {
+      width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }

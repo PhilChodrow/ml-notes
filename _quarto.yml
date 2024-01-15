@@ -1,0 +1,45 @@
+project:
+  type: book
+  output-dir: docs
+  resources:
+    - "lecture-scripts/*"
+    - "assignments"
+    - "lecture-notes/*.ipynb"
+  pre-render: 
+    - scripts/hide-markers.py
+    - scripts/create-ipynb.py
+
+book: 
+  title: "Machine Learning"
+  author: "Phil Chodrow"
+  date: "01/15/2024"
+  chapters:
+    - index.qmd
+    - part: "Introducing Classification"
+      chapters: 
+        - chapters/00-intro.qmd
+        - chapters/10-perceptron.qmd
+  appendices: 
+    - chapters/00-intro.qmd
+
+bibliography: refs.bib
+
+
+ 
+format:
+  html:
+    theme: [cosmo, custom.scss]
+    css: styles.css
+    toc: true
+    number-depth: 0
+    reference-location: margin
+    callout-icon: false;
+    callout-appearance: simple
+
+jupyter: conda-env-ml-0451-py
+
+execute: 
+  cache: true
+
+
+

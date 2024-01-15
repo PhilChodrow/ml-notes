@@ -1,0 +1,7 @@
+---
+tbl-cap-location: margin
+title: Syllabus
+callout-icon: false
+---
+
+These are the machine learning notes! 
