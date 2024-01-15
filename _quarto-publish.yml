@@ -1,0 +1,17 @@
+project: 
+  pre-render: 
+    - scripts/create-ipynb.py
+    - scripts/prep-qmd.py
+
+
+book: 
+  chapters:
+    - index.qmd
+    - part: "Introduction to Prediction"
+      chapters: 
+        - chapters/00-intro.qmd
+        - chapters/01-data-and-models.qmd
+        - chapters/10-perceptron.qmd
+  appendices: 
+    - chapters/00-intro.qmd
+  

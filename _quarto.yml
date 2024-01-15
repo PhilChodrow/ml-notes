@@ -5,27 +5,16 @@ project:
     - "lecture-scripts/*"
     - "assignments"
     - "lecture-notes/*.ipynb"
-  pre-render: 
-    - scripts/hide-markers.py
-    - scripts/create-ipynb.py
 
 book: 
   title: "Machine Learning"
   author: "Phil Chodrow"
   date: "01/15/2024"
-  chapters:
-    - index.qmd
-    - part: "Introducing Classification"
-      chapters: 
-        - chapters/00-intro.qmd
-        - chapters/10-perceptron.qmd
-  appendices: 
-    - chapters/00-intro.qmd
+  body-footer: |
+        <br> <br> <span style="color:grey;">&#169; Phil Chodrow, 2024</span>
 
 bibliography: refs.bib
 
-
- 
 format:
   html:
     theme: [cosmo, custom.scss]
@@ -41,5 +30,7 @@ jupyter: conda-env-ml-0451-py
 execute: 
   cache: true
 
-
+profile:
+  group: 
+    - [preview, publish]
 

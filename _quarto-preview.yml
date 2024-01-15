@@ -1,0 +1,10 @@
+book: 
+  chapters:
+    - index.qmd
+    - part: "Introduction to Prediction"
+      chapters: 
+        - source/00-intro.qmd
+        - source/01-data-and-models.qmd
+        - source/10-perceptron.qmd
+  appendices: 
+    - source/00-intro.qmd
