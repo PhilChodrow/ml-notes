@@ -1,5 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Petrona:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Red+Hat+Text:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
+
+
+
 /* css styles */
 
+body {
+  font-family: 'Petrona', sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-weight: bold;
+  margin-top: 1rem;
+  font-family: 'Petrona', serif;
+}
 
 td {
     /* height: 50px; */
@@ -42,7 +55,7 @@ tr {
 
 .syllabus-day-of-week { 
     font-size: 1.5em;
-    text-align: center;
+    text-align: left;
     margin-top: 0;
     padding-top: 0;       
 }
@@ -90,12 +103,12 @@ tr {
 .syllabus-description-learning-objective {
   padding-right:1em; 
   min-width:10em;
-  color: #003F84;
+  color: #A23E48;
 }
 
 .learning-objective {
   font-weight: bold;
-  color: #003F84;
+  color: #A23E48;
 }
 
 .assignment-goal {
