@@ -17,7 +17,7 @@ for f in os.listdir("source"):
             live_path = f"{f.replace('.qmd', '.ipynb')}"
             if live_path in os.listdir("docs/live-notebooks"):
                 
-                link_line = "*Download the live notebook corresponding to these notes [here](blank).* \n"
+                link_line = f"*Download the live notebook corresponding to these notes [here](../live-notebooks/{live_path}).* \n"
                 
                 cleaned_lines = cleaned.split("\n")
                 ix = 0

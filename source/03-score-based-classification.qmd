@@ -3,6 +3,8 @@ code-fold: false
 code-summary: "Show code"
 ---
 
+
+
 # Score-Based Classification
 
 A particular focus of this course is the use of machine learning models for automated decision-making. Now that we've been introduced to the fundamental idea of finding patterns in data, let's jump straight into a problem of *predictive modeling*. Predictive modeling is based on a simple idea: let's use past observations to make decisions about the future, in an automated way. 
