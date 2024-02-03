@@ -30,7 +30,7 @@ plt.style.use('seaborn-v0_8-whitegrid')
 ```
 
 ```{python}
-url = "../data/palmer-penguins/palmer-penguins.csv"
+url = "https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/palmer-penguins/palmer-penguins.csv"
 ```
 
 ```{python}
