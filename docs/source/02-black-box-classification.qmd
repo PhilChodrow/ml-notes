@@ -1,5 +1,6 @@
 ---
 fig-cap-location: margin
+code-fold: false
 ---
 
 # Classification as a Black Box
@@ -262,9 +263,11 @@ While we're at it, let's try fitting a different classifier, also supplied by Sc
 
 
 ```{python}
+#---
 SVM = SVC(gamma = 5)
 SVM.fit(X_train, y_train)
 decision_regions(X_train, y_train, SVM, "Decision Regions for Support Vector Machine")
+#---
 ```
 
 Wow! The support vector machine classifier achieved even higher accuracy on the training data. This is enabled by the greater *flexibility* of the SVM. Flexibility comes from a lot of places in machine learning, and generally refers to the ability of models to learn complicated decision boundaries like the ones shown here. 
@@ -290,21 +293,27 @@ from sklearn.model_selection import cross_val_score
 First let's compute the cross-validation accuracies for logistic regression: 
 
 ```{python}
+#---
 cv_scores_LR = cross_val_score(LR, X_train, y_train, cv=5)
 cv_scores_LR
+#---
 ```
 
 A convenient way to summarize these results is by computing the average: 
 
 ```{python}
+#---
 cv_scores_LR.mean()
+#---
 ```
 
 Let's compare to SVM: 
 
 ```{python}
+#---
 cv_scores_SVM = cross_val_score(SVM, X_train, y_train, cv=5)
 cv_scores_SVM.mean()
+#---
 ```
 
 Ah! It looks like our SVM classifier was indeed *too flexible* to do well in predicting data that it hasn't seen before. Although the SVM had better training accuracy than the logistic regression model, it failed to *generalize* to the task of unseen prediction. This phenomenon is called *overfitting*. Dealing with overfitting is one of the fundamental modeling challenges in applied machine learning. 
@@ -314,8 +323,10 @@ Ah! It looks like our SVM classifier was indeed *too flexible* to do well in pre
 So far, we've fit a logistic regression model and a support vector machine model; compared the two on a cross-validation task; and determined that the logistic regression model is most likely to generalize. Let's now retrain the logistic regression model on the complete training data and finally evaluate it on the test set: 
 
 ```{python}
+#---
 LR.fit(X_train,y_train) 
 LR.score(X_test, y_test)
+#---
 ```
 
 Not bad! This is our final estimate for the accuracy of our model as a classification tool on unseen penguin data.
@@ -326,10 +337,12 @@ Accuracy is a simple measure of how many errors a model makes. In many applicati
 
 ```{python}
 from sklearn.metrics import confusion_matrix
-y_test_pred = LR.predict(X_test)
 
+#---
+y_test_pred = LR.predict(X_test)
 C = confusion_matrix(y_test, y_test_pred)
 C
+#---
 ```
 
 The entry in the `i`th row and `j`th column of the confusion matrix gives the number of data points that have true label `i` and predicted label `j` from our model. 
@@ -346,12 +359,6 @@ for i in range(3):
 In these notes, we took a very quick tour of the core data science workflow. We considered a simple classification problem in which we acquired some data, cleaned it up a bit, visualized several of its features, used those features to make a predictive classification model, visualized that model, and evaluated its accuracy. Along the way, we encountered the phenomenon of *overfitting*: models that are too flexible will achieve remarkable accuracy on the training set but will generalize poorly to unseen data. The problem of designing models that are "flexible enough" and "in the right way" is a fundamental driving force in modern machine learning, and the deep learning revolution can be viewed as the latest paradigm for seeking appropriately flexible models. 
 
 So far, we haven't attempted to understand how any of these predictive models actually *work*. 
-
-## What's Next?
-
-
-
-
 
 ## References
 

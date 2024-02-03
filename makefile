@@ -5,8 +5,6 @@ CONDA_ACTIVATE = source $$(conda info --base)/etc/profile.d/conda.sh ; conda act
 
 make publish: 
 	$(CONDA_ACTIVATE) ml-0451
-	python scripts/create-ipynb.py
-	python scripts/prep-qmd.py
 	quarto render --profile publish
 
 preview: 
