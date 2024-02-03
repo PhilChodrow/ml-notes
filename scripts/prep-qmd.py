@@ -1,3 +1,6 @@
+print("running precompilation script")
+
+
 import os
 
 if not os.path.isdir("docs/live-notebooks"):
