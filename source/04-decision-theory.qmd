@@ -118,9 +118,9 @@ $$
         \left[
         \begin{matrix}
             x_{11} & x_{12} & \cdots & x_{1p} \\ 
-            -\mathbf{x}_2-  \\ 
+            x_{21} & x_{22} & \cdots & x_{2p} \\ 
             \vdots \\ 
-            -\mathbf{x}_n -
+            x_{n1} & x_{n2} & \cdots & x_{np} 
         \end{matrix}
         \right]\;.
 \end{aligned}

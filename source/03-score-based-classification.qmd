@@ -50,6 +50,17 @@ df = df.head(1000).copy()
 #---
 ```
 
+```{python}
+from sklearn.model_selection import train_test_split
+
+df = pd.read_csv(url)
+
+train, test = train_test_split(df, test_size = 0.2)
+
+train.to_csv("../data/credit-risk/train.csv", index = False)
+test.to_csv("../data/credit-risk/test.csv", index = False)
+```
+
 
 Let's take a look at an excerpt of the data. 
 
