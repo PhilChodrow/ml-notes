@@ -1,3 +1,4 @@
 /.quarto/
 */.jupyter_cache
 chapters
+!docs/chapters
