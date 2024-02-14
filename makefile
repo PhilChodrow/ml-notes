@@ -7,6 +7,11 @@ publish:
 	$(CONDA_ACTIVATE) ml-0451
 	quarto render --profile publish
 
+prep: 
+	$(CONDA_ACTIVATE) ml-0451
+	python scripts/create-ipynb.py
+	python scripts/prep-qmd.py
+
 preview: 
 	$(CONDA_ACTIVATE) ml-0451
 	quarto preview 

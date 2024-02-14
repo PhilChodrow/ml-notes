@@ -9,4 +9,7 @@ book:
       chapters: 
         - source/03-score-based-classification.qmd 
         - source/04-decision-theory.qmd 
+    - part: "Discrimination, Disparity, Data"
+      chapters: 
+        - source/10-compas.qmd
   
