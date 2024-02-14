@@ -3,17 +3,13 @@
 SHELL = /bin/zsh
 CONDA_ACTIVATE = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ; conda activate
 
-make publish: 
+publish: 
 	$(CONDA_ACTIVATE) ml-0451
 	quarto render --profile publish
 
 preview: 
 	$(CONDA_ACTIVATE) ml-0451
 	quarto preview 
-
-render:
-	$(CONDA_ACTIVATE) ml-0451
-	quarto render
 
 teams:
 	$(CONDA_ACTIVATE) ml-0451
