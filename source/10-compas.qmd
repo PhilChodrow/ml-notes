@@ -15,7 +15,10 @@ Let's first obtain the data. I've hosted a copy on the course website, so we can
 ```{python}
 import pandas as pd
 import seaborn as sns
+import numpy as np
 sns.set_style("whitegrid")
+np.set_printoptions(precision = 3)
+
 url = "https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/compas/compas.csv"
 compas = pd.read_csv(url)
 ```
