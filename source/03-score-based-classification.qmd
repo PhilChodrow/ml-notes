@@ -54,11 +54,6 @@ df = df.head(1000).copy()
 from sklearn.model_selection import train_test_split
 
 df = pd.read_csv(url)
-
-train, test = train_test_split(df, test_size = 0.2)
-
-train.to_csv("../data/credit-risk/train.csv", index = False)
-test.to_csv("../data/credit-risk/test.csv", index = False)
 ```
 
 
@@ -94,9 +89,10 @@ So, can we find some patterns? Here is a labeled scatterplot of our simplified d
 ```{python}
 def scatter_data(ax, df):
 
+    markers = ["o" , ","]
     for i in range(2):
         to_plot = df[df["loan_status"] == i]
-        ax.scatter(to_plot["loan_int_rate"], to_plot["loan_percent_income"], c = to_plot["loan_status"], vmin = -0.5, vmax = 1.5, facecolors='none', edgecolors = "darkgrey", alpha = 0.5, label = f"{['repaid', 'defaulted'][i]}", cmap = "BrBG")
+        ax.scatter(to_plot["loan_int_rate"], to_plot["loan_percent_income"], c = to_plot["loan_status"], vmin = -0.5, vmax = 1.5, facecolors='none', edgecolors = "darkgrey", alpha = 0.5, label = f"{['repaid', 'defaulted'][i]}", cmap = "BrBG", marker = markers[i])
         ax.legend()
         ax.set(xlabel = "Loan interest rate", ylabel = "Loan / income ratio")
 

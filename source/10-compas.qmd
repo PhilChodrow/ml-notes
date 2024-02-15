@@ -75,7 +75,7 @@ The easiest way to see how this looks is with a bar chart, which we can make eff
 
 ```{python}
 counts = compas.groupby(["race", "decile_score"]).size().reset_index(name = "n")
-p = sns.barplot(data = counts, x = "decile_score", y = "n", hue = "race", palette = "pastel")
+p = sns.barplot(data = counts, x = "decile_score", y = "n", hue = "race", palette = "BuPu", saturation = 0.5)
 ```
 
 You may notice that the number of white defendants who receive a given decile score tends to decrease as the score increases, whereas the number of Black defendants remains relatively constant. 
@@ -220,9 +220,18 @@ Let's test for calibration in the decile scores. We can compute the recidivism r
 ```{python}
 means = compas.groupby(["race", "decile_score"])["two_year_recid"].mean().reset_index(name = "mean")
 
-sns.lineplot(data = means, x = "decile_score", y = "mean", hue = "race", palette = "pastel", legend = None)
+sns.lineplot(data = means, 
+             x = "decile_score", 
+             y = "mean", 
+             hue = "race", 
+             legend = None, 
+             palette = "BuPu")
 
-points = sns.scatterplot(data = means, x = "decile_score", y = "mean", hue = "race", palette = "pastel")
+points = sns.scatterplot(data = means, 
+                         x = "decile_score", 
+                         y = "mean", 
+                         hue = "race", 
+                         palette = "BuPu")
 ```
 
 The actual recidivism rate at each risk score is *roughly* the same between Black and white defendants, especially for decile scores past 5 or so. 
@@ -233,7 +242,12 @@ The actual recidivism rate at each risk score is *roughly* the same between Blac
 ```{python}
 means = compas.groupby(["race", "predicted_high_risk"])["two_year_recid"].mean().reset_index(name = "mean")
 
-p = sns.barplot(data = means, x = "predicted_high_risk", y = "mean", hue = "race", palette = "pastel")
+p = sns.barplot(data = means, 
+                x = "predicted_high_risk", 
+                y = "mean", 
+                hue = "race", 
+                palette = "BuPu",
+                saturation = 0.5)
 ```
 
 From the perspective of calibration using this threshold, the algorithm might actually appear to be biased in favor of Black defendants rather than white ones: of those who were predicted high risk, slightly more Black than white defendants were arrested within the next two years. Formal statistical hypothesis tests are typically used to determine whether this difference is sufficiently "real" to warrant correction. In most of the published literature, scholars have considered that the two rates are sufficiently close that we should instead simply say that COMPAS appears to be reasonably well calibrated. 
