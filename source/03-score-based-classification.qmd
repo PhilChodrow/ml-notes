@@ -50,17 +50,10 @@ df = df.head(1000).copy()
 #---
 ```
 
-```{python}
-from sklearn.model_selection import train_test_split
-
-df = pd.read_csv(url)
-```
-
 
 Let's take a look at an excerpt of the data. 
 
 ```{python}
-
 #---
 df
 #---
@@ -257,12 +250,14 @@ Something interesting to notice here is that our two step method of computing a 
 Finally, once we've picked the weight vector $\mathbf{w}$ and a threshold function $t$, we are ready to simulate making decisions. For example, with our current weights and threshold, we can add a column with what our retrospective "decisions" would have been on this historical data. Here is a function that generates the column. 
 
 ```{python}
+#---
 def predict(score_fun, w, threshold, df):
     """
     make binary predictions for data df using a supplied score function with weights w and supplied threshold. 
     """
     scores = score_fun(w, df["loan_int_rate"], df["loan_percent_income"])
     return 1*(scores > threshold)
+#---
 ```
 
 Now let's use this function to add the predictions as a new column in the data frame: 

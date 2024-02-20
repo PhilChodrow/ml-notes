@@ -265,28 +265,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Banks can try to balance these risks by controlling interest rates. Higher interest rates increase prospective profit if the loan is repaid in full, but also increase the risk that an individual may be unable to keep up with payments.</p>
 <p>The judgment of whether to extend an individual a loan is handled by human experts. Recently, human experts have been seeking assistance from machine learning algorithms. As in most predictive modeling, the idea is to use the past to predict the future. Here, we’ll consider simple modeling problem in which we aim to learn patterns in when individuals are able to pay off loans, and use these patterns to make predictions.</p>
 <p>We’ll first load in the <code>pandas</code> package and use the <code>read_csv</code> command to acquire our data for this problem as a <code>pd.DataFrame</code>. <a href="https://www.kaggle.com/datasets/laotse/credit-risk-dataset">This data set was produced by Kaggle</a>; it is a <em>simulated</em> data set based on patterns in real world data, which, of course, is sensitive and confidential. For today, we are only going to focus on the first 1,000 rows of data.</p>
-<div id="0cadbee8" class="cell" data-execution_count="1">
+<div id="331f4aec" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np </span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="712609fa" class="cell" data-execution_count="3">
+<div id="0c64ac5c" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/credit-risk/credit_risk_dataset.csv"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="a55227a0" class="cell" data-execution_count="4">
+<div id="37e2f83f" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(url)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.head(<span class="dv">1000</span>).copy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="ec8986cb" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <p>Let’s take a look at an excerpt of the data.</p>
-<div id="2613e0bd" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
+<div id="b8a2a049" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
 <div>
 
 
@@ -400,84 +395,84 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>...</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">32576</td>
-<td>57</td>
-<td>53000</td>
-<td>MORTGAGE</td>
-<td>1.0</td>
-<td>PERSONAL</td>
-<td>C</td>
-<td>5800</td>
-<td>13.16</td>
-<td>0</td>
-<td>0.11</td>
-<td>N</td>
-<td>30</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">32577</td>
-<td>54</td>
-<td>120000</td>
-<td>MORTGAGE</td>
-<td>4.0</td>
-<td>PERSONAL</td>
-<td>A</td>
-<td>17625</td>
-<td>7.49</td>
-<td>0</td>
-<td>0.15</td>
-<td>N</td>
-<td>19</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">32578</td>
-<td>65</td>
-<td>76000</td>
+<td data-quarto-table-cell-role="th">995</td>
+<td>22</td>
+<td>46610</td>
 <td>RENT</td>
-<td>3.0</td>
-<td>HOMEIMPROVEMENT</td>
+<td>6.0</td>
+<td>DEBTCONSOLIDATION</td>
 <td>B</td>
-<td>35000</td>
-<td>10.99</td>
+<td>18000</td>
+<td>10.71</td>
 <td>1</td>
-<td>0.46</td>
+<td>0.39</td>
 <td>N</td>
-<td>28</td>
+<td>3</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">32579</td>
-<td>56</td>
-<td>150000</td>
-<td>MORTGAGE</td>
+<td data-quarto-table-cell-role="th">996</td>
+<td>24</td>
+<td>48000</td>
+<td>RENT</td>
 <td>5.0</td>
 <td>PERSONAL</td>
-<td>B</td>
-<td>15000</td>
-<td>11.48</td>
-<td>0</td>
-<td>0.10</td>
+<td>A</td>
+<td>18000</td>
+<td>6.54</td>
+<td>1</td>
+<td>0.38</td>
 <td>N</td>
-<td>26</td>
+<td>2</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">32580</td>
-<td>66</td>
-<td>42000</td>
+<td data-quarto-table-cell-role="th">997</td>
+<td>23</td>
+<td>24000</td>
+<td>OWN</td>
+<td>0.0</td>
+<td>PERSONAL</td>
+<td>A</td>
+<td>8000</td>
+<td>5.79</td>
+<td>0</td>
+<td>0.33</td>
+<td>N</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">998</td>
+<td>25</td>
+<td>55000</td>
 <td>RENT</td>
 <td>2.0</td>
-<td>MEDICAL</td>
-<td>B</td>
-<td>6475</td>
-<td>9.99</td>
-<td>0</td>
-<td>0.15</td>
+<td>EDUCATION</td>
+<td>C</td>
+<td>18000</td>
+<td>12.84</td>
+<td>1</td>
+<td>0.33</td>
 <td>N</td>
-<td>30</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">999</td>
+<td>25</td>
+<td>55344</td>
+<td>RENT</td>
+<td>2.0</td>
+<td>HOMEIMPROVEMENT</td>
+<td>B</td>
+<td>18000</td>
+<td>10.99</td>
+<td>1</td>
+<td>0.33</td>
+<td>N</td>
+<td>4</td>
 </tr>
 </tbody>
 </table>
 
-<p>32581 rows × 12 columns</p>
+<p>1000 rows × 12 columns</p>
 </div>
 </div>
 </div>
@@ -488,29 +483,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>loan_status</code> describes whether or not the individual defaulted on the loan. This column has value <code>1</code> if the individual defaulted on the loan and value <code>0</code> if the loan was repaid in full.</li>
 </ul>
 <p>Our primary predictive interest is whether or not a borrower is likely to default on a loan. How common is this in our data set?</p>
-<div id="a79af3d4" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"loan_status"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
-<pre><code>0.21816396059052823</code></pre>
+<div id="a1bcd748" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"loan_status"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>0.553</code></pre>
 </div>
 </div>
 <p>In this data, roughly 55% of borrowers default on their loan. An important aspect of this learning is the <em>base rate for prediction.</em> If we predicted that every borrower would default on a loan, we would be right 55% of the time. So, if we want to find patterns in our data set and use those patterns to make predictions, we should aim for accuracy greater than 55%.</p>
 <p>So, can we find some patterns? Here is a labeled scatterplot of our simplified data set.</p>
-<div id="ea9ec935" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> scatter_data(ax, df):</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    markers <span class="op">=</span> [<span class="st">"o"</span> , <span class="st">","</span>]</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        to_plot <span class="op">=</span> df[df[<span class="st">"loan_status"</span>] <span class="op">==</span> i]</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        ax.scatter(to_plot[<span class="st">"loan_int_rate"</span>], to_plot[<span class="st">"loan_percent_income"</span>], c <span class="op">=</span> to_plot[<span class="st">"loan_status"</span>], vmin <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, vmax <span class="op">=</span> <span class="fl">1.5</span>, facecolors<span class="op">=</span><span class="st">'none'</span>, edgecolors <span class="op">=</span> <span class="st">"darkgrey"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>, label <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>[<span class="st">'repaid'</span>, <span class="st">'defaulted'</span>][i]<span class="sc">}</span><span class="ss">"</span>, cmap <span class="op">=</span> <span class="st">"BrBG"</span>, marker <span class="op">=</span> markers[i])</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        ax.legend()</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Loan interest rate"</span>, ylabel <span class="op">=</span> <span class="st">"Loan / income ratio"</span>)</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.head(<span class="dv">1000</span>)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>scatter_data(ax, df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="c2d9ee78" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> scatter_data(ax, df):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    markers <span class="op">=</span> [<span class="st">"o"</span> , <span class="st">","</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        to_plot <span class="op">=</span> df[df[<span class="st">"loan_status"</span>] <span class="op">==</span> i]</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        ax.scatter(to_plot[<span class="st">"loan_int_rate"</span>], to_plot[<span class="st">"loan_percent_income"</span>], c <span class="op">=</span> to_plot[<span class="st">"loan_status"</span>], vmin <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, vmax <span class="op">=</span> <span class="fl">1.5</span>, facecolors<span class="op">=</span><span class="st">'none'</span>, edgecolors <span class="op">=</span> <span class="st">"darkgrey"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>, label <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>[<span class="st">'repaid'</span>, <span class="st">'defaulted'</span>][i]<span class="sc">}</span><span class="ss">"</span>, cmap <span class="op">=</span> <span class="st">"BrBG"</span>, marker <span class="op">=</span> markers[i])</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        ax.legend()</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Loan interest rate"</span>, ylabel <span class="op">=</span> <span class="st">"Loan / income ratio"</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.head(<span class="dv">1000</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>scatter_data(ax, df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="03-score-based-classification_files/figure-html/cell-9-output-1.png" width="581" height="423"></p>
+<p><img src="03-score-based-classification_files/figure-html/cell-8-output-1.png" width="581" height="423"></p>
 </div>
 </div>
 <p>Although it looks difficult to completely separate the defaulted loans from the loans which were repaid in full, it does look like there is some pattern to find. Loans which were repaid in full concentrate in the lower right corner of the visualization. This makes sense – these are loans which have low interest rates and which are relatively small sums relative to the annual resources of the borrower.</p>
@@ -539,62 +534,62 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 \end{aligned}
 \tag{3.1}\]</span></span></p>
 <p>Let’s implement this score in Python.</p>
-<div id="ba03ba02" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> linear_score(w, x0, x1):</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> w[<span class="dv">0</span>]<span class="op">*</span>x0 <span class="op">+</span> w[<span class="dv">1</span>]<span class="op">*</span>x1 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="85fa1490" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> linear_score(w, x0, x1):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> w[<span class="dv">0</span>]<span class="op">*</span>x0 <span class="op">+</span> w[<span class="dv">1</span>]<span class="op">*</span>x1 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we can plot this score function in the data space.</p>
-<div id="9518ddbc" class="cell" data-execution_count="10">
+<div id="a9e8c9e7" class="cell" data-execution_count="9">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_score(ax, score_fun, w, df):</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Plot a given score function on axis ax with weights w and data df. </span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    x0_col <span class="op">=</span> <span class="st">"loan_int_rate"</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    x1_col <span class="op">=</span> <span class="st">"loan_percent_income"</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    x0_min, x0_max <span class="op">=</span> df[x0_col].<span class="bu">min</span>(), df[x0_col].<span class="bu">max</span>()</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    x1_min, x1_max <span class="op">=</span> df[x1_col].<span class="bu">min</span>(), df[x1_col].<span class="bu">max</span>()</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    x0 <span class="op">=</span> np.linspace(x0_min, x0_max, <span class="dv">101</span>)</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    x1 <span class="op">=</span> np.linspace(x1_min, x1_max, <span class="dv">101</span>)</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    X0, X1 <span class="op">=</span> np.meshgrid(x0, x1)</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> score_fun(w, X0, X1)</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    ticks <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">101</span>, <span class="dv">6</span>)</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    im <span class="op">=</span> ax.contourf(X0, X1, S, origin <span class="op">=</span> <span class="st">"lower"</span>, extent <span class="op">=</span> (x0_min, x0_max, x1_min, x1_max),  cmap <span class="op">=</span> <span class="st">"BrBG"</span>, vmin <span class="op">=</span> <span class="dv">2</span><span class="op">*</span>S.<span class="bu">min</span>() <span class="op">-</span> S.<span class="bu">max</span>(), vmax <span class="op">=</span> <span class="dv">2</span><span class="op">*</span>S.<span class="bu">max</span>() <span class="op">-</span> S.<span class="bu">min</span>())</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Loan interest rate"</span>, ylabel <span class="op">=</span> <span class="st">"Loan / income ratio"</span>)</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    cbar <span class="op">=</span> plt.colorbar(im, )</span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    cbar.set_label(<span class="st">"Predicted score"</span>)</span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score_viz(score_fun, w, df):</span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">7</span>, <span class="fl">2.7</span>)) </span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    plot_score(ax[<span class="dv">0</span>], score_fun, w, df)</span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    plot_score(ax[<span class="dv">1</span>], score_fun, w, df)</span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    scatter_data(ax[<span class="dv">1</span>], df)</span>
-<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_score(ax, score_fun, w, df):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Plot a given score function on axis ax with weights w and data df. </span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    x0_col <span class="op">=</span> <span class="st">"loan_int_rate"</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    x1_col <span class="op">=</span> <span class="st">"loan_percent_income"</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    x0_min, x0_max <span class="op">=</span> df[x0_col].<span class="bu">min</span>(), df[x0_col].<span class="bu">max</span>()</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    x1_min, x1_max <span class="op">=</span> df[x1_col].<span class="bu">min</span>(), df[x1_col].<span class="bu">max</span>()</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    x0 <span class="op">=</span> np.linspace(x0_min, x0_max, <span class="dv">101</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    x1 <span class="op">=</span> np.linspace(x1_min, x1_max, <span class="dv">101</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    X0, X1 <span class="op">=</span> np.meshgrid(x0, x1)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> score_fun(w, X0, X1)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    ticks <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">101</span>, <span class="dv">6</span>)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    im <span class="op">=</span> ax.contourf(X0, X1, S, origin <span class="op">=</span> <span class="st">"lower"</span>, extent <span class="op">=</span> (x0_min, x0_max, x1_min, x1_max),  cmap <span class="op">=</span> <span class="st">"BrBG"</span>, vmin <span class="op">=</span> <span class="dv">2</span><span class="op">*</span>S.<span class="bu">min</span>() <span class="op">-</span> S.<span class="bu">max</span>(), vmax <span class="op">=</span> <span class="dv">2</span><span class="op">*</span>S.<span class="bu">max</span>() <span class="op">-</span> S.<span class="bu">min</span>())</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Loan interest rate"</span>, ylabel <span class="op">=</span> <span class="st">"Loan / income ratio"</span>)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    cbar <span class="op">=</span> plt.colorbar(im, )</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    cbar.set_label(<span class="st">"Predicted score"</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score_viz(score_fun, w, df):</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">7</span>, <span class="fl">2.7</span>)) </span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    plot_score(ax[<span class="dv">0</span>], score_fun, w, df)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    plot_score(ax[<span class="dv">1</span>], score_fun, w, df)</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    scatter_data(ax[<span class="dv">1</span>], df)</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>To see the scores, we need to make an initial choice about the weight vector <span class="math inline">\(\mathbf{w}\)</span>.</p>
-<div id="2cbdfc00" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([<span class="fl">0.4</span>, <span class="op">-</span><span class="dv">2</span>])</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>score_viz(linear_score, w, df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cd3faffd" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([<span class="fl">0.4</span>, <span class="op">-</span><span class="dv">2</span>])</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>score_viz(linear_score, w, df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="03-score-based-classification_files/figure-html/cell-12-output-1.png" width="657" height="250"></p>
+<p><img src="03-score-based-classification_files/figure-html/cell-11-output-1.png" width="657" height="250"></p>
 </div>
 </div>
 <p>Hmmm, that doesn’t look so good. Ideally, we’d like the higher scores to line up with the borrowers who defaulted, and the lower scores to line up with the borrowers who fully repaid their loans. Can we find a better choice?</p>
-<div id="e1d11f0e" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([<span class="fl">0.01</span>, <span class="fl">1.1</span>])</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>score_viz(linear_score, w, df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="82c3af4f" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([<span class="fl">0.01</span>, <span class="fl">1.1</span>])</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>score_viz(linear_score, w, df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="03-score-based-classification_files/figure-html/cell-13-output-1.png" width="660" height="250"></p>
+<p><img src="03-score-based-classification_files/figure-html/cell-12-output-1.png" width="660" height="250"></p>
 </div>
 </div>
 <div class="page-columns page-full"><p>This looks a bit better! </p><div class="no-row-height column-margin column-container"><span class="">You might be wondering: isn’t there a better way to choose the weight vector <span class="math inline">\(\mathbf{w}\)</span> than to guess and check? Of course there is! This is the topic of <em>model training</em>, which we will come to soon.</span></div></div>
@@ -602,37 +597,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="from-scores-to-predictions" class="level3">
 <h3 class="anchored" data-anchor-id="from-scores-to-predictions">From Scores to Predictions</h3>
 <p>Ok, great – we have a risk score for historical applicants. We can even compute risk scores for <em>future</em> applicants: plug their data into <a href="#eq-risk-score" class="quarto-xref">Equation&nbsp;<span>3.1</span></a>. But in order to make a decision, we need to conver the score into a yes-no decision. A common way to do this is called <em>thresholding</em>: we pick a threshold <span class="math inline">\(t\)</span> and approve a loan to individual <span class="math inline">\(i\)</span> of <span class="math inline">\(s_i &lt; t\)</span>.</p>
-<div id="d99d0dab" class="cell" data-execution_count="13">
+<div id="b43b8d17" class="cell" data-execution_count="12">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_threshold(ax, score_fun, w, df, threshold):</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Plot the t-level-set of a given score function on axis ax with weights w and data df. </span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    x0_col <span class="op">=</span> <span class="st">"loan_int_rate"</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    x1_col <span class="op">=</span> <span class="st">"loan_percent_income"</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    x0_min, x0_max <span class="op">=</span> df[x0_col].<span class="bu">min</span>(), df[x0_col].<span class="bu">max</span>()</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    x1_min, x1_max <span class="op">=</span> df[x1_col].<span class="bu">min</span>(), df[x1_col].<span class="bu">max</span>()</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    x0 <span class="op">=</span> np.linspace(x0_min, x0_max, <span class="dv">101</span>)</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    x1 <span class="op">=</span> np.linspace(x1_min, x1_max, <span class="dv">101</span>)</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    X0, X1 <span class="op">=</span> np.meshgrid(x0, x1)</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> score_fun(w, X0, X1)</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    ax.contour(X0, X1, S, levels <span class="op">=</span> [threshold], colors <span class="op">=</span> [<span class="st">"black"</span>], linestyles <span class="op">=</span> [<span class="st">"--"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_threshold(ax, score_fun, w, df, threshold):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Plot the t-level-set of a given score function on axis ax with weights w and data df. </span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    x0_col <span class="op">=</span> <span class="st">"loan_int_rate"</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    x1_col <span class="op">=</span> <span class="st">"loan_percent_income"</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    x0_min, x0_max <span class="op">=</span> df[x0_col].<span class="bu">min</span>(), df[x0_col].<span class="bu">max</span>()</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    x1_min, x1_max <span class="op">=</span> df[x1_col].<span class="bu">min</span>(), df[x1_col].<span class="bu">max</span>()</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    x0 <span class="op">=</span> np.linspace(x0_min, x0_max, <span class="dv">101</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    x1 <span class="op">=</span> np.linspace(x1_min, x1_max, <span class="dv">101</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    X0, X1 <span class="op">=</span> np.meshgrid(x0, x1)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> score_fun(w, X0, X1)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    ax.contour(X0, X1, S, levels <span class="op">=</span> [threshold], colors <span class="op">=</span> [<span class="st">"black"</span>], linestyles <span class="op">=</span> [<span class="st">"--"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now we can pick a threshold and see how it does in dividing borrowers who fully repay loans from borrowers who default:</p>
-<div id="03db9d74" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="op">=</span> <span class="fl">0.4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="7748fc66" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="op">=</span> <span class="fl">0.4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-fig-linear-score" class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>plot_score(ax, linear_score, w, df)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>scatter_data(ax, df) </span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>plot_threshold(ax, linear_score, w,  df, threshold)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-fig-linear-score" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plot_score(ax, linear_score, w, df)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>scatter_data(ax, df) </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>plot_threshold(ax, linear_score, w,  df, threshold)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="fig-linear-score" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
@@ -644,22 +639,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Something interesting to notice here is that our two step method of computing a linear score function and thresholding gave us the same <em>linear</em> classification pattern as the one we saw in <a href="01-data-and-models.html#fig-examples-with-patterns-2" class="quarto-xref">Figure&nbsp;<span>1.2 (b)</span></a>.</p>
 <p>Finally, once we’ve picked the weight vector <span class="math inline">\(\mathbf{w}\)</span> and a threshold function <span class="math inline">\(t\)</span>, we are ready to simulate making decisions. For example, with our current weights and threshold, we can add a column with what our retrospective “decisions” would have been on this historical data. Here is a function that generates the column.</p>
-<div id="20564fd5" class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> predict(score_fun, w, threshold, df):</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">    make binary predictions for data df using a supplied score function with weights w and supplied threshold. </span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> score_fun(w, df[<span class="st">"loan_int_rate"</span>], df[<span class="st">"loan_percent_income"</span>])</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span><span class="op">*</span>(scores <span class="op">&gt;</span> threshold)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="3cf13932" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> predict(score_fun, w, threshold, df):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">    make binary predictions for data df using a supplied score function with weights w and supplied threshold. </span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    scores <span class="op">=</span> score_fun(w, df[<span class="st">"loan_int_rate"</span>], df[<span class="st">"loan_percent_income"</span>])</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span><span class="op">*</span>(scores <span class="op">&gt;</span> threshold)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now let’s use this function to add the predictions as a new column in the data frame:</p>
-<div id="1b3f3f51" class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"decision"</span>] <span class="op">=</span> predict(linear_score, w, threshold, df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="af0140bc" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"decision"</span>] <span class="op">=</span> predict(linear_score, w, threshold, df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Would our decisions have accurately reflected who in fact defaulted? One way to address this question is by measuring the <em>accuracy</em> of our decisions, which we can compute using vectorized code:</p>
-<div id="cb3a49cb" class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(df[<span class="st">"decision"</span>] <span class="op">==</span> df[<span class="st">"loan_status"</span>]).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="18">
+<div id="51a8d574" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(df[<span class="st">"decision"</span>] <span class="op">==</span> df[<span class="st">"loan_status"</span>]).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
 <pre><code>0.767</code></pre>
 </div>
 </div>
@@ -689,21 +684,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 \end{aligned}
 \]</span></p><div class="no-row-height column-margin column-container"><span class="">In order for this formula to make sense, we now need <span class="math inline">\(\mathbf{w}\in \mathbb{R}^5\)</span>.</span></div></div>
 <p>Here’s an implementation of a score function with quadratic features:</p>
-<div id="54ae7375" class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> quadratic_score(w, X0, X1):</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> w[<span class="dv">0</span>]<span class="op">*</span>X0 <span class="op">+</span> w[<span class="dv">1</span>]<span class="op">*</span>X1 <span class="op">+</span> w[<span class="dv">2</span>]<span class="op">*</span>X0<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> w[<span class="dv">3</span>]<span class="op">*</span>X1<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> w[<span class="dv">4</span>]<span class="op">*</span>X0<span class="op">*</span>X1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="9f255029" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> quadratic_score(w, X0, X1):</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> w[<span class="dv">0</span>]<span class="op">*</span>X0 <span class="op">+</span> w[<span class="dv">1</span>]<span class="op">*</span>X1 <span class="op">+</span> w[<span class="dv">2</span>]<span class="op">*</span>X0<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> w[<span class="dv">3</span>]<span class="op">*</span>X1<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> w[<span class="dv">4</span>]<span class="op">*</span>X0<span class="op">*</span>X1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we can set a new vector of weights <span class="math inline">\(\mathbf{w}\in \mathbb{R}^5\)</span> and a threshold <span class="math inline">\(t\)</span>.</p>
-<div id="617170f4" class="cell" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([<span class="fl">0.01</span>, <span class="dv">1</span>, <span class="fl">0.0005</span>, <span class="fl">0.6</span>, <span class="fl">0.001</span>])</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>threshold <span class="op">=</span> <span class="fl">0.5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="d6c0fb10" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([<span class="fl">0.01</span>, <span class="dv">1</span>, <span class="fl">0.0005</span>, <span class="fl">0.6</span>, <span class="fl">0.001</span>])</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>threshold <span class="op">=</span> <span class="fl">0.5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Our classification now looks like this:</p>
-<div id="cell-fig-quadratic-score" class="cell" data-execution_count="21">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>plot_score(ax, quadratic_score, w, df)</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>scatter_data(ax, df)</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>plot_threshold(ax, quadratic_score, w,  df, threshold)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-fig-quadratic-score" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>plot_score(ax, quadratic_score, w, df)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>scatter_data(ax, df)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>plot_threshold(ax, quadratic_score, w,  df, threshold)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="fig-quadratic-score" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
@@ -714,10 +709,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>How accurate were we?</p>
-<div id="bfef8a2b" class="cell" data-execution_count="22">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"decision"</span>] <span class="op">=</span> predict(quadratic_score, w, threshold, df)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>(df[<span class="st">"decision"</span>] <span class="op">==</span> df[<span class="st">"loan_status"</span>]).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="22">
+<div id="9ebe19ff" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"decision"</span>] <span class="op">=</span> predict(quadratic_score, w, threshold, df)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>(df[<span class="st">"decision"</span>] <span class="op">==</span> df[<span class="st">"loan_status"</span>]).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
 <pre><code>0.777</code></pre>
 </div>
 </div>
