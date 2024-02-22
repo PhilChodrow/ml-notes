@@ -34,7 +34,7 @@ from matplotlib import pyplot as plt
 np.set_printoptions(precision = 3)
 plt.style.use('seaborn-v0_8-whitegrid')
 
-url = "../data/credit-risk/credit_risk_dataset.csv"
+url = "https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/credit-risk/credit_risk_dataset.csv"
 ```
 
 ```{python}
