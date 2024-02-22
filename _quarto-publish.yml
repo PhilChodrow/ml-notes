@@ -17,3 +17,4 @@ book:
     - part: "Discrimination, Disparity, Data"
       chapters: 
         - chapters/10-compas.qmd
+        - chapters/12-statistical-fairness.qmd

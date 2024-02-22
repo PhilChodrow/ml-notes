@@ -1,0 +1,301 @@
+# Statistical Definitions of Fairness in Decision-Making
+
+In these notes, we'll review three fundamental definitions of fairness for decision-making systems. While texts like @barocasFairnessMachineLearning2023 couch their definitions in the language of probability, our focus in these notes will be to relate this language to operational computations on data sets in Python. We'll practice some of our skills with `pandas`, `numpy`, and `seaborn`. After reviewing these definitions, we'll review a simple, famous result about the ability of decision systems to satisfy multiple definitions. 
+
+For this study, we'll return to the COMPAS data that we studied [last time](../chapters/10-compas.qmd). 
+
+```{python}
+import pandas as pd
+import seaborn as sns
+import numpy as np
+sns.set_style("whitegrid")
+np.set_printoptions(precision = 3)
+pd.set_option('display.precision', 3)
+
+url = "https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/compas/compas.csv"
+compas = pd.read_csv(url)
+```
+
+For this discussion, we again only need to consider a subset of the columns, and we'll focus exclusively on white (Caucasian) and Black (African-American) defendants: 
+
+```{python}
+cols = ["sex", "race", "decile_score", "two_year_recid"]
+compas = compas[cols]
+
+# using Angwin's definition
+compas["predicted_high_risk"] = 1*(compas["decile_score"] > 4)
+
+
+is_white = compas["race"] == "Caucasian"
+is_black = compas["race"] == "African-American"
+
+compas = compas[is_white | is_black]
+compas = compas.copy()
+
+# excerpt of the data
+
+compas.head()
+```
+
+## Three Statistical Definitions of Fairness
+
+Last time, we introduced the idea that fairness in decision-making could be defined formally, and models could be audited to determine the extent to which those models conformed to a given definition. In this section, we'll discuss some of the definitions in Chapter 3 of @barocasFairnessMachineLearning2023 and implement Python functions to measure the extent to which the COMPAS risk score conforms to those definitions. 
+
+To line ourselves up with the notation of @barocasFairnessMachineLearning2023, let's define the following random variables: Let $A$ be a random variable that describes the group membership of an individual. Let $Y$ be the outcome we want to predict. Let $R$ be the value of our risk score. Let $\hat{Y}$ be our model's prediction about whether $Y$ occurs. 
+
+In the case of COMPAS: 
+
+- $A$ is the race of the individual, with possible values $A = a$ and $A = b$. 
+- $Y = 1$ if the individual was arrested within two years after release, and $Y = 0$ if not. 
+- $R$ is the decile risk score. 
+- $\hat{Y} = 1$ if $R \geq 4$ and $\hat{Y} = 0$ otherwise. 
+
+### Statistical Independence
+
+For our present purposes, we focus on the definition of independence for binary classifiers as given by @barocasFairnessMachineLearning2023. 
+
+::: {.callout-note}
+
+::: {#def-independence}
+
+## Statistical Independence For Binary Classifiers 
+
+[Recall that $\mathbb{P}(Y = 1|A = a)$ is the probability that $Y = 1$ *given* that $A=a$. It can be computed using the formula $\mathbb{P}(Y = 1|A = a) = \frac{\mathbb{P}(Y = 1, A = a)}{\mathbb{P}(A = a)}$.]{.aside}
+The model predictions $\hat{Y}$ satisfy *statistical independence* if $\mathbb{P}(\hat{Y} = 1 | A = a) = {P}(\hat{Y} = 1 | A = b)$. 
+
+:::
+
+:::
+
+Colloquially, @def-independence says that the probability of a positive prediction $\hat{Y} = 1$ does not depend on the group membership $A$. In the COMPAS data, independence would require that the probability of the model predicting that an individual will be arrested within two years be the same for white and Black defendants. 
+
+Let's write a Python function to empirically check independence that will accept a data frame `df` and three additional arguments: 
+
+[For independence, we don't actually need the `target` column, but this approach will let us keep a consistent API for our more complicated implementations below.]{.aside}
+
+- `group_col`, the name of the column describing group memberships. 
+- `target`, the name of the column holding the binary outcomes. 
+- `pred`, the name of the column holding the predicted binary outcomes. 
+
+```{python}
+#---
+def test_independence(df, group_col, target, pred):
+    return df.groupby(group_col)[pred].aggregate([np.mean, len])
+#---
+```
+
+Let's run our function to check for independence: 
+
+```{python}
+test_independence(compas, "race", "two_year_recid", "predicted_high_risk")
+```
+
+The `mean` column gives the proportion of the time in which the predictor $\hat{Y}$ had value equal to 1, for each of the two groups. This is an empirical estimate of the probability $\mathbb{P}(\hat{Y} = 1 | A = a)$. We can see that the two proportions are substantially different between groups, strongly suggesting that this model violates the independence criterion. [Formally, statistical tests beyond the scope of this course would be needed to reject the hypothesis that the two proportions are different. In this case, you can take my word for it that the relevant test provides strong support for rejecting the null.]{.aside} 
+
+As discussed in @barocasFairnessMachineLearning2023, independence is a very strong expression of the idea that predictions, and therefore automated decisions, should be the same in aggregate across all groups present in the data. This idea sometimes accompanies another idea, that all groups are equally worthy, meritorious, or deserving of a given decision outcome. 
+
+### Error-Rate Balance
+
+[This definition can be generalized from binary classifiers to score functions via the concept of *separation*, which is discussed in @barocasFairnessMachineLearning2023.]{.aside}
+The primary finding of @angwin2022machine was, famously, that the COMPAS algorithm makes very different kinds of errors on Black and white defendants. 
+
+
+::: {.callout-note}
+
+::: {#def-error-rate-balance}
+
+
+## Error Rate Balance for Binary Classifiers
+
+The model predictions $\hat{Y}$ satisfy *error-rate balance* if the following conditions both hold: 
+
+$$
+\begin{aligned}
+    \mathbb{P}(\hat{Y} = 1 | Y = 1, A = a) &= \mathbb{P}(\hat{Y} =1  | Y = 1, A = b) & \text{(balanced true positives)} \\ 
+    \mathbb{P}(\hat{Y} = 1 | Y = 0, A = a) &= \mathbb{P}(\hat{Y} =1  | Y = 0, A = b)\;. & \text{(balanced false positives)} 
+\end{aligned}
+$$
+
+:::
+
+:::
+
+Error rate balance requires that the true positive rate and false positive rates be equal on the two groups. Given some data in which we have $\mathrm{TP}$ instances of true positives, $\mathrm{FP}$ instances of false positives, $\mathrm{TN}$ instances of true negatives, and $\mathrm{FN}$ instances of false negatives, we can estimate the TPR and FPR via the formulas 
+
+$$
+\begin{aligned}
+    \mathrm{TPR} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}} \\  
+    \mathrm{FPR} = \frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}\;. 
+\end{aligned}
+$$
+
+Let's write another function with the same API to give a summary of error rates between two groups using these formulas. As we saw last time, it's pretty convenient to do this with confusion matrices. It's not much more difficult to do it "by hand" using vectorized Pandas computations: 
+
+```{python}
+#---
+def test_error_rate_balance(df, group_col, target, pred):
+    return df.groupby([group_col, target])[pred].mean().reset_index()
+#---
+```
+
+We can use this function to do an empirical test for error rate balance: 
+
+```{python}
+#---
+test_error_rate_balance(compas, "race", "two_year_recid", "predicted_high_risk")
+#---
+```
+
+[As before, before concluding that the COMPAS algorithm violates error rate balance as in @def-error-rate-balance, it is technically necessary to perform a statistical test to reject the null hypothesis that the true population error rates are the same.]{.aside}
+The false positive rates are in the rows in which `two_year_recid == 0`, and the true positive rates are in the rows in which `two_year_recid == 1`. If you are playing along at home, you'll notice that these error rates exactly match the rates we calculated via confusion matrices in our first analysis of the COMPAS data set. 
+
+### Sufficiency 
+
+Finally, as we mentioned last time, the analysis of @angwin2022machine received heavy pushback from @flores2016false and others, who argued that error rate balance wasn't really the right thing to measure. Instead, we should check *sufficiency*, which we'll define here for binary classifiers: 
+
+::: {.callout-note}
+
+::: {#def-sufficiency}
+
+## Sufficiency
+
+Model predictions $\hat{Y}$ satisfy *sufficiency* if the following two conditions hold: 
+$$
+\begin{aligned}
+    \mathbb{P}(Y = 1 | \hat{Y} = 1, A = a) &= \mathbb{P}(Y = 1 | \hat{Y} = 1, A = b) \\ 
+    \mathbb{P}(Y = 0 | \hat{Y} = 0, A = a) &= \mathbb{P}(Y = 0 | \hat{Y} = 0, A = b) \;. 
+\end{aligned}
+$$
+
+::: 
+:::
+
+The quantity $\mathbb{P}(Y = 1 | \hat{Y} = 1, A = a)$ is sometimes called the *positive predictive value* (PPV) of $\hat{Y}$ for group $a$. Similarly, $\mathbb{P}(Y = 0 | \hat{Y} = 0, A = a)$ is sometimes called the *negative predictive value* (NPV) of $\hat{Y}$ for group $a$. So, the sufficiency criterion demands that the positive and negative predictive values be equal across groups. 
+
+Given some data in which we have $\mathrm{TP}$ instances of true positives, $\mathrm{FP}$ instances of false positives, $\mathrm{TN}$ instances of true negatives, and $\mathrm{FN}$ instances of false negatives, we can estimate the PPV and NPV via the formulas 
+
+$$
+\begin{aligned}
+    \mathrm{PPV} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}} \\  
+    \mathrm{NPV} = \frac{\mathrm{TN}}{\mathrm{TN} + \mathrm{FN}}\;. 
+\end{aligned}
+$$
+
+Let's write a function to check for sufficiency in the COMPAS predictions. This function will compute the positive and negative predictive values by group: 
+
+```{python}
+#---
+def test_sufficiency(df, group_col, target, pred):
+    df_ = df.copy()
+    df_["correct"] = df_[pred] == df_[target]
+    return df_.groupby([group_col, pred])["correct"].mean().reset_index()
+#---
+```
+
+```{python}
+test_sufficiency(compas, "race", "two_year_recid", "predicted_high_risk")
+```
+
+The negative predictive values are in the rows in which `predicted_high_risk == 0` and the positive predictive values are in the rows in which `predicted_high_risk == 1`. We observe that the negative predictive value is slightly higher for white defendants, while the positive predictive value is slightly higher for Black defendants. These differences, however, are much lower than the error rate disparity noted above. 
+
+## Can We Have It All? 
+
+Ok, well COMPAS isn't an ideal algorithm by any means. But couldn't we just define some more conceptions of fairness, pick the ones that we wanted to use, and then design an algorithm that satisfied all of them? 
+
+Sadly, no: we can't even have error rate balance and sufficiency simultaneously. 
+
+::: {.callout-tip} 
+
+::: {#thm-incompatibility}
+
+## Incompatibility of Error Rate Balance and Sufficiency [@chouldechovaFairPredictionDisparate2017a]
+
+If the true rates $p_a$ and $p_b$ of positive outcomes in the groups $a$ and $b$ are not equal ($p_a \neq p_b$), then there does not exist a model that produces predictions which satisfy both error rate balance and sufficiency. 
+
+:::
+:::
+
+::: {.proof}
+
+
+
+The proof strategy is to derive an algebraic relationship between the error rates and positive predictive values. Let's briefly forget about group labels -- we'll reintroduce them in a moment. 
+
+First, the prevalence of positive outcomes is 
+
+$$
+\begin{aligned}
+    p = \frac{\mathrm{TP} + \mathrm{FN}}{\mathrm{TP} + \mathrm{FP} + \mathrm{TN} + \mathrm{FN}};. 
+\end{aligned}
+$$
+
+From above, the true and false positive rates are: 
+
+$$
+\begin{aligned}
+    \mathrm{TPR} &= \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}} \\ 
+    \mathrm{FPR} &= \frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}\;.  
+\end{aligned}
+$$
+
+The PPV is: 
+$$
+\begin{aligned}
+    \mathrm{PPV} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}}\;. 
+\end{aligned}
+$$
+
+Ok, now it's time to do some algebra. Let's start with the $\mathrm{TPR}$ and see if we can find an equation that relates it to the $\mathrm{TPR}$. First, we'll multiply by $\frac{1 - \mathrm{PPV}}{\mathrm{PPV}}$. If we do this and insert the definitions of these quantities, we'll get 
+
+$$
+\begin{aligned}
+    \mathrm{TPR} \frac{1 - \mathrm{PPV}}{\mathrm{PPV}} &= \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}} \frac{\mathrm{FP}}{\mathrm{TP} + \mathrm{FP}} \frac{\mathrm{TP} + \mathrm{FP}}{\mathrm{TP}} \\ 
+    &= \frac{\mathrm{FP}}{\mathrm{TP} + \mathrm{FN}}\;. 
+\end{aligned}
+$$
+
+Let's now also multiply by a factor of $\frac{p}{1-p}$: 
+
+$$
+\begin{aligned}
+    \mathrm{TPR} \frac{1 - \mathrm{PPV}}{\mathrm{PPV}}\frac{p}{1-p} &= \frac{\mathrm{FP}}{\mathrm{TP} + \mathrm{FN}}\frac{p}{1-p} \\ 
+    &= \frac{\mathrm{FP}}{\mathrm{TP} + \mathrm{FN}} \frac{\mathrm{TP} + \mathrm{FN}}{\mathrm{TP} + \mathrm{FP} + \mathrm{TN} + \mathrm{FN}} \frac{\mathrm{TP} + \mathrm{FP} + \mathrm{TN} + \mathrm{FN}}{\mathrm{FP} + \mathrm{TN}} \\ 
+    &= \frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}} \\ 
+    &= \mathrm{FPR}\;. 
+\end{aligned}
+$$
+
+So, with some algebra, we have proven an equation for any classifier: 
+
+$$
+\begin{aligned}
+    \mathrm{TPR} \frac{1 - \mathrm{PPV}}{\mathrm{PPV}}\frac{p}{1-p} = \mathrm{FPR}\;. 
+\end{aligned}
+$$
+
+It's convenient to rearrange this equation slightly: 
+
+$$
+\begin{aligned}
+    \frac{\mathrm{TPR}}{\mathrm{FPR}} \frac{1 - \mathrm{PPV}}{\mathrm{PPV}} = \frac{1-p}{p}\;. 
+\end{aligned}
+$${#eq-rearranged-for-p}
+
+Now suppose that I want to enforce error rate balance and sufficiency for two groups $a$ and $b$, where $p_a \neq p_b$.  So, from error rate balance I am going to require that $\mathrm{TPR}_a = \mathrm{TPR}_b$, $\mathrm{FPR}_a = \mathrm{FPR}_b$, and from sufficiency I am going to enforce that $\mathrm{PPV}_a = \mathrm{PPV}_b$. Now, however, we have a problem: by @eq-rearranged-for-p, it must also be the case that $\frac{1 - p_a}{p_a} = \frac{1 - p_b}{p_b}$, which implies that $p_a = p_b$. If $p_a \neq p_b$, then we cannot mathematically satisfy both error rate balance and sufficiency. This completes the proof. 
+
+:::
+
+## Fairness, Context, and Legitimacy
+
+The proof above shows that, when the prevalences of positive outcomes differ between groups, we have no hope of being able to have both balanced error rates and sufficiency. In Chapter 3, @barocasFairnessMachineLearning2023 give a few other examples of fairness definitions, as well as proofs that some of these definitions are incompatible with each other. We can't just have it all -- we have to choose. 
+
+The quantitative story of fairness in automated decision-making is not cut-and-dried -- we need to make choices, which may be subject to politics. Let's close this discussion with three increasingly difficult questions:
+
+1. What is the right definition of fairness by which to judge the operation of a decision-making algorithm? 
+2. Is "fairness" even the right rubric for assessing the impact of a given algorithm? 
+3. Is it legitimate to use automated decision-making *at all* for a given application context? 
+
+We'll consider each of these questions soon. 
+
+
+## References
