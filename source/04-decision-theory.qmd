@@ -43,32 +43,26 @@ pd.options.mode.chained_assignment = None
 ```
 
 ```{python}
-#---
 df_all = pd.read_csv(url)
 df = df_all[["loan_int_rate", "loan_percent_income", "loan_status"]]
 df = df.dropna()
-#---
 ```
 
 Following the usual paradigm in machine learning, we're going to incorporate two  elements which we previously saw [when studying the Palmer penguins](../source/02-black-box-classification.qmd). First, we are going to hold off a part of our data set that we will not use for making any choices about how we design our decision algorithm. This held-off part of the data is called the *test set*. We'll use it for a final evaluation of our model's performance. 
 
 ```{python}
-#---
 from sklearn.model_selection import train_test_split
-df_train, df_test = train_test_split(df, test_size = 0.2) # 20% test set
-#---
+df_train, df_test = train_test_split(df, test_size = 0.2, random_state = 123) # 20% test set
 ```
 
 
 Next, we'll distinguish our predictor and target variables in each of the train and test sets. 
 ```{python}
-#---
 X_train = df_train[["loan_int_rate", "loan_percent_income"]]
 y_train = df_train["loan_status"]
 
 X_test = df_test[["loan_int_rate", "loan_percent_income"]]
 y_test = df_test["loan_status"]
-#---
 ```
 
 ## Vectorized Computation of Scores
@@ -138,8 +132,10 @@ def linear_score(X, w):
 Now, given $\mathbf{w}$, we can compute all the scores at once. 
 
 ```{python}
+#---
 w = np.array([0.01, 1.0])
 s = linear_score(X_train, w)
+#---
 ```
 
 
@@ -168,8 +164,10 @@ So, how should we choose the threshold $t$? One possibility would be to try to c
 ```{python}
 
 for t in np.linspace(0, 1, 11):
-    y_pred = s >= t 
+#---
+    y_pred = s >= t
     acc = (y_pred == y_train).mean()
+#---
     print(f"A threshold of {t:.1f} gives an accuracy of {acc:.2f}.")
 ```
 
@@ -224,10 +222,10 @@ It is common to normalize these counts into rates:
 
 |                | Abbreviation| Formula   | |
 |----------------|----|:--------------:|-|
-| True positive rate  | TPR | $\frac{\mathrm{TPR}}{\mathrm{TPR} + \mathrm{FNR}}$| 
-| False negative rate | FNR | $\frac{\mathrm{FNR}}{\mathrm{TPR} + \mathrm{FNR}}$|
-| False positive rate | FPR | $\frac{\mathrm{FPR}}{\mathrm{FPR} + \mathrm{TNR}}$|
-| True negative  rate | TNR | $\frac{\mathrm{FPR}}{\mathrm{FPR} + \mathrm{TNR}}$|
+| True positive rate  | TPR | $\frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}$| 
+| False negative rate | FNR | $\frac{\mathrm{FN}}{\mathrm{TP} + \mathrm{FN}}$|
+| False positive rate | FPR | $\frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}$|
+| True negative  rate | TNR | $\frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}$|
 
 Intuitively, the TPR measures the proportion of the time that the classifier predicts the correct (positive) label *when the true outcome was positive*. Similarly, the FPR measures the proportion of the time that the classifier predicts the incorrect (positive) label *when the true outcome was negative*. Because $\mathrm{TPR} = 1 - \mathrm{FNR}$ and $\mathrm{FPR} = 1 - \mathrm{TNR}$, folks usually only bother remembering and using $\mathrm{TPR}$ and $\mathrm{FNR}$. 
 
@@ -243,7 +241,9 @@ Let's do a quick check against the FPR using manual vectorized code. [Cases wher
 
 ```{python}
 # agrees with the top right corner of the normalized confusion matrix
+#---
 ((y_pred == 1) & (y_train == 0)).sum() / (y_train == 0).sum()
+#---
 ```
 
 ### The ROC Curve
@@ -273,7 +273,7 @@ ax.plot(FPR, TPR, color = "black")
 ax.plot([0,1], [0,1], linestyle="--", color = "grey")
 ax.set_aspect('equal')
 
-ax.set(xlabel = "False Positive Rate", ylabel = "True Positive Rate", title = "ROC Curve")
+labs = ax.set(xlabel = "False Positive Rate", ylabel = "True Positive Rate", title = "ROC Curve")
 ```
 
 We can think of the ROC curve as a description of all the possible tradeoffs between the TPR and FPR that are achievable for a given score as we vary the threshold $t$. For example, the curve tells us that if we are willing to tolerate a false positive rate of 0.40, then the best true positive rate we can achieve is approximately 0.77. 
@@ -302,14 +302,38 @@ FNR = 1 - TPR
 cost_of_FN = -2.0
 gain_of_TN = 1.0
 
-cost =  gain_of_TN*TNR  + cost_of_FN*FNR 
+gain =  gain_of_TN*TNR  + cost_of_FN*FNR 
 
-plt.plot(T, cost)
+plt.plot(T, gain)
 plt.gca().set(ylim = (-0.2, 0.2), xlim = (0, 0.5))
 labs = plt.gca().set(xlabel = r"Threshold $t$", ylabel = "Expected profit per loan")
 ```
 
 For these costs, we observe that the bank can make a small expected profit (roughly 17 cents per loan) by using the given score function with threshold of roughly $t \approx 0.21$. Note that this is very different from the value of the thresold $t \approx 0.4$ which maximized the unweighted accuracy of the predictor. 
+
+At this stage, we could go on to estimate the profit gained by using this predictor and threshold on the test data set instead of the training data set. The code below simply consolidates the many steps that we have walked through in these notes, applied to the test data. 
+
+```{python}
+t = 0.21
+
+# compute the scores
+s     = linear_score(X_test, w)
+preds = s >= t
+
+# compute error rates
+FPR   = ((preds == 1) & (y_test == 0)).sum() / (y_test == 0).sum()
+TPR   = ((preds == 1) & (y_test == 1)).sum() / (y_test == 1).sum()
+
+TNR = 1 - FPR
+FNR = 1 - TPR
+
+# compute the expected gain
+gain = gain_of_TN*TNR  + cost_of_FN*FNR 
+gain
+```
+
+Our performance on the test data is very slightly worse than our performance on the training data, which is to be expected. 
+
 
 ## Recap
 
