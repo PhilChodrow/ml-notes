@@ -468,8 +468,8 @@ A threshold of 1.0 gives an accuracy of 0.78.</code></pre>
 </div>
 </div>
 <p>The layout of the confusion matrix is:</p>
-<pre><code>true positive,  false positive 
-false negative, true negative</code></pre>
+<pre><code>true negative,  false positive 
+false negative, true positive</code></pre>
 <p>It is common to normalize these counts into rates:</p>
 <table class="table">
 <colgroup>
@@ -488,27 +488,27 @@ false negative, true negative</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>True positive rate</td>
-<td>TPR</td>
-<td style="text-align: center;"><span class="math inline">\(\frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}\)</span></td>
+<td>True negative rate</td>
+<td>TNR</td>
+<td style="text-align: center;"><span class="math inline">\(\frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}\)</span></td>
 <td></td>
 </tr>
 <tr class="even">
-<td>False negative rate</td>
-<td>FNR</td>
-<td style="text-align: center;"><span class="math inline">\(\frac{\mathrm{FN}}{\mathrm{TP} + \mathrm{FN}}\)</span></td>
-<td></td>
-</tr>
-<tr class="odd">
 <td>False positive rate</td>
 <td>FPR</td>
 <td style="text-align: center;"><span class="math inline">\(\frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}\)</span></td>
 <td></td>
 </tr>
+<tr class="odd">
+<td>False negative rate</td>
+<td>FNR</td>
+<td style="text-align: center;"><span class="math inline">\(\frac{\mathrm{FN}}{\mathrm{TP} + \mathrm{FN}}\)</span></td>
+<td></td>
+</tr>
 <tr class="even">
-<td>True negative rate</td>
-<td>TNR</td>
-<td style="text-align: center;"><span class="math inline">\(\frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}\)</span></td>
+<td>True positive rate</td>
+<td>TPR</td>
+<td style="text-align: center;"><span class="math inline">\(\frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}\)</span></td>
 <td></td>
 </tr>
 </tbody>
