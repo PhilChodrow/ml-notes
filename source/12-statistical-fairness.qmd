@@ -1,6 +1,6 @@
 # Statistical Definitions of Fairness in Decision-Making
 
-In these notes, we'll review three fundamental definitions of fairness for decision-making systems. While texts like @barocasFairnessMachineLearning2023 couch their definitions in the language of probability, our focus in these notes will be to relate this language to operational computations on data sets in Python. We'll practice some of our skills with `pandas`, `numpy`, and `seaborn`. After reviewing these definitions, we'll review a simple, famous result about the ability of decision systems to satisfy multiple definitions. 
+In these notes, we'll review three fundamental definitions of fairness for decision-making systems. While texts like @barocasFairnessMachineLearning2023 couch their definitions in the language of probability, our focus in these notes will be to relate the formal mathematical language to operational computations on data sets in Python. In doing so, we'll review some computational techniques via `pandas`, `numpy`, and `seaborn` from last time. After reviewing these definitions, we'll review a simple, famous result about the ability of decision systems to satisfy multiple definitions. 
 
 For this study, we'll return to the COMPAS data that we studied [last time](../chapters/10-compas.qmd). 
 
@@ -52,7 +52,7 @@ In the case of COMPAS:
 
 ### Statistical Independence
 
-For our present purposes, we focus on the definition of independence for binary classifiers as given by @barocasFairnessMachineLearning2023. 
+Here's our first concept of fairness: **independence**. For our present purposes, we focus on the definition of independence for binary classifiers as given by @barocasFairnessMachineLearning2023. 
 
 ::: {.callout-note}
 
@@ -67,7 +67,7 @@ The model predictions $\hat{Y}$ satisfy *statistical independence* if $\mathbb{P
 
 :::
 
-Colloquially, @def-independence says that the probability of a positive prediction $\hat{Y} = 1$ does not depend on the group membership $A$. In the COMPAS data, independence would require that the probability of the model predicting that an individual will be arrested within two years be the same for white and Black defendants. 
+Colloquially, @def-independence says that the probability of a positive prediction $\hat{Y} = 1$ does not depend on the group membership $A$. In the COMPAS data, independence would require that the probability of the model predicting that an individual will be arrested within two years be the same for Black and white defendants. 
 
 Let's write a Python function to empirically check independence that will accept a data frame `df` and three additional arguments: 
 
@@ -124,12 +124,12 @@ Error rate balance requires that the true positive rate and false positive rates
 
 $$
 \begin{aligned}
-    \mathrm{TPR} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}} \\  
-    \mathrm{FPR} = \frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}\;. 
+    \mathrm{TPR} &= \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}} \\  
+    \mathrm{FPR} &= \frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}\;. 
 \end{aligned}
 $$
 
-Let's write another function with the same API to give a summary of error rates between two groups using these formulas. As we saw last time, it's pretty convenient to do this with confusion matrices. It's not much more difficult to do it "by hand" using vectorized Pandas computations: 
+Let's write another function with the same API to give a summary of error rates between two groups using these formulas. As we know, it's pretty convenient to do this with confusion matrices. It's not much more difficult to do it "by hand" using vectorized Pandas computations: 
 
 ```{python}
 #---
@@ -147,7 +147,7 @@ test_error_rate_balance(compas, "race", "two_year_recid", "predicted_high_risk")
 ```
 
 [As before, before concluding that the COMPAS algorithm violates error rate balance as in @def-error-rate-balance, it is technically necessary to perform a statistical test to reject the null hypothesis that the true population error rates are the same.]{.aside}
-The false positive rates are in the rows in which `two_year_recid == 0`, and the true positive rates are in the rows in which `two_year_recid == 1`. If you are playing along at home, you'll notice that these error rates exactly match the rates we calculated via confusion matrices in our first analysis of the COMPAS data set. 
+The false positive rates are in the rows in which `two_year_recid == 0`, and the true positive rates are in the rows in which `two_year_recid == 1`. 
 
 ### Sufficiency 
 
@@ -170,14 +170,14 @@ $$
 ::: 
 :::
 
-The quantity $\mathbb{P}(Y = 1 | \hat{Y} = 1, A = a)$ is sometimes called the *positive predictive value* (PPV) of $\hat{Y}$ for group $a$. Similarly, $\mathbb{P}(Y = 0 | \hat{Y} = 0, A = a)$ is sometimes called the *negative predictive value* (NPV) of $\hat{Y}$ for group $a$. So, the sufficiency criterion demands that the positive and negative predictive values be equal across groups. 
+The quantity $\mathbb{P}(Y = 1 | \hat{Y} = 1, A = a)$ is sometimes called the *positive predictive value* (PPV) of $\hat{Y}$ for group $a$. You can think of it as the "*value*" of a *positive prediction*: given that the prediction is positive ($\hat{Y} = 1$) for a member of group $a$, how likely is it that the prediction is accurate? Similarly, $\mathbb{P}(Y = 0 | \hat{Y} = 0, A = a)$ is sometimes called the *negative predictive value* (NPV) of $\hat{Y}$ for group $a$. So, the sufficiency criterion demands that the positive and negative predictive values be equal across groups. 
 
 Given some data in which we have $\mathrm{TP}$ instances of true positives, $\mathrm{FP}$ instances of false positives, $\mathrm{TN}$ instances of true negatives, and $\mathrm{FN}$ instances of false negatives, we can estimate the PPV and NPV via the formulas 
 
 $$
 \begin{aligned}
-    \mathrm{PPV} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}} \\  
-    \mathrm{NPV} = \frac{\mathrm{TN}}{\mathrm{TN} + \mathrm{FN}}\;. 
+    \mathrm{PPV} &= \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}} \\  
+    \mathrm{NPV} &= \frac{\mathrm{TN}}{\mathrm{TN} + \mathrm{FN}}\;. 
 \end{aligned}
 $$
 
@@ -188,7 +188,7 @@ Let's write a function to check for sufficiency in the COMPAS predictions. This 
 def test_sufficiency(df, group_col, target, pred):
     df_ = df.copy()
     df_["correct"] = df_[pred] == df_[target]
-    return df_.groupby([group_col, pred])["correct"].mean().reset_index()
+    return df_.groupby([pred, group_col])["correct"].mean().reset_index()
 #---
 ```
 
@@ -217,11 +217,11 @@ If the true rates $p_a$ and $p_b$ of positive outcomes in the groups $a$ and $b$
 
 ::: {.proof}
 
+Our big-picture approach is proof by contrapositive. We'll show that if there were a model that satisfied error rate balance and sufficiency, then $p_a = p_b$. 
 
+Let's briefly forget about group labels -- we'll reintroduce them in a moment. 
 
-The proof strategy is to derive an algebraic relationship between the error rates and positive predictive values. Let's briefly forget about group labels -- we'll reintroduce them in a moment. 
-
-First, the prevalence of positive outcomes is 
+First, the prevalence of positive outcomes is the fraction of positive outcomes. There are $\mathrm{TP} + \mathrm{FN}$ total positive outcomes, and $\mathrm{TP} + \mathrm{FP} + \mathrm{TN} + \mathrm{FN}$ outcomes overal, so we can write the prevalence as 
 
 $$
 \begin{aligned}
@@ -245,7 +245,7 @@ $$
 \end{aligned}
 $$
 
-Ok, now it's time to do some algebra. Let's start with the $\mathrm{TPR}$ and see if we can find an equation that relates it to the $\mathrm{TPR}$. First, we'll multiply by $\frac{1 - \mathrm{PPV}}{\mathrm{PPV}}$. If we do this and insert the definitions of these quantities, we'll get 
+Ok, now it's time to do some algebra. Let's start with the $\mathrm{TPR}$ and see if we can find an equation that relates it to the $\mathrm{FPR}$. First, we'll multiply by $\frac{1 - \mathrm{PPV}}{\mathrm{PPV}}$. If we do this and insert the definitions of these quantities, we'll get 
 
 $$
 \begin{aligned}
@@ -279,11 +279,30 @@ $$
 \begin{aligned}
     \frac{\mathrm{TPR}}{\mathrm{FPR}} \frac{1 - \mathrm{PPV}}{\mathrm{PPV}} = \frac{1-p}{p}\;. 
 \end{aligned}
+$$
+
+or 
+
+$$
+\begin{aligned}
+    p = \left(1 + \frac{\mathrm{TPR}}{\mathrm{FPR}} \frac{1 - \mathrm{PPV}}{\mathrm{PPV}}\right)^{-1}\;. 
+\end{aligned}
 $${#eq-rearranged-for-p}
 
-Now suppose that I want to enforce error rate balance and sufficiency for two groups $a$ and $b$, where $p_a \neq p_b$.  So, from error rate balance I am going to require that $\mathrm{TPR}_a = \mathrm{TPR}_b$, $\mathrm{FPR}_a = \mathrm{FPR}_b$, and from sufficiency I am going to enforce that $\mathrm{PPV}_a = \mathrm{PPV}_b$. Now, however, we have a problem: by @eq-rearranged-for-p, it must also be the case that $\frac{1 - p_a}{p_a} = \frac{1 - p_b}{p_b}$, which implies that $p_a = p_b$. If $p_a \neq p_b$, then we cannot mathematically satisfy both error rate balance and sufficiency. This completes the proof. 
+Now suppose that I want to enforce error rate balance and sufficiency for two groups $a$ and $b$, where $p_a \neq p_b$.  So, from error rate balance I am going to require that $\mathrm{TPR}_a = \mathrm{TPR}_b$, $\mathrm{FPR}_a = \mathrm{FPR}_b$, and from sufficiency I am going to enforce that $\mathrm{PPV}_a = \mathrm{PPV}_b$. Now, however, we have a problem: by @eq-rearranged-for-p, it must also be the case that $p_a = p_b$. This contradicts our assumption from the theorem. We cannot mathematically satisfy both error rate balance and sufficiency. This completes the proof. 
 
 :::
+
+::: {.callout-note}
+
+## Discussion
+
+Do you feel that it is more important for a recidivism prediction algorithm like COMPAS to satisfy error rate balance or sufficiency? Why?
+
+
+:::
+
+
 
 ## Fairness, Context, and Legitimacy
 

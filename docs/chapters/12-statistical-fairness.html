@@ -281,9 +281,9 @@ div.csl-indent {
 </header>
 
 <p><em>Download the live notebook corresponding to these notes <a href="../live-notebooks/12-statistical-fairness.ipynb">here</a>.</em></p>
-<p>In these notes, we’ll review three fundamental definitions of fairness for decision-making systems. While texts like <span class="citation" data-cites="barocasFairnessMachineLearning2023">Barocas, Hardt, and Narayanan (<a href="#ref-barocasFairnessMachineLearning2023" role="doc-biblioref">2023</a>)</span> couch their definitions in the language of probability, our focus in these notes will be to relate this language to operational computations on data sets in Python. We’ll practice some of our skills with <code>pandas</code>, <code>numpy</code>, and <code>seaborn</code>. After reviewing these definitions, we’ll review a simple, famous result about the ability of decision systems to satisfy multiple definitions.</p>
+<p>In these notes, we’ll review three fundamental definitions of fairness for decision-making systems. While texts like <span class="citation" data-cites="barocasFairnessMachineLearning2023">Barocas, Hardt, and Narayanan (<a href="#ref-barocasFairnessMachineLearning2023" role="doc-biblioref">2023</a>)</span> couch their definitions in the language of probability, our focus in these notes will be to relate the formal mathematical language to operational computations on data sets in Python. In doing so, we’ll review some computational techniques via <code>pandas</code>, <code>numpy</code>, and <code>seaborn</code> from last time. After reviewing these definitions, we’ll review a simple, famous result about the ability of decision systems to satisfy multiple definitions.</p>
 <p>For this study, we’ll return to the COMPAS data that we studied <a href="../chapters/10-compas.html">last time</a>.</p>
-<div id="bc56bc75" class="cell" data-execution_count="2">
+<div id="9975c844" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -295,7 +295,7 @@ div.csl-indent {
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> pd.read_csv(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>For this discussion, we again only need to consider a subset of the columns, and we’ll focus exclusively on white (Caucasian) and Black (African-American) defendants:</p>
-<div id="137fe0cd" class="cell" data-execution_count="3">
+<div id="659c9b75" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> [<span class="st">"sex"</span>, <span class="st">"race"</span>, <span class="st">"decile_score"</span>, <span class="st">"two_year_recid"</span>]</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> compas[cols]</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -387,7 +387,7 @@ div.csl-indent {
 </ul>
 <section id="statistical-independence" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="statistical-independence">Statistical Independence</h3>
-<p>For our present purposes, we focus on the definition of independence for binary classifiers as given by <span class="citation" data-cites="barocasFairnessMachineLearning2023">Barocas, Hardt, and Narayanan (<a href="#ref-barocasFairnessMachineLearning2023" role="doc-biblioref">2023</a>)</span>.</p>
+<p>Here’s our first concept of fairness: <strong>independence</strong>. For our present purposes, we focus on the definition of independence for binary classifiers as given by <span class="citation" data-cites="barocasFairnessMachineLearning2023">Barocas, Hardt, and Narayanan (<a href="#ref-barocasFairnessMachineLearning2023" role="doc-biblioref">2023</a>)</span>.</p>
 <div class="callout callout-style-simple callout-note">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -400,7 +400,7 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<div class="no-row-height column-margin column-container"><span class="callout-margin-content callout-margin-content-simple">Recall that <span class="math inline">\(\mathbb{P}(Y = 1|A = a)\)</span> is the probability that <span class="math inline">\(Y = 1\)</span> <em>given</em> that <span class="math inline">\(A=a\)</span>. It can be computed using the formula <span class="math inline">\(\mathbb{P}(Y = 1|A = a) = \frac{\mathbb{P}(Y = 1, A = a)}{\mathbb{P}(A = a)}\)</span>.</span></div><p>Colloquially, <a href="#def-independence" class="quarto-xref">Definition&nbsp;<span>6.1</span></a> says that the probability of a positive prediction <span class="math inline">\(\hat{Y} = 1\)</span> does not depend on the group membership <span class="math inline">\(A\)</span>. In the COMPAS data, independence would require that the probability of the model predicting that an individual will be arrested within two years be the same for white and Black defendants.</p>
+<div class="no-row-height column-margin column-container"><span class="callout-margin-content callout-margin-content-simple">Recall that <span class="math inline">\(\mathbb{P}(Y = 1|A = a)\)</span> is the probability that <span class="math inline">\(Y = 1\)</span> <em>given</em> that <span class="math inline">\(A=a\)</span>. It can be computed using the formula <span class="math inline">\(\mathbb{P}(Y = 1|A = a) = \frac{\mathbb{P}(Y = 1, A = a)}{\mathbb{P}(A = a)}\)</span>.</span></div><p>Colloquially, <a href="#def-independence" class="quarto-xref">Definition&nbsp;<span>6.1</span></a> says that the probability of a positive prediction <span class="math inline">\(\hat{Y} = 1\)</span> does not depend on the group membership <span class="math inline">\(A\)</span>. In the COMPAS data, independence would require that the probability of the model predicting that an individual will be arrested within two years be the same for Black and white defendants.</p>
 <p>Let’s write a Python function to empirically check independence that will accept a data frame <code>df</code> and three additional arguments:</p>
 <div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="">For independence, we don’t actually need the <code>target</code> column, but this approach will let us keep a consistent API for our more complicated implementations below.</span></div></div>
 <ul>
@@ -408,12 +408,12 @@ div.csl-indent {
 <li><code>target</code>, the name of the column holding the binary outcomes.</li>
 <li><code>pred</code>, the name of the column holding the predicted binary outcomes.</li>
 </ul>
-<div id="9f42cb0a" class="cell" data-execution_count="4">
+<div id="1dfefdb4" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_independence(df, group_col, target, pred):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.groupby(group_col)[pred].aggregate([np.mean, <span class="bu">len</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s run our function to check for independence:</p>
-<div id="30b36e2c" class="cell" data-execution_count="5">
+<div id="f2967b71" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>test_independence(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <div>
@@ -476,17 +476,17 @@ div.csl-indent {
 <p>Error rate balance requires that the true positive rate and false positive rates be equal on the two groups. Given some data in which we have <span class="math inline">\(\mathrm{TP}\)</span> instances of true positives, <span class="math inline">\(\mathrm{FP}\)</span> instances of false positives, <span class="math inline">\(\mathrm{TN}\)</span> instances of true negatives, and <span class="math inline">\(\mathrm{FN}\)</span> instances of false negatives, we can estimate the TPR and FPR via the formulas</p>
 <p><span class="math display">\[
 \begin{aligned}
-    \mathrm{TPR} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}} \\  
-    \mathrm{FPR} = \frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}\;.
+    \mathrm{TPR} &amp;= \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}} \\  
+    \mathrm{FPR} &amp;= \frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}\;.
 \end{aligned}
 \]</span></p>
-<p>Let’s write another function with the same API to give a summary of error rates between two groups using these formulas. As we saw last time, it’s pretty convenient to do this with confusion matrices. It’s not much more difficult to do it “by hand” using vectorized Pandas computations:</p>
-<div id="aa02ed28" class="cell" data-execution_count="6">
+<p>Let’s write another function with the same API to give a summary of error rates between two groups using these formulas. As we know, it’s pretty convenient to do this with confusion matrices. It’s not much more difficult to do it “by hand” using vectorized Pandas computations:</p>
+<div id="dbbfa30a" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_error_rate_balance(df, group_col, target, pred):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.groupby([group_col, target])[pred].mean().reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can use this function to do an empirical test for error rate balance:</p>
-<div id="f5ef0b82" class="cell" data-execution_count="7">
+<div id="7be92d8f" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>test_error_rate_balance(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div>
@@ -532,7 +532,7 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<div class="page-columns page-full"><p> The false positive rates are in the rows in which <code>two_year_recid == 0</code>, and the true positive rates are in the rows in which <code>two_year_recid == 1</code>. If you are playing along at home, you’ll notice that these error rates exactly match the rates we calculated via confusion matrices in our first analysis of the COMPAS data set.</p><div class="no-row-height column-margin column-container"><span class="">As before, before concluding that the COMPAS algorithm violates error rate balance as in <a href="#def-error-rate-balance" class="quarto-xref">Definition&nbsp;<span>6.2</span></a>, it is technically necessary to perform a statistical test to reject the null hypothesis that the true population error rates are the same.</span></div></div>
+<div class="page-columns page-full"><p> The false positive rates are in the rows in which <code>two_year_recid == 0</code>, and the true positive rates are in the rows in which <code>two_year_recid == 1</code>.</p><div class="no-row-height column-margin column-container"><span class="">As before, before concluding that the COMPAS algorithm violates error rate balance as in <a href="#def-error-rate-balance" class="quarto-xref">Definition&nbsp;<span>6.2</span></a>, it is technically necessary to perform a statistical test to reject the null hypothesis that the true population error rates are the same.</span></div></div>
 </section>
 <section id="sufficiency" class="level3">
 <h3 class="anchored" data-anchor-id="sufficiency">Sufficiency</h3>
@@ -554,22 +554,22 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<p>The quantity <span class="math inline">\(\mathbb{P}(Y = 1 | \hat{Y} = 1, A = a)\)</span> is sometimes called the <em>positive predictive value</em> (PPV) of <span class="math inline">\(\hat{Y}\)</span> for group <span class="math inline">\(a\)</span>. Similarly, <span class="math inline">\(\mathbb{P}(Y = 0 | \hat{Y} = 0, A = a)\)</span> is sometimes called the <em>negative predictive value</em> (NPV) of <span class="math inline">\(\hat{Y}\)</span> for group <span class="math inline">\(a\)</span>. So, the sufficiency criterion demands that the positive and negative predictive values be equal across groups.</p>
+<p>The quantity <span class="math inline">\(\mathbb{P}(Y = 1 | \hat{Y} = 1, A = a)\)</span> is sometimes called the <em>positive predictive value</em> (PPV) of <span class="math inline">\(\hat{Y}\)</span> for group <span class="math inline">\(a\)</span>. You can think of it as the “<em>value</em>” of a <em>positive prediction</em>: given that the prediction is positive (<span class="math inline">\(\hat{Y} = 1\)</span>) for a member of group <span class="math inline">\(a\)</span>, how likely is it that the prediction is accurate? Similarly, <span class="math inline">\(\mathbb{P}(Y = 0 | \hat{Y} = 0, A = a)\)</span> is sometimes called the <em>negative predictive value</em> (NPV) of <span class="math inline">\(\hat{Y}\)</span> for group <span class="math inline">\(a\)</span>. So, the sufficiency criterion demands that the positive and negative predictive values be equal across groups.</p>
 <p>Given some data in which we have <span class="math inline">\(\mathrm{TP}\)</span> instances of true positives, <span class="math inline">\(\mathrm{FP}\)</span> instances of false positives, <span class="math inline">\(\mathrm{TN}\)</span> instances of true negatives, and <span class="math inline">\(\mathrm{FN}\)</span> instances of false negatives, we can estimate the PPV and NPV via the formulas</p>
 <p><span class="math display">\[
 \begin{aligned}
-    \mathrm{PPV} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}} \\  
-    \mathrm{NPV} = \frac{\mathrm{TN}}{\mathrm{TN} + \mathrm{FN}}\;.
+    \mathrm{PPV} &amp;= \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}} \\  
+    \mathrm{NPV} &amp;= \frac{\mathrm{TN}}{\mathrm{TN} + \mathrm{FN}}\;.
 \end{aligned}
 \]</span></p>
 <p>Let’s write a function to check for sufficiency in the COMPAS predictions. This function will compute the positive and negative predictive values by group:</p>
-<div id="32193ed5" class="cell" data-execution_count="8">
+<div id="cd001a0c" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_sufficiency(df, group_col, target, pred):</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    df_ <span class="op">=</span> df.copy()</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    df_[<span class="st">"correct"</span>] <span class="op">=</span> df_[pred] <span class="op">==</span> df_[target]</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_.groupby([group_col, pred])[<span class="st">"correct"</span>].mean().reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_.groupby([pred, group_col])[<span class="st">"correct"</span>].mean().reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="5595b97f" class="cell" data-execution_count="9">
+<div id="d745269a" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>test_sufficiency(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <div>
@@ -579,34 +579,34 @@ div.csl-indent {
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">race</th>
 <th data-quarto-table-cell-role="th">predicted_high_risk</th>
+<th data-quarto-table-cell-role="th">race</th>
 <th data-quarto-table-cell-role="th">correct</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">0</td>
-<td>African-American</td>
 <td>0</td>
+<td>African-American</td>
 <td>0.650</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1</td>
-<td>African-American</td>
-<td>1</td>
-<td>0.630</td>
+<td>0</td>
+<td>Caucasian</td>
+<td>0.712</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">2</td>
-<td>Caucasian</td>
-<td>0</td>
-<td>0.712</td>
+<td>1</td>
+<td>African-American</td>
+<td>0.630</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">3</td>
-<td>Caucasian</td>
 <td>1</td>
+<td>Caucasian</td>
 <td>0.591</td>
 </tr>
 </tbody>
@@ -635,8 +635,9 @@ div.csl-indent {
 </div>
 </div>
 <div class="proof">
-<p><span class="proof-title"><em>Proof</em>. </span>The proof strategy is to derive an algebraic relationship between the error rates and positive predictive values. Let’s briefly forget about group labels – we’ll reintroduce them in a moment.</p>
-<p>First, the prevalence of positive outcomes is</p>
+<p><span class="proof-title"><em>Proof</em>. </span>Our big-picture approach is proof by contrapositive. We’ll show that if there were a model that satisfied error rate balance and sufficiency, then <span class="math inline">\(p_a = p_b\)</span>.</p>
+<p>Let’s briefly forget about group labels – we’ll reintroduce them in a moment.</p>
+<p>First, the prevalence of positive outcomes is the fraction of positive outcomes. There are <span class="math inline">\(\mathrm{TP} + \mathrm{FN}\)</span> total positive outcomes, and <span class="math inline">\(\mathrm{TP} + \mathrm{FP} + \mathrm{TN} + \mathrm{FN}\)</span> outcomes overal, so we can write the prevalence as</p>
 <p><span class="math display">\[
 \begin{aligned}
     p = \frac{\mathrm{TP} + \mathrm{FN}}{\mathrm{TP} + \mathrm{FP} + \mathrm{TN} + \mathrm{FN}};.
@@ -654,7 +655,7 @@ div.csl-indent {
     \mathrm{PPV} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}}\;.
 \end{aligned}
 \]</span></p>
-<p>Ok, now it’s time to do some algebra. Let’s start with the <span class="math inline">\(\mathrm{TPR}\)</span> and see if we can find an equation that relates it to the <span class="math inline">\(\mathrm{TPR}\)</span>. First, we’ll multiply by <span class="math inline">\(\frac{1 - \mathrm{PPV}}{\mathrm{PPV}}\)</span>. If we do this and insert the definitions of these quantities, we’ll get</p>
+<p>Ok, now it’s time to do some algebra. Let’s start with the <span class="math inline">\(\mathrm{TPR}\)</span> and see if we can find an equation that relates it to the <span class="math inline">\(\mathrm{FPR}\)</span>. First, we’ll multiply by <span class="math inline">\(\frac{1 - \mathrm{PPV}}{\mathrm{PPV}}\)</span>. If we do this and insert the definitions of these quantities, we’ll get</p>
 <p><span class="math display">\[
 \begin{aligned}
     \mathrm{TPR} \frac{1 - \mathrm{PPV}}{\mathrm{PPV}} &amp;= \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}} \frac{\mathrm{FP}}{\mathrm{TP} + \mathrm{FP}} \frac{\mathrm{TP} + \mathrm{FP}}{\mathrm{TP}} \\
@@ -677,12 +678,31 @@ div.csl-indent {
 \end{aligned}
 \]</span></p>
 <p>It’s convenient to rearrange this equation slightly:</p>
-<p><span id="eq-rearranged-for-p"><span class="math display">\[
+<p><span class="math display">\[
 \begin{aligned}
     \frac{\mathrm{TPR}}{\mathrm{FPR}} \frac{1 - \mathrm{PPV}}{\mathrm{PPV}} = \frac{1-p}{p}\;.
 \end{aligned}
+\]</span></p>
+<p>or</p>
+<p><span id="eq-rearranged-for-p"><span class="math display">\[
+\begin{aligned}
+    p = \left(1 + \frac{\mathrm{TPR}}{\mathrm{FPR}} \frac{1 - \mathrm{PPV}}{\mathrm{PPV}}\right)^{-1}\;.
+\end{aligned}
 \tag{6.1}\]</span></span></p>
-<p>Now suppose that I want to enforce error rate balance and sufficiency for two groups <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>, where <span class="math inline">\(p_a \neq p_b\)</span>. So, from error rate balance I am going to require that <span class="math inline">\(\mathrm{TPR}_a = \mathrm{TPR}_b\)</span>, <span class="math inline">\(\mathrm{FPR}_a = \mathrm{FPR}_b\)</span>, and from sufficiency I am going to enforce that <span class="math inline">\(\mathrm{PPV}_a = \mathrm{PPV}_b\)</span>. Now, however, we have a problem: by <a href="#eq-rearranged-for-p" class="quarto-xref">Equation&nbsp;<span>6.1</span></a>, it must also be the case that <span class="math inline">\(\frac{1 - p_a}{p_a} = \frac{1 - p_b}{p_b}\)</span>, which implies that <span class="math inline">\(p_a = p_b\)</span>. If <span class="math inline">\(p_a \neq p_b\)</span>, then we cannot mathematically satisfy both error rate balance and sufficiency. This completes the proof.</p>
+<p>Now suppose that I want to enforce error rate balance and sufficiency for two groups <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>, where <span class="math inline">\(p_a \neq p_b\)</span>. So, from error rate balance I am going to require that <span class="math inline">\(\mathrm{TPR}_a = \mathrm{TPR}_b\)</span>, <span class="math inline">\(\mathrm{FPR}_a = \mathrm{FPR}_b\)</span>, and from sufficiency I am going to enforce that <span class="math inline">\(\mathrm{PPV}_a = \mathrm{PPV}_b\)</span>. Now, however, we have a problem: by <a href="#eq-rearranged-for-p" class="quarto-xref">Equation&nbsp;<span>6.1</span></a>, it must also be the case that <span class="math inline">\(p_a = p_b\)</span>. This contradicts our assumption from the theorem. We cannot mathematically satisfy both error rate balance and sufficiency. This completes the proof.</p>
+</div>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Discussion
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Do you feel that it is more important for a recidivism prediction algorithm like COMPAS to satisfy error rate balance or sufficiency? Why?</p>
+</div>
 </div>
 </section>
 <section id="fairness-context-and-legitimacy" class="level2">
