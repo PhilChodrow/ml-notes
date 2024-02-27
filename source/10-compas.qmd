@@ -171,7 +171,9 @@ The overall accuracies for Black and white defendants are comparable, and both a
 What about the error rates? Here is a simple calculation which computes the false positive rate (FPR) in the first row and the true positive rate (TPR) on the bottom row: 
 
 ```{python}
+#---
 compas.groupby(["two_year_recid"])["predicted_high_risk"].mean().reset_index()
+#---
 ```
 
 However, and this was the main finding of the ProPublica study, the FPR and FNR are very different when we break down the data by race:
