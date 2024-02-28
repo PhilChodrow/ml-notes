@@ -264,6 +264,7 @@ div.csl-indent {
   <li><a href="#our-data" id="toc-our-data" class="nav-link active" data-scroll-target="#our-data">Our Data</a></li>
   <li><a href="#linear-classifiers" id="toc-linear-classifiers" class="nav-link" data-scroll-target="#linear-classifiers">Linear Classifiers</a></li>
   <li><a href="#the-perceptron-algorithm" id="toc-the-perceptron-algorithm" class="nav-link" data-scroll-target="#the-perceptron-algorithm">The Perceptron Algorithm</a></li>
+  <li><a href="#a-minimal-training-loop" id="toc-a-minimal-training-loop" class="nav-link" data-scroll-target="#a-minimal-training-loop">A Minimal Training Loop</a></li>
   <li><a href="#illustration" id="toc-illustration" class="nav-link" data-scroll-target="#illustration">Illustration</a></li>
   <li><a href="#theory-of-the-perceptron-algorithm" id="toc-theory-of-the-perceptron-algorithm" class="nav-link" data-scroll-target="#theory-of-the-perceptron-algorithm">Theory of the Perceptron Algorithm</a>
   <ul class="collapse">
@@ -304,7 +305,7 @@ div.csl-indent {
 </div></div><section id="our-data" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="our-data">Our Data</h3>
 <p>The perceptron algorithm aims to find a rule for separating two distinct groups in some data. Here’s an example of some data on which we might aim to apply the perceptron:</p>
-<div id="cell-fig-scatter" class="cell page-columns page-full" data-execution_count="1">
+<div id="cell-fig-scatter" class="cell page-columns page-full" data-execution_count="3">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -313,10 +314,10 @@ div.csl-indent {
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">1234</span>)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> perceptron_data(n_points <span class="op">=</span> <span class="dv">300</span>, noise <span class="op">=</span> <span class="fl">0.2</span>):</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> perceptron_data(n_points <span class="op">=</span> <span class="dv">300</span>, noise <span class="op">=</span> <span class="fl">0.2</span>, p_dims <span class="op">=</span> <span class="dv">2</span>):</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> torch.arange(n_points) <span class="op">&gt;=</span> <span class="bu">int</span>(n_points<span class="op">/</span><span class="dv">2</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> y[:, <span class="va">None</span>] <span class="op">+</span> torch.normal(<span class="fl">0.0</span>, noise, size <span class="op">=</span> (n_points,<span class="dv">2</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> y[:, <span class="va">None</span>] <span class="op">+</span> torch.normal(<span class="fl">0.0</span>, noise, size <span class="op">=</span> (n_points,p_dims))</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> torch.cat((X, torch.ones((X.shape[<span class="dv">0</span>], <span class="dv">1</span>))), <span class="dv">1</span>)</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># convert y from {0, 1} to {-1, 1}</span></span>
@@ -382,7 +383,7 @@ div.csl-indent {
 </div>
 </div>
 <p>When <span class="math inline">\(k = 2\)</span>, a hyperplane is just a line. Here are two candidate hyperplanes that we could use to classify our data. Which one looks like it better separates the two classes?</p>
-<div id="cell-fig-scatter-with-separators" class="cell page-columns page-full" data-execution_count="2">
+<div id="cell-fig-scatter-with-separators" class="cell page-columns page-full" data-execution_count="4">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> draw_line(w, x_min, x_max, ax, <span class="op">**</span>kwargs):</span>
@@ -446,7 +447,7 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 <section id="example" class="level4">
 <h4 class="anchored" data-anchor-id="example">Example</h4>
 <p>Now let’s go ahead and run the perceptron algorithm on some data. First we should set up our feature matrix <span class="math inline">\(\mathbf{X}\)</span> and target vector <span class="math inline">\(\mathbf{y}\)</span>.</p>
-<div id="cell-5" class="cell" data-execution_count="3">
+<div id="cell-5" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">1234</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> perceptron_data(n_points <span class="op">=</span> <span class="dv">50</span>, noise <span class="op">=</span> <span class="fl">0.3</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
@@ -458,10 +459,10 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 </div>
 <p>You may be able to eyeball the fact that this data is <em>linearly separable</em>: it is possible to draw a line that perfectly separates the two clusters. We can think of the perceptron algorithm as searching for such a line.</p>
 <p>Let’s start with a random guess for the weight vector <span class="math inline">\(\mathbf{w}\)</span>:</p>
-<div id="cell-7" class="cell" data-execution_count="4">
+<div id="cell-7" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> torch.Tensor([<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-8" class="cell" data-execution_count="5">
+<div id="cell-8" class="cell" data-execution_count="7">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
@@ -474,34 +475,34 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 </div>
 </div>
 <p>Well, that doesn’t seem very promising. So, let’s do the perceptron update! First, we need to pick a random data point:</p>
-<div id="cell-10" class="cell" data-execution_count="6">
-<div class="cell-output cell-output-display" data-execution_count="6">
-<pre><code>&lt;torch._C.Generator at 0x7f80c03244b0&gt;</code></pre>
+<div id="cell-10" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>&lt;torch._C.Generator at 0x7fab411df3d0&gt;</code></pre>
 </div>
 </div>
-<div id="cell-11" class="cell" data-execution_count="7">
+<div id="cell-11" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> X.shape[<span class="dv">0</span>] <span class="co"># number of data points</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>i <span class="op">=</span> torch.randint(n, size <span class="op">=</span> (<span class="dv">1</span>,)) <span class="co"># index of a random data point</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>x_i <span class="op">=</span> X[[i],] <span class="co"># the random data point itself</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we need to compute the score:</p>
-<div id="cell-13" class="cell" data-execution_count="8">
+<div id="cell-13" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>s_i <span class="op">=</span> x_i<span class="op">@</span>w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We need to compare the score to the value of the target <span class="math inline">\(y_i\)</span>:</p>
-<div id="cell-15" class="cell" data-execution_count="9">
+<div id="cell-15" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>y_i <span class="op">=</span> y[i]</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>s_i, y_i</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="9">
+<div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>(tensor([1.1401]), tensor([-1]))</code></pre>
 </div>
 </div>
 <p>In this case, the score and the target have opposite signs, which means that we need to perform the perceptron update:</p>
-<div id="cell-17" class="cell" data-execution_count="10">
+<div id="cell-17" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> w <span class="op">+</span> y_i<span class="op">*</span>x_i</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>If we now check the decision boundary again, it appears visually that it has improved slightly:</p>
-<div id="cell-19" class="cell" data-execution_count="11">
+<div id="cell-19" class="cell" data-execution_count="13">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
@@ -515,54 +516,97 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 </div>
 </section>
 </section>
+<section id="a-minimal-training-loop" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="a-minimal-training-loop">A Minimal Training Loop</h3>
+<p>Now it’s time for us to introduce a <em>training loop</em>. In the training loop, we simply repeat the above procedure for a specified number of times (or until convergence). We’re going to illustrate this using a specific <em>organization</em> of our computational steps, which will stick with us throughout most of the rest of these notes.</p>
+<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="">The classes <code>Perceptron</code> and <code>PerceptronOptimizer</code> are defined in an external script. You’ll have the opportunity to implement and experiment with these classes in an upcoming assignment.</span></div></div>
+<div id="cell-21" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hidden.perceptron <span class="im">import</span> Perceptron, PerceptronOptimizer</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># instantiate a model and an optimizer</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> Perceptron() </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> PerceptronOptimizer(p)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co"># for keeping track of loss values</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>loss_vec <span class="op">=</span> []</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> X.size()[<span class="dv">0</span>]</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> loss <span class="op">&gt;</span> <span class="dv">0</span>: <span class="co"># dangerous -- only terminates if data is linearly separable</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># not part of the update: just for tracking our progress    </span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> p.loss(X, y) </span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    loss_vec.append(loss)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># pick a random data point</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    i <span class="op">=</span> torch.randint(n, size <span class="op">=</span> (<span class="dv">1</span>,))</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    x_i <span class="op">=</span> X[[i],:]</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    y_i <span class="op">=</span> y[i]</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># perform a perceptron update using the random data point</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    opt.step(x_i, y_i)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can track the progress of our training by checking the values of the loss function over time:</p>
+<div id="cell-23" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plt.plot(loss_vec, color <span class="op">=</span> <span class="st">"slategrey"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(torch.arange(<span class="bu">len</span>(loss_vec)), loss_vec, color <span class="op">=</span> <span class="st">"slategrey"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Perceptron Iteration (Updates Only)"</span>, ylabel <span class="op">=</span> <span class="st">"loss"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="20-perceptron_files/figure-html/cell-14-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We can see that training completed with the achievement of zero loss; that is, perfect training accuracy.</p>
+</section>
 <section id="illustration" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="illustration">Illustration</h2>
-<p>The following figure illustrates the perceptron algorithm in action over several iterations. The classes <code>Perceptron</code> and <code>PerceptronOptimizer</code> are defined in an external script. You’ll have the opportunity to implement and experiment with these classes in an upcoming assignment.</p>
+<p>The following figure illustrates the perceptron algorithm in action over several iterations.</p>
 <div id="cell-fig-demonstration" class="cell page-columns page-full" data-execution_count="13">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">1234567</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># initialize a perceptron </span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> Perceptron()</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> PerceptronOptimizer(p)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>p.loss(X, y)</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># set up the figure</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">7</span>, <span class="dv">5</span>)</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, sharex <span class="op">=</span> <span class="va">True</span>, sharey <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>markers <span class="op">=</span> [<span class="st">"o"</span>, <span class="st">","</span>]</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>marker_map <span class="op">=</span> {<span class="op">-</span><span class="dv">1</span> : <span class="dv">0</span>, <span class="dv">1</span> : <span class="dv">1</span>}</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co"># initialize for main loop</span></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>current_ax <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>loss_vec <span class="op">=</span> []</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> loss <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    ax <span class="op">=</span> axarr.ravel()[current_ax]</span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># save the old value of w for plotting later</span></span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    old_w <span class="op">=</span> torch.clone(p.w)</span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># make an optimization step -- this is where the update actually happens</span></span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># now p.w is the new value </span></span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    i, local_loss <span class="op">=</span> opt.step(X, y)</span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># if a change was made, plot the old and new decision boundaries</span></span>
-<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># also add the new loss to loss_vec for plotting below</span></span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_loss <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>        plot_perceptron_data(X, y, ax)</span>
-<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>        draw_line(old_w, x_min <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>, x_max <span class="op">=</span> <span class="dv">2</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>, linestyle <span class="op">=</span> <span class="st">"dashed"</span>)</span>
-<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> p.loss(X, y).item()</span>
-<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>        loss_vec.append(loss)</span>
-<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>        draw_line(p.w, x_min <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>, x_max <span class="op">=</span> <span class="dv">2</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>)</span>
-<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X[i,<span class="dv">0</span>],X[i,<span class="dv">1</span>], color <span class="op">=</span> <span class="st">"black"</span>, facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"black"</span>, marker <span class="op">=</span> markers[marker_map[y[i].item()]])</span>
-<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>        <span class="co"># draw_line(w, -10, 10, ax, color = "black")</span></span>
-<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>        ax.set_title(<span class="ss">f"loss = </span><span class="sc">{</span>loss<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>        ax.<span class="bu">set</span>(xlim <span class="op">=</span> (<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>), ylim <span class="op">=</span> (<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>))</span>
-<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>        current_ax <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">1234567</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># initialize a perceptron </span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> Perceptron()</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> PerceptronOptimizer(p)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>p.loss(X, y)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># set up the figure</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">7</span>, <span class="dv">5</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, sharex <span class="op">=</span> <span class="va">True</span>, sharey <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>markers <span class="op">=</span> [<span class="st">"o"</span>, <span class="st">","</span>]</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>marker_map <span class="op">=</span> {<span class="op">-</span><span class="dv">1</span> : <span class="dv">0</span>, <span class="dv">1</span> : <span class="dv">1</span>}</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co"># initialize for main loop</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>current_ax <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>loss_vec <span class="op">=</span> []</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> loss <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    ax <span class="op">=</span> axarr.ravel()[current_ax]</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># save the old value of w for plotting later</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    old_w <span class="op">=</span> torch.clone(p.w)</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># make an optimization step -- this is where the update actually happens</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># now p.w is the new value </span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    i, local_loss <span class="op">=</span> opt.step(X, y)</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># if a change was made, plot the old and new decision boundaries</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># also add the new loss to loss_vec for plotting below</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_loss <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>        plot_perceptron_data(X, y, ax)</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>        draw_line(old_w, x_min <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>, x_max <span class="op">=</span> <span class="dv">2</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>, linestyle <span class="op">=</span> <span class="st">"dashed"</span>)</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> p.loss(X, y).item()</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>        loss_vec.append(loss)</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>        draw_line(p.w, x_min <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>, x_max <span class="op">=</span> <span class="dv">2</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X[i,<span class="dv">0</span>],X[i,<span class="dv">1</span>], color <span class="op">=</span> <span class="st">"black"</span>, facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"black"</span>, marker <span class="op">=</span> markers[marker_map[y[i].item()]])</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>        <span class="co"># draw_line(w, -10, 10, ax, color = "black")</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>        ax.set_title(<span class="ss">f"loss = </span><span class="sc">{</span>loss<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>        ax.<span class="bu">set</span>(xlim <span class="op">=</span> (<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>), ylim <span class="op">=</span> (<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>        current_ax <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-demonstration" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -573,19 +617,6 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 </div>
 </div>
 </div>
-<p>A common way to visualize the behavior of machine learning algorithms is by plotting the loss in each iteration. Since we’re plotting the loss, we want this plot to go down!</p>
-<div id="cell-24" class="cell" data-execution_count="14">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plt.plot(loss_vec, color <span class="op">=</span> <span class="st">"slategrey"</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(torch.arange(<span class="bu">len</span>(loss_vec)), loss_vec, color <span class="op">=</span> <span class="st">"slategrey"</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Perceptron Iteration (Updates Only)"</span>, ylabel <span class="op">=</span> <span class="st">"loss"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display">
-<p><img src="20-perceptron_files/figure-html/cell-15-output-1.png" class="img-fluid"></p>
-</div>
-</div>
-<p>In this particular case the loss decreases monotonically, although this is not guaranteed.</p>
 </section>
 <section id="theory-of-the-perceptron-algorithm" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="theory-of-the-perceptron-algorithm">Theory of the Perceptron Algorithm</h2>
