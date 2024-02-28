@@ -50,6 +50,7 @@ for f in os.listdir("source"):
         notebook = nb.read(out_path, as_version = 4)
         for cell in notebook["cells"]:
             cell["source"] = re.sub(r"#---\n", "", cell["source"])
+            cell["source"] = re.sub(r"#---", "", cell["source"])
 
         nb.write(notebook, out_path)
             
