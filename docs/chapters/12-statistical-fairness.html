@@ -301,7 +301,7 @@ div.csl-indent {
 <p><em>Download the live notebook corresponding to these notes <a href="../live-notebooks/12-statistical-fairness.ipynb">here</a>.</em></p>
 <p>In these notes, we’ll review three fundamental definitions of fairness for decision-making systems. While texts like <span class="citation" data-cites="barocasFairnessMachineLearning2023">Barocas, Hardt, and Narayanan (<a href="#ref-barocasFairnessMachineLearning2023" role="doc-biblioref">2023</a>)</span> couch their definitions in the language of probability, our focus in these notes will be to relate the formal mathematical language to operational computations on data sets in Python. In doing so, we’ll review some computational techniques via <code>pandas</code>, <code>numpy</code>, and <code>seaborn</code> from last time. After reviewing these definitions, we’ll review a simple, famous result about the ability of decision systems to satisfy multiple definitions.</p>
 <p>For this study, we’ll return to the COMPAS data that we studied <a href="../chapters/10-compas.html">last time</a>.</p>
-<div id="e307f25b" class="cell" data-execution_count="1">
+<div id="e307f25b" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -313,7 +313,7 @@ div.csl-indent {
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> pd.read_csv(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>For this discussion, we again only need to consider a subset of the columns, and we’ll focus exclusively on white (Caucasian) and Black (African-American) defendants:</p>
-<div id="eed5be4c" class="cell" data-execution_count="2">
+<div id="eed5be4c" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> [<span class="st">"sex"</span>, <span class="st">"race"</span>, <span class="st">"decile_score"</span>, <span class="st">"two_year_recid"</span>]</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> compas[cols]</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -426,12 +426,12 @@ div.csl-indent {
 <li><code>target</code>, the name of the column holding the binary outcomes.</li>
 <li><code>pred</code>, the name of the column holding the predicted binary outcomes.</li>
 </ul>
-<div id="d1ce535b" class="cell" data-execution_count="3">
+<div id="d1ce535b" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_independence(df, group_col, target, pred):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.groupby(group_col)[pred].aggregate([np.mean, <span class="bu">len</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s run our function to check for independence:</p>
-<div id="4da98518" class="cell" data-execution_count="4">
+<div id="4da98518" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>test_independence(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <div>
@@ -499,12 +499,12 @@ div.csl-indent {
 \end{aligned}
 \]</span></p>
 <p>Let’s write another function with the same API to give a summary of error rates between two groups using these formulas. As we know, it’s pretty convenient to do this with confusion matrices. It’s not much more difficult to do it “by hand” using vectorized Pandas computations:</p>
-<div id="1eb30786" class="cell" data-execution_count="5">
+<div id="1eb30786" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_error_rate_balance(df, group_col, target, pred):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.groupby([group_col, target])[pred].mean().reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can use this function to do an empirical test for error rate balance:</p>
-<div id="dc6ca7a2" class="cell" data-execution_count="6">
+<div id="dc6ca7a2" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>test_error_rate_balance(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div>
@@ -581,13 +581,13 @@ div.csl-indent {
 \end{aligned}
 \]</span></p>
 <p>Let’s write a function to check for sufficiency in the COMPAS predictions. This function will compute the positive and negative predictive values by group:</p>
-<div id="92b42a2a" class="cell" data-execution_count="7">
+<div id="92b42a2a" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_sufficiency(df, group_col, target, pred):</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    df_ <span class="op">=</span> df.copy()</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    df_[<span class="st">"correct"</span>] <span class="op">=</span> df_[pred] <span class="op">==</span> df_[target]</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_.groupby([pred, group_col])[<span class="st">"correct"</span>].mean().reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="186e0f37" class="cell" data-execution_count="8">
+<div id="186e0f37" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>test_sufficiency(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <div>

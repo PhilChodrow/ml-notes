@@ -2,6 +2,8 @@ print("running precompilation script")
 
 import shutil
 import os
+import nbformat as nb
+import re
 
 if not os.path.isdir("docs/live-notebooks"):
     os.makedirs("docs/live-notebooks", exist_ok=True)
@@ -44,7 +46,13 @@ for f in os.listdir("source"):
     
     elif f.endswith(".ipynb"):
         out_path = f"chapters/{f}"
-        shutil.copyfile(f"source/{f}", out_path)       
+        shutil.copyfile(f"source/{f}", out_path)   
+        notebook = nb.read(out_path, as_version = 4)
+        for cell in notebook["cells"]:
+            cell["source"] = re.sub(r"#---\n", "", cell["source"])
+
+        nb.write(notebook, out_path)
+            
         # os.system(f"quarto convert {f}")
 
 
