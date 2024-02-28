@@ -18,3 +18,6 @@ book:
       chapters: 
         - chapters/10-compas.qmd
         - chapters/12-statistical-fairness.qmd
+    - part: "Machine Learning Models"
+      chapters: 
+        - chapters/20-perceptron.qmd

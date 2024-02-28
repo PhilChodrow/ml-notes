@@ -1,6 +1,6 @@
 print("running precompilation script")
 
-
+import shutil
 import os
 
 if not os.path.isdir("docs/live-notebooks"):
@@ -9,7 +9,13 @@ if not os.path.isdir("docs/live-notebooks"):
 if not os.path.isdir("chapters"):
     os.makedirs("chapters", exist_ok=True)
 
+if "hidden" not in os.listdir("chapters"):
+    source_dir = "source/hidden"
+    destination_dir = "chapters/hidden"
+    shutil.copytree(source_dir, destination_dir)
+
 for f in os.listdir("source"):
+    
     if f[-4:] == ".qmd":
         with open(f"source/{f}", "r") as file: 
             cleaned = file.read().replace('#---\n', '')

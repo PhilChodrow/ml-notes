@@ -13,4 +13,7 @@ book:
       chapters: 
         - source/10-compas.qmd
         - source/12-statistical-fairness.qmd
+    - part: "Machine Learning Models"
+      chapters: 
+        - source/20-perceptron.qmd
   

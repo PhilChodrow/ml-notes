@@ -2,3 +2,5 @@
 */.jupyter_cache
 chapters
 !docs/chapters
+*.DS_Store
+*/hidden
