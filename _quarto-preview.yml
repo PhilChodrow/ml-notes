@@ -15,5 +15,5 @@ book:
         - source/12-statistical-fairness.qmd
     - part: "Machine Learning Models"
       chapters: 
-        - source/20-perceptron.qmd
+        - source/20-perceptron.ipynb
   

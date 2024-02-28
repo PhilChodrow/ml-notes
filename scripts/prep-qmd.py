@@ -16,7 +16,7 @@ if "hidden" not in os.listdir("chapters"):
 
 for f in os.listdir("source"):
     
-    if f[-4:] == ".qmd":
+    if f.endswith(".qmd"):
         with open(f"source/{f}", "r") as file: 
             cleaned = file.read().replace('#---\n', '')
             
@@ -41,7 +41,10 @@ for f in os.listdir("source"):
             
             with open(f"chapters/{f}", "w") as new: 
                 new.write(cleaned)
-            
+    
+    elif f.endswith(".ipynb"):
+        out_path = f"chapters/{f}"
+        shutil.copyfile(f"source/{f}", out_path)       
         # os.system(f"quarto convert {f}")
 
 

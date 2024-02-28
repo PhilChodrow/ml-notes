@@ -4,3 +4,4 @@ chapters
 !docs/chapters
 *.DS_Store
 */hidden
+source/*_files
