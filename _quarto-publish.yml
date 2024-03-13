@@ -21,3 +21,4 @@ book:
     - part: "Machine Learning Models"
       chapters: 
         - chapters/20-perceptron.ipynb
+        - chapters/22-convex-erm.ipynb 

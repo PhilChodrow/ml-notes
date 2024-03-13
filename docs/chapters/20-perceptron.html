@@ -83,6 +83,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../chapters/22-convex-erm.html" rel="next">
 <link href="../chapters/12-statistical-fairness.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -249,6 +250,12 @@ div.csl-indent {
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Introduction to Classification: The Perceptron</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/22-convex-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Convex Empirical Risk Minimization</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -328,16 +335,17 @@ div.csl-indent {
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> perceptron_data(n_points <span class="op">=</span> <span class="dv">300</span>, noise <span class="op">=</span> <span class="fl">0.2</span>)</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_perceptron_data(X, y, ax):</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    targets <span class="op">=</span> [<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>]</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    markers <span class="op">=</span> [<span class="st">"o"</span> , <span class="st">","</span>]</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        ix <span class="op">=</span> y <span class="op">==</span> targets[i]</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X[ix,<span class="dv">0</span>], X[ix,<span class="dv">1</span>], s <span class="op">=</span> <span class="dv">20</span>,  c <span class="op">=</span> y[ix], facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"darkgrey"</span>, cmap <span class="op">=</span> <span class="st">"BrBG"</span>, vmin <span class="op">=</span> <span class="op">-</span><span class="dv">2</span>, vmax <span class="op">=</span> <span class="dv">2</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>, marker <span class="op">=</span> markers[i])</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"$x_1$"</span>, ylabel <span class="op">=</span> <span class="vs">r"$x_2$"</span>)</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> perceptron_data()</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>plot_perceptron_data(X, y, ax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> X.shape[<span class="dv">1</span>] <span class="op">==</span> <span class="dv">3</span>, <span class="st">"This function only works for data created with p_dims == 2"</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    targets <span class="op">=</span> [<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>]</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    markers <span class="op">=</span> [<span class="st">"o"</span> , <span class="st">","</span>]</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        ix <span class="op">=</span> y <span class="op">==</span> targets[i]</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X[ix,<span class="dv">0</span>], X[ix,<span class="dv">1</span>], s <span class="op">=</span> <span class="dv">20</span>,  c <span class="op">=</span> y[ix], facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"darkgrey"</span>, cmap <span class="op">=</span> <span class="st">"BrBG"</span>, vmin <span class="op">=</span> <span class="op">-</span><span class="dv">2</span>, vmax <span class="op">=</span> <span class="dv">2</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>, marker <span class="op">=</span> markers[i])</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"$x_1$"</span>, ylabel <span class="op">=</span> <span class="vs">r"$x_2$"</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> perceptron_data()</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>plot_perceptron_data(X, y, ax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-scatter" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -365,7 +373,7 @@ div.csl-indent {
 <h3 class="anchored" data-anchor-id="linear-classifiers">Linear Classifiers</h3>
 <p>The idea of a linear classifier is that we seek a <em>hyperplane</em> that approximately divides the data into its two classes. A hyperplane in <span class="math inline">\(\mathbb{R}^p\)</span> is an <em>affine subspace of dimension <span class="math inline">\(\mathbb{R}^{p-1}\)</span></em>. Such a hyperplane can be specified as the set of vectors <span class="math inline">\(\mathbf{x} \in \mathbb{R}^p\)</span> satisfying the equation</p>
 <p><span id="eq-hyperplane-1"><span class="math display">\[
-\langle \mathbf{w}, \mathbf{x}\rangle - b = \sum_{i = 1}^p w_i x_i - b = 0
+\langle \mathbf{w}, \mathbf{x}\rangle - b = \sum_{i = 1}^{p-1} w_i x_i - b = 0
 \tag{7.1}\]</span></span></p>
 <p>for some vector of <em>weights</em> <span class="math inline">\(\mathbf{w} \in \mathbb{R}^p\)</span> and <em>bias</em> <span class="math inline">\(b \in R\)</span>. For mathematical convenience, it’s nicer to write this equation as</p>
 <p><span id="eq-hyperplane"><span class="math display">\[
@@ -712,10 +720,10 @@ s_i^{(t+1)} &amp;= \langle \mathbf{w}^{(t+1)}, \mathbf{x}_i\rangle  &amp;\text{(
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-hardtPatternsPredictionsActions2022" class="csl-entry" role="listitem">
-Hardt, Moritz, and Benjamin Recht. 2022. <em>Patterns, <span>Predictions</span>, and <span>Actions</span></em>. <span>Princeton University Press</span>. <a href="https://mlstory.org/pdf/patterns.pdf">https://mlstory.org/pdf/patterns.pdf</a>.
+Hardt, Moritz, and Benjamin Recht. 2022. <em>Patterns, <span>Predictions</span>, and <span>Actions</span></em>. Princeton University Press. <a href="https://mlstory.org/pdf/patterns.pdf">https://mlstory.org/pdf/patterns.pdf</a>.
 </div>
 <div id="ref-kearnsEfficientAgnosticLearning1992" class="csl-entry" role="listitem">
-Kearns, Michael J., Robert E. Schapire, and Linda M. Sellie. 1992. <span>“Toward Efficient Agnostic Learning.”</span> In <em>Proceedings of the Fifth Annual Workshop on <span>Computational</span> Learning Theory</em>, 341–52. <span>Pittsburgh Pennsylvania USA</span>: <span>ACM</span>. <a href="https://doi.org/10.1145/130385.130424">https://doi.org/10.1145/130385.130424</a>.
+Kearns, Michael J., Robert E. Schapire, and Linda M. Sellie. 1992. <span>“Toward Efficient Agnostic Learning.”</span> In <em>Proceedings of the Fifth Annual Workshop on <span>Computational</span> Learning Theory</em>, 341–52. Pittsburgh Pennsylvania USA: ACM. <a href="https://doi.org/10.1145/130385.130424">https://doi.org/10.1145/130385.130424</a>.
 </div>
 </div>
 </section>
@@ -1072,6 +1080,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="../chapters/22-convex-erm.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Convex Empirical Risk Minimization</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->
