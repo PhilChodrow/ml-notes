@@ -254,6 +254,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#convex-empirical-risk-minimization" id="toc-convex-empirical-risk-minimization" class="nav-link" data-scroll-target="#convex-empirical-risk-minimization">Convex Empirical Risk Minimization</a></li>
   <li><a href="#convex-functions-have-global-minimizers" id="toc-convex-functions-have-global-minimizers" class="nav-link" data-scroll-target="#convex-functions-have-global-minimizers">Convex Functions Have Global Minimizers</a></li>
   <li><a href="#demo-logistic-regression" id="toc-demo-logistic-regression" class="nav-link" data-scroll-target="#demo-logistic-regression">Demo: Logistic Regression</a></li>
+  <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap">Recap</a>
+  <ul class="collapse">
+  <li><a href="#optional-a-logistic-regression-training-loop" id="toc-optional-a-logistic-regression-training-loop" class="nav-link" data-scroll-target="#optional-a-logistic-regression-training-loop">(Optional): A Logistic Regression Training Loop</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -286,7 +290,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 &amp; - &amp; \mathbf{x}_{n} &amp; - \end{matrix}\right]
 \]</span></p>
 <div class="page-columns page-full"><p>We also have a <em>target vector</em> <span class="math inline">\(\mathbf{y} \in \{0,1\}^n\)</span>.  Here’s an example of how our training data might look:</p><div class="no-row-height column-margin column-container"><span class="">For convenience, we will continue to assume that the final column of <span class="math inline">\(\mathbf{X}\)</span> is a column of 1s; i.e.&nbsp;<span class="math inline">\(x_{ip} = 1\)</span> for all <span class="math inline">\(i = 1,\ldots,n\)</span>.</span></div></div>
-<div id="cell-fig-scatter" class="cell page-columns page-full" data-execution_count="25">
+<div id="cell-fig-scatter" class="cell page-columns page-full" data-execution_count="1">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -361,14 +365,14 @@ L(\mathbf{w}) = \frac{1}{n}\sum_{i = 1}^n \mathbb{1}[s_i (2y_i-1) &lt; 0]
 \ell(s, y) = \mathbb{1}[s (2y-1) &lt; 0]\;.
 \]</span></p>
 <p>We’ll call this the <em>0-1 loss function</em>. Here’s a plot of this function for each of the two possible values of <span class="math inline">\(y\)</span>:</p>
-<div id="203a2fc0" class="cell" data-execution_count="27">
+<div id="203a2fc0" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> zero_one_loss(s, y): </span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span><span class="op">*</span>(s<span class="op">*</span>(<span class="dv">2</span><span class="op">*</span>y<span class="op">-</span><span class="dv">1</span>)<span class="op">&lt;</span> <span class="dv">0</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># or </span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># hinge_loss = lambda s, y: 1*(s*(2*y-1) &lt; 0)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-fig-0-1-loss" class="cell page-columns page-full" data-execution_count="28">
+<div id="cell-fig-0-1-loss" class="cell page-columns page-full" data-execution_count="4">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt </span>
@@ -415,7 +419,7 @@ L(\mathbf{w}) = \frac{1}{n}\sum_{i = 1}^n \mathbb{1}[s_i (2y_i-1) &lt; 0]
 </div>
 </div>
 <p>Surprsingly, the problem with this loss function <span class="math inline">\(\ell\)</span> is that we can “draw lines under the function.” What this means is that we can pick two points on the graph of the function, connect them with a line, and find that the line lies <em>under</em> the graph of the function in some regions:</p>
-<div id="cell-fig-0-1-loss-nonconvex" class="cell page-columns page-full" data-execution_count="29">
+<div id="cell-fig-0-1-loss-nonconvex" class="cell page-columns page-full" data-execution_count="5">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plot_loss(loss_fun <span class="op">=</span> zero_one_loss, show_line <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -467,7 +471,7 @@ f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) &lt; \lambda f( \mathbf{z}_1 )
 </div>
 </div>
 <p>Roughly, a convex function is “bowl-shaped,” in the sense that any line connecting two points on its graph must lie above the graph. The most familiar example of a convex function is our good friend the convex parabola:</p>
-<div id="cell-fig-parabola" class="cell page-columns page-full" data-execution_count="30">
+<div id="cell-fig-parabola" class="cell page-columns page-full" data-execution_count="6">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">10001</span>)</span>
@@ -490,7 +494,7 @@ f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) &lt; \lambda f( \mathbf{z}_1 )
 <p><span class="math display">\[
 \ell(s, y) = y \max \{0, s\} + (1 - y) \max\{0, -s\}\;.
 \]</span></p>
-<div id="fd6716f0" class="cell" data-execution_count="31">
+<div id="fd6716f0" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hinge_loss(s, y):</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    first_term  <span class="op">=</span>  y    <span class="op">*</span> (torch.<span class="bu">max</span>(torch.zeros_like(s),  s))  </span>
@@ -500,7 +504,7 @@ f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) &lt; \lambda f( \mathbf{z}_1 )
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># hinge_loss = lambda s, y: y * (torch.max(torch.zeros_like(s), s))  + (1-y) * (torch.max(torch.zeros_like(s), -s))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-fig-hinge-loss" class="cell page-columns page-full" data-execution_count="32">
+<div id="cell-fig-hinge-loss" class="cell page-columns page-full" data-execution_count="8">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plot_loss(loss_fun <span class="op">=</span> hinge_loss, show_line <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -520,7 +524,7 @@ f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) &lt; \lambda f( \mathbf{z}_1 )
 \ell(s, y) &amp;=  -y \log \sigma(s) - (1-y)\log (1-\sigma(s))\;,
 \end{aligned}
 \]</span></p><div class="no-row-height column-margin column-container"><span class="">In this formula, <span class="math inline">\(\sigma(s) = \frac{1}{1 + e^{-s}}\)</span> is the logistic sigmoid function.</span></div></div>
-<div id="1326f8d2" class="cell" data-execution_count="33">
+<div id="1326f8d2" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sig(s):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> torch.exp(<span class="op">-</span>s))</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -531,7 +535,7 @@ f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) &lt; \lambda f( \mathbf{z}_1 )
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># sig = lambda s: 1 / (1 + torch.exp(-s))</span></span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># binary_cross_entropy = lambda s, y: -(y * sig(s).log() + (1 - y)*(1-sig(s)).log())</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-fig-cross-entropy-loss" class="cell page-columns page-full" data-execution_count="34">
+<div id="cell-fig-cross-entropy-loss" class="cell page-columns page-full" data-execution_count="10">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sig <span class="op">=</span> <span class="kw">lambda</span> s: <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> torch.exp(<span class="op">-</span>s))</span>
@@ -549,7 +553,7 @@ f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) &lt; \lambda f( \mathbf{z}_1 )
 </div>
 <p>This function is also convex, and has the considerable benefit of being everywhere differentiable.</p>
 <p>We intentionally formulated our definition of convexity for functions of many variables. Here is a convex function <span class="math inline">\(f:\mathbb{R}^2 \rightarrow \mathbb{R}\)</span>.</p>
-<div id="cell-fig-quadratic-3d" class="cell page-columns page-full" data-execution_count="35">
+<div id="cell-fig-quadratic-3d" class="cell page-columns page-full" data-execution_count="11">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(subplot_kw<span class="op">=</span>{<span class="st">"projection"</span>: <span class="st">"3d"</span>})</span>
@@ -712,7 +716,7 @@ f(\mathbf{z}) &amp;= f(\lambda \mathbf{z}' + (1-\lambda)\mathbf{z}^*) &amp;\quad
 \end{aligned}
 \]</span></p>
 <p>So, let’s do convex empirical risk minimization! We’ll use the following data set. Note that this data is not linearly separable and therefore the perceptron algorithm would not converge.</p>
-<div id="cell-fig-LR-data" class="cell page-columns page-full" data-execution_count="36">
+<div id="cell-fig-LR-data" class="cell page-columns page-full" data-execution_count="12">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
@@ -728,76 +732,111 @@ f(\mathbf{z}) &amp;= f(\lambda \mathbf{z}' + (1-\lambda)\mathbf{z}^*) &amp;\quad
 </div>
 </div>
 </div>
-<p>The code block below shows the training loop for a logistic regression model. This model <em>also</em> inherits from the <code>LinearModel</code> class that you previously started implementing. The training loop is also <em>very</em> similar to our training loop for the perceptron. The main difference is that the loss is calculated using the <code>binary_cross_entropy</code> function above, and the <code>step</code> function of the <code>GradientDescentOptimizer</code> works differently in a way that we will discuss in the following section.</p>
-<p><em>Starting with the code block below, you won’t be able to follow along in coding these notes unless you have sneakily implemented logistic regression in a <code>hidden</code> module.</em></p>
-<div id="cell-fig-LR-loss-iterations" class="cell page-columns page-full" data-execution_count="37">
+<p>Let’s go ahead and train a logistic regression model. For the purposes of today, we can do this in a very simple way that doesn’t even involve an explicit training loop. Next time, we’ll learn how to write an explicit training loop.</p>
+<p>First, we’ll define a complete function for calculating the empirical risk for a given value of <span class="math inline">\(\mathbf{w}\)</span>. Since we already implemented <code>binary_cross_entropy</code>, this implementation is very quick:</p>
+<div id="3b2b9dec" class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> empirical_risk(w, X, y):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> X<span class="op">@</span>w</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> binary_cross_entropy(s, y).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we’ll use the <code>minimize</code> function from <code>scipy.optimize</code> to find the value of <span class="math inline">\(\mathbf{w}\)</span> that makes this function smallest:</p>
+<div id="3de84042" class="cell" data-execution_count="52">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> minimize</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>w0 <span class="op">=</span> torch.tensor([<span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.0</span>])</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> minimize(<span class="kw">lambda</span> w: empirical_risk(w, X, y), x0 <span class="op">=</span> w0)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> result.x</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Learned parameter vector w = </span><span class="sc">{</span>w<span class="sc">}</span><span class="ss">.</span><span class="ch">\n</span><span class="ss">The empirical risk is </span><span class="sc">{</span>result<span class="sc">.</span>fun<span class="sc">:.4f}</span><span class="ss">."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Learned parameter vector w = [ 3.88016032  4.915439   -4.37486882].
+The empirical risk is 0.1712.</code></pre>
+</div>
+</div>
+<p>How does it look?</p>
+<div id="cell-fig-LR-line" class="cell page-columns page-full" data-execution_count="43">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hidden.logistic <span class="im">import</span> LogisticRegression, GradientDescentOptimizer</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># instantiate a model and an optimizer</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression() </span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer(LR)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># for keeping track of loss values</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>loss_vec <span class="op">=</span> []</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># not part of the update: just for tracking our progress    </span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> LR.loss(X, y) </span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    loss_vec.append(loss)</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># only this line actually changes the parameter value</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    opt.step(X, y, lr <span class="op">=</span> <span class="fl">0.02</span>)</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>plt.plot(torch.arange(<span class="dv">1</span>, <span class="bu">len</span>(loss_vec)<span class="op">+</span><span class="dv">1</span>), loss_vec, color <span class="op">=</span> <span class="st">"black"</span>)</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>plt.semilogx()</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Number of gradient descent iterations"</span>, ylabel <span class="op">=</span> <span class="st">"Loss (binary cross entropy)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> draw_line(w, X, y, x_min, x_max, ax, <span class="op">**</span>kwargs):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    plot_classification_data(X, y, ax)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> torch.linspace(x_min, x_max, <span class="dv">101</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="op">-</span>(w[<span class="dv">0</span>]<span class="op">*</span>x <span class="op">+</span> w[<span class="dv">2</span>])<span class="op">/</span>w[<span class="dv">1</span>]</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    l <span class="op">=</span> ax.plot(x, y, <span class="op">**</span>kwargs)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>draw_line(w, X, y, x_min <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, x_max <span class="op">=</span> <span class="fl">1.5</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>, linestyle <span class="op">=</span> <span class="st">"dashed"</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># fig</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-lr-line" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
+<p><img src="22-convex-erm_files/figure-html/fig-lr-line-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;8.9: The separating line learned by logistic regression.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Pretty good! Yes, it’s as easy as that – provided that you don’t ask too many questions about how the <code>minimize</code> function works. Questions like that will be the topic of our next several sets of notes.</p>
+</section>
+<section id="recap" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="recap">Recap</h2>
+<p>In this set of notes, we introduced a fundamental idea: <em>convex empirical risk minimization</em>. To do convex empirical risk minimization, all we need is a convex per-observation loss function. This gives us a <em>convex empirical risk function</em>, which is simply the mean of all the per-observation losses. Once we have that, the problem of classification reduces to the problem of finding a value of the parameter vector <span class="math inline">\(\mathbf{w}\)</span> that makes the empirical risk small. Convexity guarantees that this problem has exactly one solution. Today, we found this solution using a packaged optimizer. Starting next time, we’ll learn how to write our own optimization algorithms and explore how optimization techniques enable scalable machine learning.</p>
+<section id="optional-a-logistic-regression-training-loop" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="optional-a-logistic-regression-training-loop">(Optional): A Logistic Regression Training Loop</h3>
+<p>How would we do this if we didn’t have access to the <code>minimize</code> function? We’ll soon discuss this question much more. For now, we can take a look at the code block below, which implements such a loop using a framework very similar to the one we learned for perceptron. This model <em>also</em> inherits from the <code>LinearModel</code> class that you previously started implementing. The training loop is also <em>very</em> similar to our training loop for the perceptron. The main difference is that the loss is calculated using the <code>binary_cross_entropy</code> function above, and the <code>step</code> function of the <code>GradientDescentOptimizer</code> works differently in a way that we will discuss in the following section.</p>
+<p><em>Starting with the code block below, you won’t be able to follow along in coding these notes unless you have sneakily implemented logistic regression in a <code>hidden</code> module.</em></p>
+<div id="cell-fig-LR-loss-iterations" class="cell page-columns page-full" data-execution_count="37">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hidden.logistic <span class="im">import</span> LogisticRegression, GradientDescentOptimizer</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># instantiate a model and an optimizer</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression() </span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer(LR)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># for keeping track of loss values</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>loss_vec <span class="op">=</span> []</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># not part of the update: just for tracking our progress    </span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> LR.loss(X, y) </span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    loss_vec.append(loss)</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># only this line actually changes the parameter value</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    opt.step(X, y, lr <span class="op">=</span> <span class="fl">0.02</span>)</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>plt.plot(torch.arange(<span class="dv">1</span>, <span class="bu">len</span>(loss_vec)<span class="op">+</span><span class="dv">1</span>), loss_vec, color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>plt.semilogx()</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Number of gradient descent iterations"</span>, ylabel <span class="op">=</span> <span class="st">"Loss (binary cross entropy)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-lr-loss-iterations" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="22-convex-erm_files/figure-html/fig-lr-loss-iterations-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;8.9: Evolution of the binary cross entropy loss function in the logistic regression training loop.</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;8.10: Evolution of the binary cross entropy loss function in the logistic regression training loop.</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>The loss quickly levels out to a constant value. Because our theory tells us that the loss function is convex, we know that the value of <span class="math inline">\(\mathbf{w}\)</span> we have found is the best possible, in the sense of minimizing the loss.</p>
+<p>The loss quickly levels out to a constant value (which is the same as we learned with <code>scipy.optimize.minimize</code>). Because our theory tells us that the loss function is convex, we know that the value of <span class="math inline">\(\mathbf{w}\)</span> we have found is the best possible, in the sense of minimizing the loss.</p>
 <p>Let’s take a look at the separating line we found:</p>
-<div id="cell-fig-LR-line" class="cell page-columns page-full" data-execution_count="38">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> draw_line(w, x_min, x_max, ax, <span class="op">**</span>kwargs):</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    w_ <span class="op">=</span> w.flatten()</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> torch.linspace(x_min, x_max, <span class="dv">101</span>)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="op">-</span>(w_[<span class="dv">0</span>]<span class="op">*</span>x <span class="op">+</span> w_[<span class="dv">2</span>])<span class="op">/</span>w_[<span class="dv">1</span>]</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    l <span class="op">=</span> ax.plot(x, y, <span class="op">**</span>kwargs)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>draw_line(LR.w, x_min <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, x_max <span class="op">=</span> <span class="fl">1.5</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>, linestyle <span class="op">=</span> <span class="st">"dashed"</span>)</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="38">
-<div id="fig-lr-line" class="quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="figure page-columns page-full">
-<p><img src="22-convex-erm_files/figure-html/fig-lr-line-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;8.10: The separating line learned by logistic regression.</figcaption>
-</figure>
+<div id="a69b15d0" class="cell" data-execution_count="44">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>draw_line(LR.w, X, y, x_min <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, x_max <span class="op">=</span> <span class="fl">1.5</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>, linestyle <span class="op">=</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="22-convex-erm_files/figure-html/cell-18-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-</div>
+<p>Yep, that’s the same line as we found earlier!</p>
 <p>Although our data is not linearly separable, the separating line we have learned appears to do a reasonable job of separating the points from each other. Let’s check our accuracy:</p>
-<div id="71a03bb7" class="cell" data-execution_count="39">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(<span class="fl">1.0</span><span class="op">*</span>(LR.predict(X) <span class="op">==</span> y)).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="39">
-<pre><code>tensor(0.9067)</code></pre>
+<div id="71a03bb7" class="cell" data-execution_count="45">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(<span class="fl">1.0</span><span class="op">*</span>(LR.predict(X) <span class="op">==</span> y)).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="45">
+<pre><code>tensor(0.9133)</code></pre>
 </div>
 </div>
 <p>Not too bad! In the next section, we’ll learn much, much more about what’s behind that <code>opt.step()</code> call.</p>
 
 
+</section>
 </section>
 
 <p><br> <br> <span style="color:grey;">© Phil Chodrow, 2024</span></p></main> <!-- /main -->
