@@ -1,0 +1,252 @@
+[Last time](22-convex-erm.ipynb), we studied the *empirical risk minimization* (ERM). ERM casts the machine learning problem as an optimization problem: we want to find a vector of weights $\mathbf{w}$ such that 
+
+$$
+\DeclareMathOperator*{\argmin}{argmin}
+\begin{aligned}
+\hat{\mathbf{w}} &= \argmin_{\mathbf{w}} L(\mathbf{w}) \\ 
+&= \argmin_{\mathbf{w}} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \mathbf{x}_i\rangle, y_i)\;.
+\end{aligned}
+$${#eq-erm}
+
+As usual, $\mathbf{X} \in \mathbb{R}^{n\times p}$ is the feature matrix
+
+$$
+\mathbf{X} = \left[\begin{matrix} & - & \mathbf{x}_1 & - \\ 
+& - & \mathbf{x}_2 & - \\ 
+& \vdots & \vdots & \vdots \\ 
+& - & \mathbf{x}_{n} & - \end{matrix}\right] 
+$$
+
+and $\mathbf{y}$ is the vector of targets, which we usually assume to be binary in the context of classification. The per-observation *loss function* $\ell: \mathbb{R}\times \mathbb{R}\rightarrow \mathbb{R}$ measures the quality of the score $s_i = \langle \mathbf{w}, \mathbf{x}_i \rangle$ assigned to data point $i$ by comparing it to $y_i$ and outputing a real number $\ell(s_i, y_i)$. 
+
+So, our mathematical task is to find a vector of weights $\mathbf{w}$ that solves @eq-erm. How do we do it? The modern answer is *gradient descent*, and this set of lecture notes is about what that means and why it works. 
+
+## Linear Approximations of Single-Variable Functions
+
+Recall the limit definition of a derivative of a single-variable function. Let $g:\mathbb{R} \rightarrow \mathbb{R}$. The derivative of $g$ at point $w_0$, if it exists, is 
+
+$$
+\begin{aligned}
+\frac{dg(w_0)}{dw} = \lim_{\delta w\rightarrow 0}\frac{g(w_0 + \delta w) - g(w_0)}{\delta w}\;.
+\end{aligned}
+$$
+
+If we imagine that $\delta w$ is very small but nonzero, we can interpret this equation a bit loosely as the statement that 
+
+$$
+\begin{aligned}
+\frac{dg(w_0)}{dw} \approx \frac{g(w_0 + \delta w) - g(w_0)}{\delta w}\;,
+\end{aligned}
+$$
+
+which upon some algebraic rearrangement says that 
+
+$$
+g(w_0 + \delta w) \approx g(w_0) + \frac{dg(w_0)}{dw} \delta w\;.
+$$
+
+Taylor's theorem makes this statement precise: 
+
+::: {.callout-note}
+::: {#thm-taylor}
+
+## Taylor's Theorem: Univariate Functions
+
+Let $g:\mathbb{R}\rightarrow \mathbb{R}$ be differentiable at point $w_0$. Then, there exists $a > 0$ such that, if $\delta w < a$, then 
+
+$$
+g(w_0 + \delta w) = g(w_0) + \frac{dg(w_0)}{dw} \delta w + o(\delta w)\;.
+$$
+
+:::
+:::
+
+Here, $o(\delta w)$ means "terms that grow small in comparison to $\delta w$ when $\delta w$ itself grows small."
+
+Another common way to write Taylor's theorem is 
+
+$$
+g(w) = g(w_0) + \frac{dg(w_0)}{dw} (w - w_0) + o(|w - w_0|)\;,
+$$
+
+which comes from substituting $\delta w = t - w_0$. 
+
+Taylor's theorem says that, in a neighborhood of $w_0$, we can approximate $g(w)$ with a linear function. Here's an example of how that looks: 
+
+```{python}
+import torch 
+from matplotlib import pyplot as plt
+plt.style.use('seaborn-v0_8-whitegrid')
+
+w = torch.linspace(-1, 1, 101)
+
+g = lambda w: w**2
+
+plt.plot(w, g(w), label = r"$g(w)$", color = "black")
+plt.gca().set(xlabel = r"$w$", ylim = (-0.2, 0.5))
+
+#---
+def taylor(w, w0):
+    return g(w0) + 2*w0*(w-w0)
+plt.plot(w, taylor(w, .2), label = r"1st-order Taylor approximation", linestyle = "--")
+#---
+plt.legend()
+```
+
+## Gradient Descent in 1 dimension
+
+Suppose that we have a function $g$ and we would like to solve the the optimization problem 
+
+$$
+\begin{aligned}
+\hat{w} = \argmin _w g(w) \;.
+\end{aligned}
+$$
+
+How do we go about doing this? You might remember from calculus that one way starts with solving the equation 
+
+$$
+\begin{aligned}
+\frac{dg(\hat{w})}{dw} = 0\;,
+\end{aligned}
+$$
+
+but it is not always feasible to solve this equation exactly in practice. 
+
+In *iterative* approaches, we instead imagine that we have a current guess $\hat{w}$ which we would like to improve. To this end, consider the casual Taylor approximation [In the rest of these notes, we will assume that term $o(\delta w)$ is small enough to be negligible. ]{.alert}
+
+$$
+\begin{aligned}
+g(\hat{w} + \delta \hat{w}) \approx g(\hat{w}) + \frac{dg(\hat{w})}{dw} \delta \hat{w}\;.
+\end{aligned}
+$$
+
+We'd like to update our estimate of $\hat{w}$. Suppose we make a strategic choice: $\delta hat{w} = -\alpha \frac{dg(\hat{w})}{dw}$ for some small $\alpha > 0$. We therefore decide that we will do the update 
+
+$$
+\begin{aligned}
+    \hat{w} \gets \hat{w} - \alpha \frac{dg(\hat{w})}{dw}\;.
+\end{aligned}
+$${#eq-w-update}
+
+What does this update do to the value of $g$? Let's check: 
+
+$$
+\begin{aligned}
+    g(\hat{w} + \delta \hat{w}) &\approx g(\hat{w}) + \frac{dg(\hat{w})}{dw} \delta \hat{w} \\ 
+    &= g(\hat{w}) - \frac{dg(\hat{w})}{dw} \alpha \frac{dg(\hat{w})}{dw}\\ 
+    &= g(\hat{w}) - \alpha\left(\frac{dg(\hat{w})}{dw}\right)^2\;.   
+\end{aligned}
+$$
+
+This is the big punchline. Let's look at the second term. If $(\frac{dg(\hat{w})}{dw}\right)^2 = 0$ then that must mean that $\frac{dg(\hat{w})}{dw}$ and that we are at a critical point, which we could check for being a local minimum. On the other hand, if $\frac{dg(\hat{w})}{dw} \neq 0$, then $\left(\frac{dg(\hat{w})}{dw}\right)^2 > 0$. This means that 
+
+$$
+g(\hat{w} + \delta \hat{w}) &\approx &= g(\hat{w}) - \alpha\left(\frac{dg(\hat{w})}{dw}\right)^2 \\ 
+                            &<  g(\hat{w})\;,
+$$
+
+provided that $\alpha$ is small enough for the error terms in Taylor's Theorem to be small. We have informally derived the following fact: 
+
+::: {.callout-tip}
+
+## Single-Variable Gradient-Descent Works
+
+Let $g:\mathbb{R}\rightarrow \mathbb{R}$ be differentiable and assume that $\frac{dg(\hat{w})}{dw} \neq 0$. Then, if $\alpha$ is sufficiently small, @eq-w-update is guaranteed to reduce the value of $g$. 
+
+:::
+
+
+## Gradient Descent in Multiple Dimensions
+
+Our empirical risk function $L$ is not a single-variable function; indeed, $L: \mathbb{R}^p \rightarrow \mathbb{R}$. So, we can't directly apply the results above. Fortunately, these results extend in a smooth way to this setting. The main thing we need is the definition of the *gradient* of a multivariate function. 
+
+## Gradients
+
+[We're not going to talk much about what it means for a function to be multivariate differentiable. You can assume that all the functions we will deal with in this class are unless I highlight otherwise. For a more rigorous definition, you should check out a multivariable calculus class.]{.aside}
+
+::: {.callout-note}
+::: {#def-gradient}
+
+## Gradient of a Multivariate Function
+
+Let $g:\mathbb{R}^p \rightarrow \mathbb{R}$ be a *multivariate differentiable* function. The *gradient* of $g$ evaluated at point $\mathbf{w}\in \mathbb{R}^p$ is written $\nabla g(\mathbf{w})$, and has value 
+
+$$
+\nabla g(\mathbf{w}) \triangleq 
+\left(\begin{matrix}
+    \frac{\partial g(\mathbf{w})}{\partial w_1} \\ 
+    \frac{\partial g(\mathbf{w})}{\partial w_2} \\ 
+    \cdots \\ 
+    \frac{\partial g(\mathbf{w})}{\partial w_p} \\ 
+\end{matrix}\right) \in \mathbb{R}^p\;.
+$$
+
+Here, $\frac{\partial g(\mathbf{w})}{\partial w_1}$ is the *partial derivative of $f$ with respect to $z_1$, evaluated at $\mathbf{w}$*. To compute it: 
+
+> Take the derivative of $f$ *with respect to variable $z_1$, holding all other variables constant, and then evaluate the result at $\mathbf{w}$. 
+
+:::
+:::
+
+::: {.callout-tip}
+
+## Example
+
+Let $p = 3$. Let $g(\mathbf{w}) = w_2\sin w_1  + w_1e^{2w_3}$. The partial derivatives we need are 
+
+$$
+\begin{align}
+\frac{\partial g(\mathbf{w})}{\partial w_1} &= w_2 \cos w_1 + e^{2w_3}\\ 
+\frac{\partial g(\mathbf{w})}{\partial w_2} &= \sin w_1\\ 
+\frac{\partial g(\mathbf{w})}{\partial w_3} &= 2w_1 e^{2w_3}\;. 
+\end{align}
+$$
+
+So, the gradient of $g$ evaluated at a point $\mathbf{w}$ is 
+
+$$
+\nabla g(\mathbf{w}) =
+\left(\begin{matrix}
+    \frac{\partial g(\mathbf{w})}{\partial w_1} \\ 
+    \frac{\partial g(\mathbf{w})}{\partial w_2} \\ 
+    \frac{\partial g(\mathbf{w})}{\partial w_3} \\ 
+\end{matrix}\right) = 
+\left(\begin{matrix}
+    w_2 \cos w_1 + e^{2w_3}\\
+    \sin w_1\\ 
+    2w_1 e^{2w_3}
+\end{matrix}\right) 
+$$
+
+:::
+
+Taylor's Theorem extends smoothly to this setting. 
+
+
+::: {.callout-note}
+::: {#thm-taylor}
+
+## Taylor's Theorem: Multivariate Functions
+
+Let $g:\mathbb{R}^p\rightarrow \mathbb{R}$ be differentiable at point $\mathbf{w}_0 \in \mathbb{R}^p$. Then, there exists $a > 0$ such that, if $\lVert \delta \mathbf{w} \rVert < a$, then [$\lVert \mathbf{\delta} \mathbf{w}\rVert \triangleq \sqrt{\sum_{i = 1}^p (\delta w_i)^2}$]{.aside}
+
+$$
+g(\mathbf{w}_0 + \delta \mathbf{w}) = g(\mathbf{w}_0) + \langle \nabla g(\mathbf{w}_0), \delta \mathbf{w} \rangle + o(\lVert \delta \mathbf{w}\rVert)\;.
+$$
+
+:::
+:::
+
+The vector $\nabla g(\mathbf{w}_0)$ plays the role of the single-variable derivative $\frac{d g(w_0)}{dw}$. 
+
+TODO: prove gradient descent; work an example; gradient of the loss for a linear model. 
+
+
+
+
+
+
+
+
+
