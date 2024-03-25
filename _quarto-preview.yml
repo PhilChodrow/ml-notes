@@ -17,3 +17,4 @@ book:
       chapters:
         - source/20-perceptron.ipynb
         - source/22-convex-erm.ipynb
+        - source/23-gradient-descent.ipynb

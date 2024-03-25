@@ -22,3 +22,4 @@ book:
       chapters: 
         - chapters/20-perceptron.ipynb
         - chapters/22-convex-erm.ipynb 
+        - chapters/23-gradient-descent.ipynb

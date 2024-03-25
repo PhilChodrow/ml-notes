@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.339">
+<meta name="generator" content="quarto-1.4.551">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -22,7 +22,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -81,12 +81,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
   "keyboard-shortcut": [
     "f",
     "/",
     "s"
   ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -95,6 +96,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -103,6 +105,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -113,11 +142,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/01-data-and-models.html">Introducing Machine Learning</a></li><li class="breadcrumb-item"><a href="../chapters/01-data-and-models.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Data, Patterns, and Models</span></a></li></ol></nav>
-        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -128,7 +157,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Machine Learning</a> 
@@ -237,12 +266,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Convex Empirical Risk Minimization</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/23-gradient-descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Optimization with Gradient Descent</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
     </div>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -274,11 +309,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
+
 <p><em>Download the live notebook corresponding to these notes <a href="../live-notebooks/01-data-and-models.ipynb">here</a>.</em></p>
 <p>Broadly, machine learning is the science and practice of building algorithms that learn patterns from data. Here are two synthetic examples of data in which there is some kind visually clear pattern in the data. In the first example (<a href="#fig-examples-1" class="quarto-xref">Figure&nbsp;<span>1.1 (a)</span></a>), we can see that there is a relationship between two quantitative variables, <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>. If someone told is the value of <span class="math inline">\(x\)</span>, then we would likely be able to make a reasonable prediction about the value of the number <span class="math inline">\(y\)</span>. This is an example of a <strong>regression</strong> task. In the second example (<a href="#fig-examples-2" class="quarto-xref">Figure&nbsp;<span>1.1 (b)</span></a>), we can observe a relation between the location of each data point in 2d space and a color, which could represent a category or class. If someone told us the location of the point in 2d space, we would likely be able to say which of the two classes it belonged to. This is an example of a <strong>classification</strong> task.</p>
-<div>
-<details>
-<summary>Code</summary>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -326,29 +361,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>plot_fig()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div id="fig-examples" class="cell quarto-layout-panel" data-execution_count="2">
-<figure class="figure">
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 49.1%;justify-content: center;">
-<div id="fig-examples-1" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="01-data-and-models_files/figure-html/fig-examples-output-1.png" class="img-fluid figure-img" data-ref-parent="fig-examples" width="430"></p>
-<figcaption class="figure-caption">(a) Example data in which we can seek a pattern in the value of <span class="math inline">\(y\)</span> based on the value of <span class="math inline">\(x\)</span>. This task is called <strong>regression</strong>.</figcaption>
+<div id="fig-examples" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-examples-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="cell-output cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-examples" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-examples-1" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-examples-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-data-and-models_files/figure-html/fig-examples-output-1.png" data-ref-parent="fig-examples" width="430" height="423" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-examples-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Example data in which we can seek a pattern in the value of <span class="math inline">\(y\)</span> based on the value of <span class="math inline">\(x\)</span>. This task is called <strong>regression</strong>.
+</figcaption>
 </figure>
 </div>
 </div>
-<div class="cell-output cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.9%;justify-content: center;">
-<div id="fig-examples-2" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="01-data-and-models_files/figure-html/fig-examples-output-2.png" class="img-fluid figure-img" data-ref-parent="fig-examples" width="446"></p>
-<figcaption class="figure-caption">(b) Example data in which we can seek a pattern in the <strong>category</strong> of a data point (represented by color) based on the value of two variables, <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>. This task is called <strong>classification.</strong></figcaption>
+<div class="cell-output cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-examples" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-examples-2" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-examples-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-data-and-models_files/figure-html/fig-examples-output-2.png" data-ref-parent="fig-examples" width="446" height="428" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-examples-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Example data in which we can seek a pattern in the <strong>category</strong> of a data point (represented by color) based on the value of two variables, <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>. This task is called <strong>classification.</strong>
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1.1: Examples of data with visualizable patterns.</figcaption><p></p>
-</figure>
 </div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-examples-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.1: Examples of data with visualizable patterns.
+</figcaption>
+</figure>
 </div>
 <p>In examples like these, it’s often possible for us to just use our eyes and spatial reasoning in order to make a reasonable prediction.</p>
 <p>How do we encode this knowledge mathematically, in a way that a computer can understand and use? In each of the two cases, we can express the pattern in the data <strong>as a mathematical function</strong>.</p>
@@ -356,34 +402,44 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>In the regression example (<a href="#fig-examples-1" class="quarto-xref">Figure&nbsp;<span>1.1 (a)</span></a>), we can encode the pattern in the data as a function <span class="math inline">\(f:\mathbb{R} \rightarrow \mathbb{R}\)</span> that accepts a value of <span class="math inline">\(x\)</span> and returns a modeled or predicted value of <span class="math inline">\(y\)</span>. Such a function is shown in <a href="#fig-examples-with-patterns-1" class="quarto-xref">Figure&nbsp;<span>1.2 (a)</span></a>. The function <span class="math inline">\(f\)</span> is our <em>predictive model</em>. We often write <span class="math inline">\(y \approx f(x)\)</span> to express the qualitative idea that <span class="math inline">\(f\)</span> models the relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> in a given data set. We’ll learn how to make this idea much more precise when we study empirical risk minimization later in the notes.</li>
 <li>In the classification example (<a href="#fig-examples-2" class="quarto-xref">Figure&nbsp;<span>1.1 (b)</span></a>), we can again encode the pattern in the data as a function. This time, our model is going to describe an estimated **boundary* between the two classes of points. In this example, a linear boundary is pretty good. The plot shows the plot of the linear equation <span class="math inline">\(x_2 = g(x_1) = 1 - x_1\)</span>. Later in the course, it will be convenient to instead write this equation in the equivalent form <span class="math inline">\(\langle \mathbf{x}, \mathbf{w} \rangle = 0\)</span>, where <span class="math inline">\(\mathbf{x} = (x_1, x_2, 1)^T\)</span> and <span class="math inline">\(\mathbf{w} = (1, 1, -1)^T\)</span>.</li>
 </ul>
-<div>
-<details>
-<summary>Code</summary>
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>plot_fig(pattern <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div id="fig-examples-with-patterns" class="cell quarto-layout-panel" data-execution_count="3">
-<figure class="figure">
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 49.1%;justify-content: center;">
-<div id="fig-examples-with-patterns-1" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="01-data-and-models_files/figure-html/fig-examples-with-patterns-output-1.png" class="img-fluid figure-img" data-ref-parent="fig-examples-with-patterns" width="430"></p>
-<figcaption class="figure-caption">(a) As above, with a plot of the function <span class="math inline">\(f(x) = 2\sin{x} + \frac{1}{2}\)</span>.</figcaption>
+<div id="fig-examples-with-patterns" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-examples-with-patterns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="cell-output cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-examples-with-patterns" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-examples-with-patterns-1" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-examples-with-patterns-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-data-and-models_files/figure-html/fig-examples-with-patterns-output-1.png" data-ref-parent="fig-examples-with-patterns" width="430" height="423" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-examples-with-patterns-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) As above, with a plot of the function <span class="math inline">\(f(x) = 2\sin{x} + \frac{1}{2}\)</span>.
+</figcaption>
 </figure>
 </div>
 </div>
-<div class="cell-output cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.9%;justify-content: center;">
-<div id="fig-examples-with-patterns-2" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="01-data-and-models_files/figure-html/fig-examples-with-patterns-output-2.png" class="img-fluid figure-img" data-ref-parent="fig-examples-with-patterns" width="446"></p>
-<figcaption class="figure-caption">(b) As above, with a plot of the function <span class="math inline">\(g(x_1) = 1 - x_1\)</span>. This plot is the same as the affine subspace defined by the equation <span class="math inline">\(x_1 + x_2 = 1\)</span>.</figcaption>
+<div class="cell-output cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-examples-with-patterns" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-examples-with-patterns-2" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-examples-with-patterns-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-data-and-models_files/figure-html/fig-examples-with-patterns-output-2.png" data-ref-parent="fig-examples-with-patterns" width="446" height="428" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-examples-with-patterns-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) As above, with a plot of the function <span class="math inline">\(g(x_1) = 1 - x_1\)</span>. This plot is the same as the affine subspace defined by the equation <span class="math inline">\(x_1 + x_2 = 1\)</span>.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1.2: Examples of patterns in data.</figcaption><p></p>
-</figure>
 </div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-examples-with-patterns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.2: Examples of patterns in data.
+</figcaption>
+</figure>
 </div>
 <section id="supervised-learning" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="supervised-learning">Supervised Learning</h2>
@@ -498,6 +554,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -532,7 +606,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
@@ -547,15 +625,28 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
     stripColumnClz(note)
-    if (id.startsWith('sec-')) {
+    if (id === null || id.startsWith('sec-')) {
       // Special case sections, only their first couple elements
       const container = document.createElement("div");
       if (note.children && note.children.length > 2) {
-        for (let i = 0; i < 2; i++) {
-          container.appendChild(note.children[i].cloneNode(true));
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
         }
         return container.innerHTML
       } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
         return note.innerHTML;
       }
     } else {
@@ -564,7 +655,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (anchorLink) {
         anchorLink.remove();
       }
-      return note.innerHTML;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
     }
   }
   for (var i=0; i<xrefs.length; i++) {
@@ -606,6 +705,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
       }
     }, function(instance) {
     });
@@ -681,7 +803,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     window.addEventListener(
       "resize",
       throttle(() => {
-        console.log("RESIZE");
         elRect = undefined;
         if (selectedAnnoteEl) {
           selectCodeLines(selectedAnnoteEl);
@@ -765,12 +886,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../index.html" class="pagination-link">
+      <a href="../index.html" class="pagination-link" aria-label="Welcome">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Welcome</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../chapters/02-black-box-classification.html" class="pagination-link">
+      <a href="../chapters/02-black-box-classification.html" class="pagination-link" aria-label="Classification as a Black Box">
         <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Classification as a Black Box</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>

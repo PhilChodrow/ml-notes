@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.339">
+<meta name="generator" content="quarto-1.4.551">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -22,7 +22,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -58,6 +58,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -76,7 +77,7 @@ div.csl-indent {
 }</style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -100,12 +101,13 @@ div.csl-indent {
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
   "keyboard-shortcut": [
     "f",
     "/",
     "s"
   ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -114,17 +116,45 @@ div.csl-indent {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -135,11 +165,11 @@ div.csl-indent {
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/10-compas.html">Discrimination, Disparity, Data</a></li><li class="breadcrumb-item"><a href="../chapters/12-statistical-fairness.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Statistical Definitions of Fairness in Decision-Making</span></a></li></ol></nav>
-        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -150,7 +180,7 @@ div.csl-indent {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Machine Learning</a> 
@@ -259,12 +289,18 @@ div.csl-indent {
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Convex Empirical Risk Minimization</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/23-gradient-descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Optimization with Gradient Descent</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
     </div>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -304,10 +340,11 @@ div.csl-indent {
 
 </header>
 
+
 <p><em>Download the live notebook corresponding to these notes <a href="../live-notebooks/12-statistical-fairness.ipynb">here</a>.</em></p>
 <p>In these notes, we’ll review three fundamental definitions of fairness for decision-making systems. While texts like <span class="citation" data-cites="barocasFairnessMachineLearning2023">Barocas, Hardt, and Narayanan (<a href="#ref-barocasFairnessMachineLearning2023" role="doc-biblioref">2023</a>)</span> couch their definitions in the language of probability, our focus in these notes will be to relate the formal mathematical language to operational computations on data sets in Python. In doing so, we’ll review some computational techniques via <code>pandas</code>, <code>numpy</code>, and <code>seaborn</code> from last time. After reviewing these definitions, we’ll review a simple, famous result about the ability of decision systems to satisfy multiple definitions.</p>
 <p>For this study, we’ll return to the COMPAS data that we studied <a href="../chapters/10-compas.html">last time</a>.</p>
-<div id="5c62b603" class="cell" data-execution_count="2">
+<div id="7daad845" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -319,7 +356,7 @@ div.csl-indent {
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> pd.read_csv(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>For this discussion, we again only need to consider a subset of the columns, and we’ll focus exclusively on white (Caucasian) and Black (African-American) defendants:</p>
-<div id="5f909fce" class="cell" data-execution_count="3">
+<div id="030db483" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> [<span class="st">"sex"</span>, <span class="st">"race"</span>, <span class="st">"decile_score"</span>, <span class="st">"two_year_recid"</span>]</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> compas[cols]</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -337,6 +374,7 @@ div.csl-indent {
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>compas.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
+<div>
 <div>
 
 
@@ -398,6 +436,7 @@ div.csl-indent {
 </div>
 </div>
 </div>
+</div>
 <section id="three-statistical-definitions-of-fairness" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="three-statistical-definitions-of-fairness">Three Statistical Definitions of Fairness</h2>
 <p>Last time, we introduced the idea that fairness in decision-making could be defined formally, and models could be audited to determine the extent to which those models conformed to a given definition. In this section, we’ll discuss some of the definitions in Chapter 3 of <span class="citation" data-cites="barocasFairnessMachineLearning2023">Barocas, Hardt, and Narayanan (<a href="#ref-barocasFairnessMachineLearning2023" role="doc-biblioref">2023</a>)</span> and implement Python functions to measure the extent to which the COMPAS risk score conforms to those definitions.</p>
@@ -419,27 +458,28 @@ div.csl-indent {
 </div>
 <div class="callout-body-container">
 <div id="def-independence" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 6.1 (Statistical Independence For Binary Classifiers) </strong></span> The model predictions <span class="math inline">\(\hat{Y}\)</span> satisfy <em>statistical independence</em> if <span class="math inline">\(\mathbb{P}(\hat{Y} = 1 | A = a) = {P}(\hat{Y} = 1 | A = b)\)</span>.</p>
+<p><span class="theorem-title"><strong>Definition 6.1 (Statistical Independence For Binary Classifiers)</strong></span>  The model predictions <span class="math inline">\(\hat{Y}\)</span> satisfy <em>statistical independence</em> if <span class="math inline">\(\mathbb{P}(\hat{Y} = 1 | A = a) = {P}(\hat{Y} = 1 | A = b)\)</span>.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="no-row-height column-margin column-container"><span class="callout-margin-content callout-margin-content-simple">Recall that <span class="math inline">\(\mathbb{P}(Y = 1|A = a)\)</span> is the probability that <span class="math inline">\(Y = 1\)</span> <em>given</em> that <span class="math inline">\(A=a\)</span>. It can be computed using the formula <span class="math inline">\(\mathbb{P}(Y = 1|A = a) = \frac{\mathbb{P}(Y = 1, A = a)}{\mathbb{P}(A = a)}\)</span>.</span></div><p>Colloquially, <a href="#def-independence" class="quarto-xref">Definition&nbsp;<span>6.1</span></a> says that the probability of a positive prediction <span class="math inline">\(\hat{Y} = 1\)</span> does not depend on the group membership <span class="math inline">\(A\)</span>. In the COMPAS data, independence would require that the probability of the model predicting that an individual will be arrested within two years be the same for Black and white defendants.</p>
+<div class="no-row-height column-margin column-container"><span class="margin-aside callout-margin-content callout-margin-content-simple">Recall that <span class="math inline">\(\mathbb{P}(Y = 1|A = a)\)</span> is the probability that <span class="math inline">\(Y = 1\)</span> <em>given</em> that <span class="math inline">\(A=a\)</span>. It can be computed using the formula <span class="math inline">\(\mathbb{P}(Y = 1|A = a) = \frac{\mathbb{P}(Y = 1, A = a)}{\mathbb{P}(A = a)}\)</span>.</span></div><p>Colloquially, <a href="#def-independence" class="quarto-xref">Definition&nbsp;<span>6.1</span></a> says that the probability of a positive prediction <span class="math inline">\(\hat{Y} = 1\)</span> does not depend on the group membership <span class="math inline">\(A\)</span>. In the COMPAS data, independence would require that the probability of the model predicting that an individual will be arrested within two years be the same for Black and white defendants.</p>
 <p>Let’s write a Python function to empirically check independence that will accept a data frame <code>df</code> and three additional arguments:</p>
-<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="">For independence, we don’t actually need the <code>target</code> column, but this approach will let us keep a consistent API for our more complicated implementations below.</span></div></div>
+<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">For independence, we don’t actually need the <code>target</code> column, but this approach will let us keep a consistent API for our more complicated implementations below.</span></div></div>
 <ul>
 <li><code>group_col</code>, the name of the column describing group memberships.</li>
 <li><code>target</code>, the name of the column holding the binary outcomes.</li>
 <li><code>pred</code>, the name of the column holding the predicted binary outcomes.</li>
 </ul>
-<div id="df79d6e8" class="cell" data-execution_count="4">
+<div id="1758cc2f" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_independence(df, group_col, target, pred):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.groupby(group_col)[pred].aggregate([np.mean, <span class="bu">len</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s run our function to check for independence:</p>
-<div id="2f58a008" class="cell" data-execution_count="5">
+<div id="b28af8bb" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>test_independence(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
+<div>
 <div>
 
 
@@ -473,12 +513,13 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<div class="page-columns page-full"><p>The <code>mean</code> column gives the proportion of the time in which the predictor <span class="math inline">\(\hat{Y}\)</span> had value equal to 1, for each of the two groups. This is an empirical estimate of the probability <span class="math inline">\(\mathbb{P}(\hat{Y} = 1 | A = a)\)</span>. We can see that the two proportions are substantially different between groups, strongly suggesting that this model violates the independence criterion. </p><div class="no-row-height column-margin column-container"><span class="">Formally, statistical tests beyond the scope of this course would be needed to reject the hypothesis that the two proportions are different. In this case, you can take my word for it that the relevant test provides strong support for rejecting the null.</span></div></div>
+</div>
+<div class="page-columns page-full"><p>The <code>mean</code> column gives the proportion of the time in which the predictor <span class="math inline">\(\hat{Y}\)</span> had value equal to 1, for each of the two groups. This is an empirical estimate of the probability <span class="math inline">\(\mathbb{P}(\hat{Y} = 1 | A = a)\)</span>. We can see that the two proportions are substantially different between groups, strongly suggesting that this model violates the independence criterion. </p><div class="no-row-height column-margin column-container"><span class="margin-aside">Formally, statistical tests beyond the scope of this course would be needed to reject the hypothesis that the two proportions are different. In this case, you can take my word for it that the relevant test provides strong support for rejecting the null.</span></div></div>
 <p>As discussed in <span class="citation" data-cites="barocasFairnessMachineLearning2023">Barocas, Hardt, and Narayanan (<a href="#ref-barocasFairnessMachineLearning2023" role="doc-biblioref">2023</a>)</span>, independence is a very strong expression of the idea that predictions, and therefore automated decisions, should be the same in aggregate across all groups present in the data. This idea sometimes accompanies another idea, that all groups are equally worthy, meritorious, or deserving of a given decision outcome.</p>
 </section>
 <section id="error-rate-balance" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="error-rate-balance">Error-Rate Balance</h3>
-<div class="page-columns page-full"><p> The primary finding of <span class="citation" data-cites="angwin2022machine">Angwin et al. (<a href="#ref-angwin2022machine" role="doc-biblioref">2022</a>)</span> was, famously, that the COMPAS algorithm makes very different kinds of errors on Black and white defendants.</p><div class="no-row-height column-margin column-container"><span class="">This definition can be generalized from binary classifiers to score functions via the concept of <em>separation</em>, which is discussed in <span class="citation" data-cites="barocasFairnessMachineLearning2023">Barocas, Hardt, and Narayanan (<a href="#ref-barocasFairnessMachineLearning2023" role="doc-biblioref">2023</a>)</span>.</span></div></div>
+<div class="page-columns page-full"><p> The primary finding of <span class="citation" data-cites="angwin2022machine">Angwin et al. (<a href="#ref-angwin2022machine" role="doc-biblioref">2022</a>)</span> was, famously, that the COMPAS algorithm makes very different kinds of errors on Black and white defendants.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">This definition can be generalized from binary classifiers to score functions via the concept of <em>separation</em>, which is discussed in <span class="citation" data-cites="barocasFairnessMachineLearning2023">Barocas, Hardt, and Narayanan (<a href="#ref-barocasFairnessMachineLearning2023" role="doc-biblioref">2023</a>)</span>.</span></div></div>
 <div class="callout callout-style-simple callout-note">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -486,7 +527,7 @@ div.csl-indent {
 </div>
 <div class="callout-body-container">
 <div id="def-error-rate-balance" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 6.2 (Error Rate Balance for Binary Classifiers) </strong></span>The model predictions <span class="math inline">\(\hat{Y}\)</span> satisfy <em>error-rate balance</em> if the following conditions both hold:</p>
+<p><span class="theorem-title"><strong>Definition 6.2 (Error Rate Balance for Binary Classifiers)</strong></span> The model predictions <span class="math inline">\(\hat{Y}\)</span> satisfy <em>error-rate balance</em> if the following conditions both hold:</p>
 <p><span class="math display">\[
 \begin{aligned}
     \mathbb{P}(\hat{Y} = 1 | Y = 1, A = a) &amp;= \mathbb{P}(\hat{Y} =1  | Y = 1, A = b) &amp; \text{(balanced true positives)} \\
@@ -505,14 +546,15 @@ div.csl-indent {
 \end{aligned}
 \]</span></p>
 <p>Let’s write another function with the same API to give a summary of error rates between two groups using these formulas. As we know, it’s pretty convenient to do this with confusion matrices. It’s not much more difficult to do it “by hand” using vectorized Pandas computations:</p>
-<div id="c88e57ad" class="cell" data-execution_count="6">
+<div id="b6f6d2d5" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_error_rate_balance(df, group_col, target, pred):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.groupby([group_col, target])[pred].mean().reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can use this function to do an empirical test for error rate balance:</p>
-<div id="83f3d11a" class="cell" data-execution_count="7">
+<div id="99ba494e" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>test_error_rate_balance(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
+<div>
 <div>
 
 
@@ -556,7 +598,8 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<div class="page-columns page-full"><p> The false positive rates are in the rows in which <code>two_year_recid == 0</code>, and the true positive rates are in the rows in which <code>two_year_recid == 1</code>.</p><div class="no-row-height column-margin column-container"><span class="">As before, before concluding that the COMPAS algorithm violates error rate balance as in <a href="#def-error-rate-balance" class="quarto-xref">Definition&nbsp;<span>6.2</span></a>, it is technically necessary to perform a statistical test to reject the null hypothesis that the true population error rates are the same.</span></div></div>
+</div>
+<div class="page-columns page-full"><p> The false positive rates are in the rows in which <code>two_year_recid == 0</code>, and the true positive rates are in the rows in which <code>two_year_recid == 1</code>.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">As before, before concluding that the COMPAS algorithm violates error rate balance as in <a href="#def-error-rate-balance" class="quarto-xref">Definition&nbsp;<span>6.2</span></a>, it is technically necessary to perform a statistical test to reject the null hypothesis that the true population error rates are the same.</span></div></div>
 </section>
 <section id="sufficiency" class="level3">
 <h3 class="anchored" data-anchor-id="sufficiency">Sufficiency</h3>
@@ -568,7 +611,7 @@ div.csl-indent {
 </div>
 <div class="callout-body-container">
 <div id="def-sufficiency" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 6.3 (Sufficiency) </strong></span>Model predictions <span class="math inline">\(\hat{Y}\)</span> satisfy <em>sufficiency</em> if the following two conditions hold: <span class="math display">\[
+<p><span class="theorem-title"><strong>Definition 6.3 (Sufficiency)</strong></span> Model predictions <span class="math inline">\(\hat{Y}\)</span> satisfy <em>sufficiency</em> if the following two conditions hold: <span class="math display">\[
 \begin{aligned}
     \mathbb{P}(Y = 1 | \hat{Y} = 1, A = a) &amp;= \mathbb{P}(Y = 1 | \hat{Y} = 1, A = b) \\
     \mathbb{P}(Y = 0 | \hat{Y} = 0, A = a) &amp;= \mathbb{P}(Y = 0 | \hat{Y} = 0, A = b) \;.
@@ -587,15 +630,16 @@ div.csl-indent {
 \end{aligned}
 \]</span></p>
 <p>Let’s write a function to check for sufficiency in the COMPAS predictions. This function will compute the positive and negative predictive values by group:</p>
-<div id="a5b0b8c4" class="cell" data-execution_count="8">
+<div id="15bff971" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_sufficiency(df, group_col, target, pred):</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    df_ <span class="op">=</span> df.copy()</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    df_[<span class="st">"correct"</span>] <span class="op">=</span> df_[pred] <span class="op">==</span> df_[target]</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_.groupby([pred, group_col])[<span class="st">"correct"</span>].mean().reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="6d2d44b0" class="cell" data-execution_count="9">
+<div id="0589354c" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>test_sufficiency(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
+<div>
 <div>
 
 
@@ -639,6 +683,7 @@ div.csl-indent {
 </div>
 </div>
 </div>
+</div>
 <p>The negative predictive values are in the rows in which <code>predicted_high_risk == 0</code> and the positive predictive values are in the rows in which <code>predicted_high_risk == 1</code>. We observe that the negative predictive value is slightly higher for white defendants, while the positive predictive value is slightly higher for Black defendants. These differences, however, are much lower than the error rate disparity noted above.</p>
 </section>
 </section>
@@ -653,7 +698,7 @@ div.csl-indent {
 </div>
 <div class="callout-body-container">
 <div id="thm-incompatibility" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 6.1 (Incompatibility of Error Rate Balance and Sufficiency <span class="citation" data-cites="chouldechovaFairPredictionDisparate2017a">(<a href="#ref-chouldechovaFairPredictionDisparate2017a" role="doc-biblioref">Chouldechova 2017</a>)</span>) </strong></span>If the true rates <span class="math inline">\(p_a\)</span> and <span class="math inline">\(p_b\)</span> of positive outcomes in the groups <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> are not equal (<span class="math inline">\(p_a \neq p_b\)</span>), then there does not exist a model that produces predictions which satisfy both error rate balance and sufficiency.</p>
+<p><span class="theorem-title"><strong>Theorem 6.1 (Incompatibility of Error Rate Balance and Sufficiency <span class="citation" data-cites="chouldechovaFairPredictionDisparate2017a">(<a href="#ref-chouldechovaFairPredictionDisparate2017a" role="doc-biblioref">Chouldechova 2017</a>)</span>)</strong></span> If the true rates <span class="math inline">\(p_a\)</span> and <span class="math inline">\(p_b\)</span> of positive outcomes in the groups <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> are not equal (<span class="math inline">\(p_a \neq p_b\)</span>), then there does not exist a model that produces predictions which satisfy both error rate balance and sufficiency.</p>
 </div>
 </div>
 </div>
@@ -744,7 +789,7 @@ Discussion
 <h2 class="anchored" data-anchor-id="references">References</h2>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-angwin2022machine" class="csl-entry" role="listitem">
 Angwin, Julia, Jeff Larson, Surya Mattu, and Lauren Kirchner. 2022. <span>“Machine Bias.”</span> In <em>Ethics of Data and Analytics</em>, 254–64. Auerbach Publications.
 </div>
@@ -840,6 +885,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -874,7 +937,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
@@ -889,15 +956,28 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
     stripColumnClz(note)
-    if (id.startsWith('sec-')) {
+    if (id === null || id.startsWith('sec-')) {
       // Special case sections, only their first couple elements
       const container = document.createElement("div");
       if (note.children && note.children.length > 2) {
-        for (let i = 0; i < 2; i++) {
-          container.appendChild(note.children[i].cloneNode(true));
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
         }
         return container.innerHTML
       } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
         return note.innerHTML;
       }
     } else {
@@ -906,7 +986,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (anchorLink) {
         anchorLink.remove();
       }
-      return note.innerHTML;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
     }
   }
   for (var i=0; i<xrefs.length; i++) {
@@ -948,6 +1036,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
       }
     }, function(instance) {
     });
@@ -1023,7 +1134,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     window.addEventListener(
       "resize",
       throttle(() => {
-        console.log("RESIZE");
         elRect = undefined;
         if (selectedAnnoteEl) {
           selectCodeLines(selectedAnnoteEl);
@@ -1107,12 +1217,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../chapters/10-compas.html" class="pagination-link">
+      <a href="../chapters/10-compas.html" class="pagination-link" aria-label="Introduction to Algorithmic Disparity: COMPAS">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Introduction to Algorithmic Disparity: COMPAS</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../chapters/20-perceptron.html" class="pagination-link">
+      <a href="../chapters/20-perceptron.html" class="pagination-link" aria-label="Introduction to Classification: The Perceptron">
         <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Introduction to Classification: The Perceptron</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>

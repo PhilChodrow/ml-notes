@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.339">
+<meta name="generator" content="quarto-1.4.551">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -22,7 +22,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -58,6 +58,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -76,7 +77,7 @@ div.csl-indent {
 }</style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -100,12 +101,13 @@ div.csl-indent {
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
   "keyboard-shortcut": [
     "f",
     "/",
     "s"
   ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -114,17 +116,45 @@ div.csl-indent {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -135,11 +165,11 @@ div.csl-indent {
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/01-data-and-models.html">Introducing Machine Learning</a></li><li class="breadcrumb-item"><a href="../chapters/02-black-box-classification.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Classification as a Black Box</span></a></li></ol></nav>
-        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -150,7 +180,7 @@ div.csl-indent {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Machine Learning</a> 
@@ -259,12 +289,18 @@ div.csl-indent {
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Convex Empirical Risk Minimization</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/23-gradient-descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Optimization with Gradient Descent</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
     </div>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -308,6 +344,7 @@ div.csl-indent {
 
 </header>
 
+
 <p><em>Download the live notebook corresponding to these notes <a href="../live-notebooks/02-black-box-classification.ipynb">here</a>.</em></p>
 <p>In these notes, we’ll make a lightning tour through the “standard workflow” for users of predictive machine learning technologies. Our focus will be on out-of-the-box Python tools for acquiring, visualizing, and analyzing tabular data sets.</p>
 <p>We’re going to move pretty quickly through some big topics in practical data science: acquiring data, data visualization, data manipulation, and prediction using the Scikit-Learn package. Throughout these notes, I’ve sprinkled references to the <a href="https://jakevdp.github.io/PythonDataScienceHandbook/">Python Data Science Handbook</a> <span class="citation" data-cites="vanderplasPythonDataScience2016">(<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">Vanderplas 2016</a>)</span>, which treats many of these practical considerations in much greater detail.</p>
@@ -316,13 +353,13 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="https://allisonhorst.github.io/palmerpenguins/reference/figures/lter_penguins.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Image source: @allisonhorst</figcaption>
+<figcaption class="margin-caption">Image source: @allisonhorst</figcaption>
 </figure>
 </div>
 <p>Our data set for these notes is Palmer Penguins. This data set contains physiological measurements and species labels for several populations of Adelie, Chinstrap, and Gentoo penguins.</p>
-<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="">The Palmer Penguins data was originally collected by <span class="citation" data-cites="gormanEcologicalSexualDimorphism2014">Gorman, Williams, and Fraser (<a href="#ref-gormanEcologicalSexualDimorphism2014" role="doc-biblioref">2014</a>)</span> and was nicely packaged and released for use in the data science community by <span class="citation" data-cites="horstAllisonhorstPalmerpenguinsV02020">Horst, Hill, and Gorman (<a href="#ref-horstAllisonhorstPalmerpenguinsV02020" role="doc-biblioref">2020</a>)</span>. You can find <a href="https://jakevdp.github.io/PythonDataScienceHandbook/05.02-introducing-scikit-learn.html#Supervised-learning-example:-Iris-classification">a very concise summary</a> of the main workflow using a similar data set in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>.</span></div></div>
+<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">The Palmer Penguins data was originally collected by <span class="citation" data-cites="gormanEcologicalSexualDimorphism2014">Gorman, Williams, and Fraser (<a href="#ref-gormanEcologicalSexualDimorphism2014" role="doc-biblioref">2014</a>)</span> and was nicely packaged and released for use in the data science community by <span class="citation" data-cites="horstAllisonhorstPalmerpenguinsV02020">Horst, Hill, and Gorman (<a href="#ref-horstAllisonhorstPalmerpenguinsV02020" role="doc-biblioref">2020</a>)</span>. You can find <a href="https://jakevdp.github.io/PythonDataScienceHandbook/05.02-introducing-scikit-learn.html#Supervised-learning-example:-Iris-classification">a very concise summary</a> of the main workflow using a similar data set in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>.</span></div></div>
 <p>Let’s go ahead and acquire the data.</p>
-<div id="db9d585d" class="cell" data-execution_count="2">
+<div id="e376833e" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
@@ -330,17 +367,18 @@ div.csl-indent {
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>np.set_printoptions(precision <span class="op">=</span> <span class="dv">3</span>)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="512fa58d" class="cell" data-execution_count="3">
+<div id="7a30803c" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/palmer-penguins/palmer-penguins.csv"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="89dea7c5" class="cell" data-execution_count="4">
+<div id="713f890c" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="page-columns page-full"><p> The <code>df</code> variable holds a <code>pandas.DataFrame</code> object. You can think of a data frame as a table of data with a variety of useful behaviors for data manipulation and visualization.</p><div class="no-row-height column-margin column-container"><span class="">You can learn much more about the capabilities of <code>pandas.DataFrame</code> objects in <a href="https://jakevdp.github.io/PythonDataScienceHandbook/03.00-introduction-to-pandas.html">Chapter 3</a> of <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span></span></div></div>
+<div class="page-columns page-full"><p> The <code>df</code> variable holds a <code>pandas.DataFrame</code> object. You can think of a data frame as a table of data with a variety of useful behaviors for data manipulation and visualization.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">You can learn much more about the capabilities of <code>pandas.DataFrame</code> objects in <a href="https://jakevdp.github.io/PythonDataScienceHandbook/03.00-introduction-to-pandas.html">Chapter 3</a> of <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span></span></div></div>
 <p>Let’s take a look:</p>
-<div id="3c0f53de" class="cell" data-execution_count="5">
+<div id="c9788ac1" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df.head() <span class="co"># first 5 rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
+<div>
 <div>
 
 
@@ -474,15 +512,16 @@ div.csl-indent {
 </div>
 </div>
 </div>
+</div>
 <p>It’s always useful to get acquainted with the “basics” of the data. For example, how many rows and columns do we have?</p>
-<div id="b91ecb64" class="cell" data-execution_count="6">
+<div id="4453ac52" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.shape <span class="co"># (rows, columns)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>(344, 17)</code></pre>
 </div>
 </div>
-<div class="page-columns page-full"><p>What are the data types of the columns? </p><div class="no-row-height column-margin column-container"><span class=""><code>str</code> columns are represented with the generic <code>object</code> in Pandas.</span></div></div>
-<div id="daa68d40" class="cell" data-execution_count="7">
+<div class="page-columns page-full"><p>What are the data types of the columns? </p><div class="no-row-height column-margin column-container"><span class="margin-aside"><code>str</code> columns are represented with the generic <code>object</code> in Pandas.</span></div></div>
+<div id="cad96a82" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df.dtypes </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>studyName               object
@@ -512,9 +551,9 @@ dtype: object</code></pre>
 </section>
 <section id="data-preparation" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="data-preparation">Data Preparation</h2>
-<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="">We can select our desired columns from the data frame, operate on them, and make assignments to them using the <a href="https://jakevdp.github.io/PythonDataScienceHandbook/03.02-data-indexing-and-selection.html#Data-Selection-in-DataFrame">data-frame-as-dictionary paradigm</a> explored in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>.</span></div></div>
+<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">We can select our desired columns from the data frame, operate on them, and make assignments to them using the <a href="https://jakevdp.github.io/PythonDataScienceHandbook/03.02-data-indexing-and-selection.html#Data-Selection-in-DataFrame">data-frame-as-dictionary paradigm</a> explored in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>.</span></div></div>
 <p>In applied data science, at least 80% of the work is typically spent acquiring and preparing data. Here, we’re going to do some simple data preparation directed by our question. It’s going to be convenient to shorten the <code>Species</code> column for each penguin. Furthermore, for visualization purposes today we are going to focus on the <code>Culmen Length (mm)</code> and <code>Culmen Depth (mm)</code> columns.</p>
-<div id="9cadef03" class="cell" data-execution_count="8">
+<div id="aad3dace" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># use only these three columns</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df[[<span class="st">"Culmen Length (mm)"</span>, <span class="st">"Culmen Depth (mm)"</span>, <span class="st">"Species"</span>]] </span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -526,9 +565,10 @@ dtype: object</code></pre>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"Species"</span>] <span class="op">=</span> df[<span class="st">"Species"</span>].<span class="bu">str</span>.split().<span class="bu">str</span>.get(<span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s take a look at what we’ve done so far:</p>
-<div id="d8f4cbad" class="cell" data-execution_count="9">
+<div id="15360f28" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
+<div>
 <div>
 
 
@@ -578,8 +618,9 @@ dtype: object</code></pre>
 </div>
 </div>
 </div>
+</div>
 <p>As another preprocessing step, we are going to add transformed labels represented as integers.</p>
-<div id="99437ebd" class="cell" data-execution_count="10">
+<div id="743ac8cb" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for later: assign an integer to each species</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> LabelEncoder</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -595,9 +636,10 @@ Class number 2 represents Gentoo penguins.</code></pre>
 </div>
 </div>
 <p>Now our data looks like this:</p>
-<div id="5c5f4dbf" class="cell" data-execution_count="11">
+<div id="620828ac" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
+<div>
 <div>
 
 
@@ -653,16 +695,17 @@ Class number 2 represents Gentoo penguins.</code></pre>
 </div>
 </div>
 </div>
+</div>
 <section id="train-test-split" class="level3">
 <h3 class="anchored" data-anchor-id="train-test-split">Train-Test Split</h3>
 <p>When designing predictive models, it’s important to <em>evaluate</em> them in a context that simulates the prediction application as accurately as possible. One important way we do this is by performing a <em>train-test split</em>. We keep most of the data as <em>training data</em> which we’ll use to design the model. We’ll hold out a bit of the data as <em>testing data</em>, which we’ll treat as unseen and only use once we are ready to evaluate our final design. The testing data simulates the idea of “new, unseen data” – exactly the kind of data on which it would be useful for us to make predictions!</p>
-<div id="0eb0ecd8" class="cell" data-execution_count="12">
+<div id="9c8b5c83" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>df_train, df_test <span class="op">=</span> train_test_split(df, test_size <span class="op">=</span> <span class="fl">0.2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s check the size of our two split data sets:</p>
-<div id="4e698ff4" class="cell" data-execution_count="13">
+<div id="b2337868" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df_train.shape, df_test.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>((273, 4), (69, 4))</code></pre>
@@ -674,31 +717,31 @@ Class number 2 represents Gentoo penguins.</code></pre>
 <section id="data-analysis-and-visualization" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="data-analysis-and-visualization">Data Analysis and Visualization</h2>
 <p>As a first step, it’s useful to understand how many of each species there are in the training data:</p>
-<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="">This is an example of a “split-apply-combine” operation <span class="citation" data-cites="wickhamSplitApplyCombineStrategyData2011">(<a href="#ref-wickhamSplitApplyCombineStrategyData2011" role="doc-biblioref">Wickham 2011</a>)</span>. We split the dataframe into three groups depending on the species label, apply an operation (in this case, computing the number of rows), and then combine the results into a single object. Pandas implements split-apply-combine primarily through the <a href="https://pandas.pydata.org/docs/user_guide/groupby.html"><code>groupby</code> method</a> and several associated functions. There are <a href="https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html">some nice examples of split-apply-combine</a> in Pandas in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>.</span></div></div>
-<div id="d301086f" class="cell" data-execution_count="14">
+<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">This is an example of a “split-apply-combine” operation <span class="citation" data-cites="wickhamSplitApplyCombineStrategyData2011">(<a href="#ref-wickhamSplitApplyCombineStrategyData2011" role="doc-biblioref">Wickham 2011</a>)</span>. We split the dataframe into three groups depending on the species label, apply an operation (in this case, computing the number of rows), and then combine the results into a single object. Pandas implements split-apply-combine primarily through the <a href="https://pandas.pydata.org/docs/user_guide/groupby.html"><code>groupby</code> method</a> and several associated functions. There are <a href="https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html">some nice examples of split-apply-combine</a> in Pandas in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>.</span></div></div>
+<div id="d721e21b" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df_train.groupby(<span class="st">"Species"</span>).size()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
 <pre><code>Species
-Adelie       118
-Chinstrap     51
-Gentoo       104
+Adelie       121
+Chinstrap     50
+Gentoo       102
 dtype: int64</code></pre>
 </div>
 </div>
 <p>There are more Adelie penguins than Chintraps or Gentoos in this data set. Here are the proportions:</p>
-<div id="70b6af46" class="cell" data-execution_count="15">
+<div id="d6c77661" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>df_train.groupby(<span class="st">"Species"</span>).size() <span class="op">/</span> df_train.shape[<span class="dv">0</span>] <span class="co"># divide by total rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <pre><code>Species
-Adelie       0.432234
-Chinstrap    0.186813
-Gentoo       0.380952
+Adelie       0.443223
+Chinstrap    0.183150
+Gentoo       0.373626
 dtype: float64</code></pre>
 </div>
 </div>
 <p>So, over 40% of the penguins in the data are Adelie penguins. One important consequence of this proportion is the <em>base rate</em> of the classification problem. The base rate refers to how well we could perform at prediction if we did not use any kind of predictive modeling, but instead simply predicted the most common class for every penguin. Here, if we always predicted “Adelie” for the species, we’d expect to be right more than 40% of the time. So, a minimal expectation of anything fancier we do is that it should be correct much more than 40% of the time.</p>
 <p>Now let’s take a look at our (training) data and see whether our chosen columns look like they have a chance of predicting the penguin species. We’ll show the plot both without and with the species labels.</p>
-<div id="fc95d7ce" class="cell page-columns page-full" data-execution_count="16">
+<div id="44e94d63" class="cell page-columns page-full" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -710,7 +753,7 @@ dtype: float64</code></pre>
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="02-black-box-classification_files/figure-html/cell-16-output-1.png" class="figure-img" width="651" height="312"></p>
-<figcaption class="figure-caption margin-caption">These plots are generated using the <a href="https://seaborn.pydata.org/">Seaborn library</a> for Python. Seaborn is a high-level wrapper around the classical <a href="https://matplotlib.org/">matplotlib</a> library for data visualization. Although Matplotlib is very flexible, Seaborn is optimized for visualizing data contained in Pandas data frames. You can find many examples of creating Seaborn plots in the <a href="https://seaborn.pydata.org/examples/index.html">official gallery</a>, and <a href="https://jakevdp.github.io/PythonDataScienceHandbook/04.00-introduction-to-matplotlib.html">many tips and examples for matplotlib</a> in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>.</figcaption>
+<figcaption class="margin-caption">These plots are generated using the <a href="https://seaborn.pydata.org/">Seaborn library</a> for Python. Seaborn is a high-level wrapper around the classical <a href="https://matplotlib.org/">matplotlib</a> library for data visualization. Although Matplotlib is very flexible, Seaborn is optimized for visualizing data contained in Pandas data frames. You can find many examples of creating Seaborn plots in the <a href="https://seaborn.pydata.org/examples/index.html">official gallery</a>, and <a href="https://jakevdp.github.io/PythonDataScienceHandbook/04.00-introduction-to-matplotlib.html">many tips and examples for matplotlib</a> in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>.</figcaption>
 </figure>
 </div>
 </div>
@@ -721,13 +764,13 @@ dtype: float64</code></pre>
 <section id="modeling-and-model-selection" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="modeling-and-model-selection">Modeling and Model Selection</h2>
 <p>Let’s go ahead and fit some models! We’re going to fit two models that are pre-implemented in the package <code>scikit-learn</code>. For now, you can think of these models as black-box algorithms that accept <em>predictor variables</em> as inputs and return a <em>predicted target</em> as an output. In our case, the predictor variables are the culmen length and culmen depth columns, while the target we are attempting to predict is the species. Later on, we’ll learn more about how some of these models actually work.</p>
-<div id="4b8d8802" class="cell" data-execution_count="17">
+<div id="79ac5e55" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.svm <span class="im">import</span> SVC <span class="co"># support vector classifier</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mlxtend.plotting <span class="im">import</span> plot_decision_regions <span class="co"># for visualization later</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>It’s convenient to split our data into predictors <span class="math inline">\(\mathbf{X}\)</span> and targets <span class="math inline">\(\mathbf{y}\)</span>. We need to do this once for each of the training and test sets.</p>
-<div id="555fe83c" class="cell" data-execution_count="18">
+<div id="715af033" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>predictor_cols <span class="op">=</span> [<span class="st">"Culmen Length (mm)"</span>, <span class="st">"Culmen Depth (mm)"</span>]</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>target_col <span class="op">=</span> <span class="st">"species_label"</span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -738,9 +781,10 @@ dtype: float64</code></pre>
 <span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> df_test[target_col]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s take a quick look at <code>X_train</code></p>
-<div id="07e67fd1" class="cell" data-execution_count="19">
+<div id="602f7d32" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>X_train</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="18">
+<div>
 <div>
 
 
@@ -754,14 +798,24 @@ dtype: float64</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
+<td data-quarto-table-cell-role="th">194</td>
+<td>50.9</td>
+<td>19.1</td>
+</tr>
+<tr class="even">
 <td data-quarto-table-cell-role="th">64</td>
 <td>36.4</td>
 <td>17.1</td>
 </tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">163</td>
+<td>51.7</td>
+<td>20.3</td>
+</tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">9</td>
-<td>42.0</td>
-<td>20.2</td>
+<td data-quarto-table-cell-role="th">290</td>
+<td>47.7</td>
+<td>15.0</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">239</td>
@@ -769,44 +823,34 @@ dtype: float64</code></pre>
 <td>15.1</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">307</td>
-<td>51.3</td>
-<td>14.2</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">226</td>
-<td>45.4</td>
-<td>14.6</td>
-</tr>
-<tr class="even">
 <td data-quarto-table-cell-role="th">...</td>
 <td>...</td>
 <td>...</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">157</td>
-<td>45.2</td>
-<td>17.8</td>
+<td data-quarto-table-cell-role="th">253</td>
+<td>59.6</td>
+<td>17.0</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">75</td>
-<td>42.8</td>
-<td>18.5</td>
+<td data-quarto-table-cell-role="th">280</td>
+<td>45.3</td>
+<td>13.8</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">238</td>
-<td>46.2</td>
-<td>14.5</td>
+<td data-quarto-table-cell-role="th">200</td>
+<td>51.5</td>
+<td>18.7</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">46</td>
-<td>41.1</td>
-<td>19.0</td>
+<td data-quarto-table-cell-role="th">337</td>
+<td>48.8</td>
+<td>16.2</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">85</td>
-<td>41.3</td>
-<td>20.3</td>
+<td data-quarto-table-cell-role="th">76</td>
+<td>40.9</td>
+<td>16.8</td>
 </tr>
 </tbody>
 </table>
@@ -815,24 +859,25 @@ dtype: float64</code></pre>
 </div>
 </div>
 </div>
-<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="">We’ll go in-depth on logistic regression later in this course.</span></div></div>
+</div>
+<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">We’ll go in-depth on logistic regression later in this course.</span></div></div>
 <p>Now we’re ready to fit our first machine learning model. Let’s try logistic regression! In the Scikit-learn API, we first need to instantiate the <code>LogisticRegression()</code> class, and then call the <code>fit()</code> method of this class on the training predictors and targets.</p>
-<div id="36679066" class="cell" data-execution_count="20">
+<div id="313160f5" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression()</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> LR.fit(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>So, uh, did it work? The <code>LogisticRegression()</code> class includes a handy method to compute the accuracy of the classifier:</p>
-<div id="298dfcf7" class="cell" data-execution_count="21">
+<div id="f5822bfc" class="cell" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>LR.score(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="20">
-<pre><code>0.9560439560439561</code></pre>
+<pre><code>0.9633699633699634</code></pre>
 </div>
 </div>
 <p>Wow! Much better than the base rate. Note that this is the accuracy on the <em>training data</em>. In theory, accuracy on the test data could look very different.</p>
 <p>A useful way to visualize models with two numerical predictors is via <em>decision regions</em>. Each region describes the set of possible measurements that would result in a given classification.</p>
-<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="">You can unfold this code to see a simple implementation of a function for plotting decision regions which wraps <a href="https://rasbt.github.io/mlxtend/user_guide/plotting/plot_decision_regions/">the <code>plot_decision_regions</code> function</a> of the <code>mlxtend</code> package.</span></div></div>
-<div id="eaf9c5b4" class="cell" data-execution_count="22">
-<details>
+<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">You can unfold this code to see a simple implementation of a function for plotting decision regions which wraps <a href="https://rasbt.github.io/mlxtend/user_guide/plotting/plot_decision_regions/">the <code>plot_decision_regions</code> function</a> of the <code>mlxtend</code> package.</span></div></div>
+<div id="9be0acec" class="cell" data-execution_count="21">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> decision_regions(X, y, model, title):</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -850,17 +895,25 @@ dtype: float64</code></pre>
 <span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>decision_regions(X_train, y_train, LR, <span class="st">"Decision Regions for Logistic Regression"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="02-black-box-classification_files/figure-html/cell-22-output-1.png" class="" width="577" height="442"></p>
+<div>
+<figure class="figure">
+<p><img src="02-black-box-classification_files/figure-html/cell-22-output-1.png" class="figure-img" width="577" height="442"></p>
+</figure>
 </div>
 </div>
-<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="">You can <a href="https://jakevdp.github.io/PythonDataScienceHandbook/05.07-support-vector-machines.html">learn more about how support vector machines</a> work in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>. We’ll also study these models later in the course.</span></div></div>
+</div>
+<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">You can <a href="https://jakevdp.github.io/PythonDataScienceHandbook/05.07-support-vector-machines.html">learn more about how support vector machines</a> work in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>. We’ll also study these models later in the course.</span></div></div>
 <p>While we’re at it, let’s try fitting a different classifier, also supplied by Scikit-learn. This classifier is called <em>support vector machine</em> (SVM).</p>
-<div id="171d145e" class="cell" data-execution_count="23">
+<div id="81a305db" class="cell" data-execution_count="22">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>SVM <span class="op">=</span> SVC(gamma <span class="op">=</span> <span class="dv">5</span>)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>SVM.fit(X_train, y_train)</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>decision_regions(X_train, y_train, SVM, <span class="st">"Decision Regions for Support Vector Machine"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="02-black-box-classification_files/figure-html/cell-23-output-1.png" class="" width="577" height="442"></p>
+<div>
+<figure class="figure">
+<p><img src="02-black-box-classification_files/figure-html/cell-23-output-1.png" class="figure-img" width="577" height="442"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Wow! The support vector machine classifier achieved even higher accuracy on the training data. This is enabled by the greater <em>flexibility</em> of the SVM. Flexibility comes from a lot of places in machine learning, and generally refers to the ability of models to learn complicated decision boundaries like the ones shown here.</p>
@@ -868,20 +921,20 @@ dtype: float64</code></pre>
 <section id="simulating-evaluation-cross-validation" class="level4 page-columns page-full">
 <h4 class="anchored" data-anchor-id="simulating-evaluation-cross-validation">Simulating Evaluation: Cross-Validation</h4>
 <p>Now we have two competing classification models: logistic regression and support vector machine. Which one is going to do the best job of prediction on totally new, unseen data? We could go ahead and evaluate on our test set, but for statistical reasons we need to avoid doing this until we’ve made a final choice of classifier.</p>
-<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class=""><span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span> has <a href="https://jakevdp.github.io/PythonDataScienceHandbook/05.03-hyperparameters-and-model-validation.html">more on cross-validation</a> and overfitting. We’ll confront overfitting agian many times in this course.</span></div></div>
+<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside"><span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span> has <a href="https://jakevdp.github.io/PythonDataScienceHandbook/05.03-hyperparameters-and-model-validation.html">more on cross-validation</a> and overfitting. We’ll confront overfitting agian many times in this course.</span></div></div>
 <p>In order to make an assessment, we can simulate the process of fitting the model and evaluating on “test” data by witholding parts of our <em>training</em> data to use as testing. We split the data into chunks and withold each chunk, using the other chunks to train the data. This is called <em>cross-validation</em>, and it is illustrated in this figure:</p>
 <div class="quarto-figure quarto-figure-center page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="https://scikit-learn.org/stable/_images/grid_search_cross_validation.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Image source: <a href="https://scikit-learn.org/stable/_images/grid_search_cross_validation.png">scikit-learn</a></figcaption>
+<figcaption class="margin-caption">Image source: <a href="https://scikit-learn.org/stable/_images/grid_search_cross_validation.png">scikit-learn</a></figcaption>
 </figure>
 </div>
 <p>We could do this with a janky for-loop, but the nice <code>scikit-learn</code> developers have implemented this for us. Here’s an example of cross-validation with 5 folds. This can take a little while, as there are actually 5 calls to <code>model.fit()</code> happening under the hood each time.</p>
-<div id="25738f5f" class="cell" data-execution_count="24">
+<div id="92dff660" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_val_score</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>First let’s compute the cross-validation accuracies for logistic regression:</p>
-<div id="101ade7f" class="cell" data-execution_count="25">
+<div id="c3d673ff" class="cell" data-execution_count="24">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>cv_scores_LR <span class="op">=</span> cross_val_score(LR, X_train, y_train, cv<span class="op">=</span><span class="dv">5</span>)</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>cv_scores_LR</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -894,25 +947,35 @@ Increase the number of iterations (max_iter) or scale the data as shown in:
     https://scikit-learn.org/stable/modules/preprocessing.html
 Please also refer to the documentation for alternative solver options:
     https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
+
+/Users/philchodrow/opt/anaconda3/envs/ml-0451/lib/python3.9/site-packages/sklearn/linear_model/_logistic.py:444: ConvergenceWarning:
+
+lbfgs failed to converge (status=1):
+STOP: TOTAL NO. of ITERATIONS REACHED LIMIT.
+
+Increase the number of iterations (max_iter) or scale the data as shown in:
+    https://scikit-learn.org/stable/modules/preprocessing.html
+Please also refer to the documentation for alternative solver options:
+    https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
 </code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="24">
-<pre><code>array([0.964, 0.927, 0.909, 0.981, 0.981])</code></pre>
+<pre><code>array([0.927, 0.945, 0.945, 1.   , 0.963])</code></pre>
 </div>
 </div>
 <p>A convenient way to summarize these results is by computing the average:</p>
-<div id="2a7bf6f9" class="cell" data-execution_count="26">
+<div id="214a0ce9" class="cell" data-execution_count="25">
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>cv_scores_LR.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="25">
-<pre><code>0.9525925925925925</code></pre>
+<pre><code>0.9562289562289562</code></pre>
 </div>
 </div>
 <p>Let’s compare to SVM:</p>
-<div id="e8a47962" class="cell" data-execution_count="27">
+<div id="e0b12295" class="cell" data-execution_count="26">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>cv_scores_SVM <span class="op">=</span> cross_val_score(SVM, X_train, y_train, cv<span class="op">=</span><span class="dv">5</span>)</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>cv_scores_SVM.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="26">
-<pre><code>0.8534006734006733</code></pre>
+<pre><code>0.8429629629629629</code></pre>
 </div>
 </div>
 <p>Ah! It looks like our SVM classifier was indeed <em>too flexible</em> to do well in predicting data that it hasn’t seen before. Although the SVM had better training accuracy than the logistic regression model, it failed to <em>generalize</em> to the task of unseen prediction. This phenomenon is called <em>overfitting</em>. Dealing with overfitting is one of the fundamental modeling challenges in applied machine learning.</p>
@@ -921,44 +984,44 @@ Please also refer to the documentation for alternative solver options:
 <section id="model-evaluation" class="level2">
 <h2 class="anchored" data-anchor-id="model-evaluation">Model Evaluation</h2>
 <p>So far, we’ve fit a logistic regression model and a support vector machine model; compared the two on a cross-validation task; and determined that the logistic regression model is most likely to generalize. Let’s now retrain the logistic regression model on the complete training data and finally evaluate it on the test set:</p>
-<div id="209557fb" class="cell" data-execution_count="28">
+<div id="0d36e16d" class="cell" data-execution_count="27">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>LR.fit(X_train,y_train) </span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>LR.score(X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="27">
-<pre><code>0.9855072463768116</code></pre>
+<pre><code>0.9710144927536232</code></pre>
 </div>
 </div>
 <p>Not bad! This is our final estimate for the accuracy of our model as a classification tool on unseen penguin data.</p>
 <section id="beyond-accuracy" class="level3">
 <h3 class="anchored" data-anchor-id="beyond-accuracy">Beyond Accuracy</h3>
 <p>Accuracy is a simple measure of how many errors a model makes. In many applications, it’s important to understand what <em>kind</em> of errors the model makes, a topic which we’ll study much more when we come to decision theory in the near future. We can get a quick overview of the kinds of mistakes that a model makes by computing the <em>confusion matrix</em> between the true labels and predictions. This matrix cross-tabulates all the true labels with all the predicted ones.</p>
-<div id="39f61aee" class="cell" data-execution_count="29">
+<div id="7faa5343" class="cell" data-execution_count="28">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>y_test_pred <span class="op">=</span> LR.predict(X_test)</span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> confusion_matrix(y_test, y_test_pred)</span>
 <span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>C</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="28">
-<pre><code>array([[33,  0,  0],
-       [ 1, 16,  0],
-       [ 0,  0, 19]])</code></pre>
+<pre><code>array([[30,  0,  0],
+       [ 1, 17,  0],
+       [ 0,  1, 20]])</code></pre>
 </div>
 </div>
 <p>The entry in the <code>i</code>th row and <code>j</code>th column of the confusion matrix gives the number of data points that have true label <code>i</code> and predicted label <code>j</code> from our model.</p>
-<div id="8d1a7b67" class="cell" data-execution_count="30">
+<div id="02c4e800" class="cell" data-execution_count="29">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"There were </span><span class="sc">{</span>C[i,j]<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>le<span class="sc">.</span>classes_[i]<span class="sc">}</span><span class="ss"> penguin(s) who were classified as </span><span class="sc">{</span>le<span class="sc">.</span>classes_[j]<span class="sc">}</span><span class="ss">."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>There were 33 Adelie penguin(s) who were classified as Adelie.
+<pre><code>There were 30 Adelie penguin(s) who were classified as Adelie.
 There were 0 Adelie penguin(s) who were classified as Chinstrap.
 There were 0 Adelie penguin(s) who were classified as Gentoo.
 There were 1 Chinstrap penguin(s) who were classified as Adelie.
-There were 16 Chinstrap penguin(s) who were classified as Chinstrap.
+There were 17 Chinstrap penguin(s) who were classified as Chinstrap.
 There were 0 Chinstrap penguin(s) who were classified as Gentoo.
 There were 0 Gentoo penguin(s) who were classified as Adelie.
-There were 0 Gentoo penguin(s) who were classified as Chinstrap.
-There were 19 Gentoo penguin(s) who were classified as Gentoo.</code></pre>
+There were 1 Gentoo penguin(s) who were classified as Chinstrap.
+There were 20 Gentoo penguin(s) who were classified as Gentoo.</code></pre>
 </div>
 </div>
 </section>
@@ -972,7 +1035,7 @@ There were 19 Gentoo penguin(s) who were classified as Gentoo.</code></pre>
 <h2 class="anchored" data-anchor-id="references">References</h2>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-gormanEcologicalSexualDimorphism2014" class="csl-entry" role="listitem">
 Gorman, Kristen B., Tony D. Williams, and William R. Fraser. 2014. <span>“Ecological <span>Sexual Dimorphism</span> and <span>Environmental Variability</span> Within a <span>Community</span> of <span>Antarctic Penguins</span> (<span>Genus Pygoscelis</span>).”</span> Edited by André Chiaradia. <em>PLoS ONE</em> 9 (3): e90081. <a href="https://doi.org/10.1371/journal.pone.0090081">https://doi.org/10.1371/journal.pone.0090081</a>.
 </div>
@@ -1068,6 +1131,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -1102,7 +1183,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
@@ -1117,15 +1202,28 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
     stripColumnClz(note)
-    if (id.startsWith('sec-')) {
+    if (id === null || id.startsWith('sec-')) {
       // Special case sections, only their first couple elements
       const container = document.createElement("div");
       if (note.children && note.children.length > 2) {
-        for (let i = 0; i < 2; i++) {
-          container.appendChild(note.children[i].cloneNode(true));
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
         }
         return container.innerHTML
       } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
         return note.innerHTML;
       }
     } else {
@@ -1134,7 +1232,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (anchorLink) {
         anchorLink.remove();
       }
-      return note.innerHTML;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
     }
   }
   for (var i=0; i<xrefs.length; i++) {
@@ -1176,6 +1282,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
       }
     }, function(instance) {
     });
@@ -1251,7 +1380,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     window.addEventListener(
       "resize",
       throttle(() => {
-        console.log("RESIZE");
         elRect = undefined;
         if (selectedAnnoteEl) {
           selectCodeLines(selectedAnnoteEl);
@@ -1335,12 +1463,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../chapters/01-data-and-models.html" class="pagination-link">
+      <a href="../chapters/01-data-and-models.html" class="pagination-link" aria-label="Data, Patterns, and Models">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Data, Patterns, and Models</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../chapters/03-score-based-classification.html" class="pagination-link">
+      <a href="../chapters/03-score-based-classification.html" class="pagination-link" aria-label="Score-Based Classification">
         <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Score-Based Classification</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.339">
+<meta name="generator" content="quarto-1.4.551">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -22,7 +22,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -57,7 +57,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -81,12 +81,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
   "keyboard-shortcut": [
     "f",
     "/",
     "s"
   ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -95,17 +96,45 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -116,11 +145,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/03-score-based-classification.html">Fundamentals of Prediction</a></li><li class="breadcrumb-item"><a href="../chapters/03-score-based-classification.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Score-Based Classification</span></a></li></ol></nav>
-        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -131,7 +160,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Machine Learning</a> 
@@ -240,12 +269,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Convex Empirical Risk Minimization</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/23-gradient-descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Optimization with Gradient Descent</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
     </div>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -282,6 +317,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
+
 <p><em>Download the live notebook corresponding to these notes <a href="../live-notebooks/03-score-based-classification.ipynb">here</a>.</em></p>
 <p>A particular focus of this course is the use of machine learning models for automated decision-making. Now that we’ve been introduced to the fundamental idea of finding patterns in data, let’s jump straight into a problem of <em>predictive modeling</em>. Predictive modeling is based on a simple idea: let’s use past observations to make decisions about the future, in an automated way.</p>
 <section id="to-lend-or-not-to-lend" class="level3 page-columns page-full">
@@ -294,23 +330,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Banks can try to balance these risks by controlling interest rates. Higher interest rates increase prospective profit if the loan is repaid in full, but also increase the risk that an individual may be unable to keep up with payments.</p>
 <p>The judgment of whether to extend an individual a loan is handled by human experts. Recently, human experts have been seeking assistance from machine learning algorithms. As in most predictive modeling, the idea is to use the past to predict the future. Here, we’ll consider simple modeling problem in which we aim to learn patterns in when individuals are able to pay off loans, and use these patterns to make predictions.</p>
 <p>We’ll first load in the <code>pandas</code> package and use the <code>read_csv</code> command to acquire our data for this problem as a <code>pd.DataFrame</code>. <a href="https://www.kaggle.com/datasets/laotse/credit-risk-dataset">This data set was produced by Kaggle</a>; it is a <em>simulated</em> data set based on patterns in real world data, which, of course, is sensitive and confidential. For today, we are only going to focus on the first 1,000 rows of data.</p>
-<div id="6c8790db" class="cell" data-execution_count="2">
+<div id="a64f7412" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np </span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="b302ed37" class="cell" data-execution_count="4">
+<div id="f1ec0dff" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/credit-risk/credit_risk_dataset.csv"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="bcaa5c82" class="cell" data-execution_count="5">
+<div id="dc5904d0" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(url)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.head(<span class="dv">1000</span>).copy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s take a look at an excerpt of the data.</p>
-<div id="05faa132" class="cell" data-execution_count="6">
+<div id="1227e50f" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
+<div>
 <div>
 
 
@@ -505,6 +542,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+</div>
 <p>Each row of this data set describes a single loan and the attributes of the borrower. For visualization purposes, today we are going to focus on just three of the columns:</p>
 <ul>
 <li><code>loan_percent_income</code> is the ratio of the loan amount to the annual income of the individual.</li>
@@ -512,7 +550,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>loan_status</code> describes whether or not the individual defaulted on the loan. This column has value <code>1</code> if the individual defaulted on the loan and value <code>0</code> if the loan was repaid in full.</li>
 </ul>
 <p>Our primary predictive interest is whether or not a borrower is likely to default on a loan. How common is this in our data set?</p>
-<div id="e69d3203" class="cell" data-execution_count="7">
+<div id="0cb03964" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"loan_status"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>0.553</code></pre>
@@ -520,7 +558,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>In this data, roughly 55% of borrowers default on their loan. An important aspect of this learning is the <em>base rate for prediction.</em> If we predicted that every borrower would default on a loan, we would be right 55% of the time. So, if we want to find patterns in our data set and use those patterns to make predictions, we should aim for accuracy greater than 55%.</p>
 <p>So, can we find some patterns? Here is a labeled scatterplot of our simplified data set.</p>
-<div id="5d569a4f" class="cell" data-execution_count="8">
+<div id="4cc62351" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> scatter_data(ax, df):</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    markers <span class="op">=</span> [<span class="st">"o"</span> , <span class="st">","</span>]</span>
@@ -534,7 +572,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>scatter_data(ax, df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="03-score-based-classification_files/figure-html/cell-8-output-1.png" width="581" height="423"></p>
+<div>
+<figure class="figure">
+<p><img src="03-score-based-classification_files/figure-html/cell-8-output-1.png" width="581" height="423" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Although it looks difficult to completely separate the defaulted loans from the loans which were repaid in full, it does look like there is some pattern to find. Loans which were repaid in full concentrate in the lower right corner of the visualization. This makes sense – these are loans which have low interest rates and which are relatively small sums relative to the annual resources of the borrower.</p>
@@ -563,14 +605,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 \end{aligned}
 \tag{3.1}\]</span></span></p>
 <p>Let’s implement this score in Python.</p>
-<div id="57efa07b" class="cell" data-execution_count="9">
+<div id="bbae668f" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> linear_score(w, x0, x1):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> w[<span class="dv">0</span>]<span class="op">*</span>x0 <span class="op">+</span> w[<span class="dv">1</span>]<span class="op">*</span>x1 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we can plot this score function in the data space.</p>
-<div id="19dd94c7" class="cell" data-execution_count="10">
-<details>
-<summary>Code</summary>
+<div id="dfa19ef6" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_score(ax, score_fun, w, df):</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Plot a given score function on axis ax with weights w and data df. </span></span>
@@ -606,29 +648,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 <p>To see the scores, we need to make an initial choice about the weight vector <span class="math inline">\(\mathbf{w}\)</span>.</p>
-<div id="a70d416f" class="cell" data-execution_count="11">
+<div id="38f2b45e" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([<span class="fl">0.4</span>, <span class="op">-</span><span class="dv">2</span>])</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>score_viz(linear_score, w, df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="03-score-based-classification_files/figure-html/cell-11-output-1.png" width="657" height="250"></p>
+<div>
+<figure class="figure">
+<p><img src="03-score-based-classification_files/figure-html/cell-11-output-1.png" width="657" height="250" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Hmmm, that doesn’t look so good. Ideally, we’d like the higher scores to line up with the borrowers who defaulted, and the lower scores to line up with the borrowers who fully repaid their loans. Can we find a better choice?</p>
-<div id="bc907a71" class="cell" data-execution_count="12">
+<div id="62ce8de8" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([<span class="fl">0.01</span>, <span class="fl">1.1</span>])</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>score_viz(linear_score, w, df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="03-score-based-classification_files/figure-html/cell-12-output-1.png" width="660" height="250"></p>
+<div>
+<figure class="figure">
+<p><img src="03-score-based-classification_files/figure-html/cell-12-output-1.png" width="660" height="250" class="figure-img"></p>
+</figure>
 </div>
 </div>
-<div class="page-columns page-full"><p>This looks a bit better! </p><div class="no-row-height column-margin column-container"><span class="">You might be wondering: isn’t there a better way to choose the weight vector <span class="math inline">\(\mathbf{w}\)</span> than to guess and check? Of course there is! This is the topic of <em>model training</em>, which we will come to soon.</span></div></div>
+</div>
+<div class="page-columns page-full"><p>This looks a bit better! </p><div class="no-row-height column-margin column-container"><span class="margin-aside">You might be wondering: isn’t there a better way to choose the weight vector <span class="math inline">\(\mathbf{w}\)</span> than to guess and check? Of course there is! This is the topic of <em>model training</em>, which we will come to soon.</span></div></div>
 </section>
 <section id="from-scores-to-predictions" class="level3">
 <h3 class="anchored" data-anchor-id="from-scores-to-predictions">From Scores to Predictions</h3>
 <p>Ok, great – we have a risk score for historical applicants. We can even compute risk scores for <em>future</em> applicants: plug their data into <a href="#eq-risk-score" class="quarto-xref">Equation&nbsp;<span>3.1</span></a>. But in order to make a decision, we need to conver the score into a yes-no decision. A common way to do this is called <em>thresholding</em>: we pick a threshold <span class="math inline">\(t\)</span> and approve a loan to individual <span class="math inline">\(i\)</span> of <span class="math inline">\(s_i &lt; t\)</span>.</p>
-<div id="cafe128d" class="cell" data-execution_count="13">
-<details>
-<summary>Code</summary>
+<div id="20845fab" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>Show code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_threshold(ax, score_fun, w, df, threshold):</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Plot the t-level-set of a given score function on axis ax with weights w and data df. </span></span>
@@ -649,26 +699,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 <p>Now we can pick a threshold and see how it does in dividing borrowers who fully repay loans from borrowers who default:</p>
-<div id="d2fe1478" class="cell" data-execution_count="14">
+<div id="5ab71c54" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="op">=</span> <span class="fl">0.4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-fig-linear-score" class="cell" data-execution_count="15">
+<div id="cell-fig-linear-score" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plot_score(ax, linear_score, w, df)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>scatter_data(ax, df) </span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>plot_threshold(ax, linear_score, w,  df, threshold)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<div id="fig-linear-score" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="03-score-based-classification_files/figure-html/fig-linear-score-output-1.png" width="569" height="428" class="figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;3.1: Linear score-based classification.</figcaption>
+<div id="fig-linear-score" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-linear-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="03-score-based-classification_files/figure-html/fig-linear-score-output-1.png" width="569" height="428" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-linear-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.1: Linear score-based classification.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <p>Something interesting to notice here is that our two step method of computing a linear score function and thresholding gave us the same <em>linear</em> classification pattern as the one we saw in <a href="01-data-and-models.html#fig-examples-with-patterns-2" class="quarto-xref">Figure&nbsp;<span>1.2 (b)</span></a>.</p>
 <p>Finally, once we’ve picked the weight vector <span class="math inline">\(\mathbf{w}\)</span> and a threshold function <span class="math inline">\(t\)</span>, we are ready to simulate making decisions. For example, with our current weights and threshold, we can add a column with what our retrospective “decisions” would have been on this historical data. Here is a function that generates the column.</p>
-<div id="495dea79" class="cell" data-execution_count="16">
+<div id="168de907" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> predict(score_fun, w, threshold, df):</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">    make binary predictions for data df using a supplied score function with weights w and supplied threshold. </span></span>
@@ -677,11 +731,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span><span class="op">*</span>(scores <span class="op">&gt;</span> threshold)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now let’s use this function to add the predictions as a new column in the data frame:</p>
-<div id="17799fa9" class="cell" data-execution_count="17">
+<div id="c996777e" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"decision"</span>] <span class="op">=</span> predict(linear_score, w, threshold, df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Would our decisions have accurately reflected who in fact defaulted? One way to address this question is by measuring the <em>accuracy</em> of our decisions, which we can compute using vectorized code:</p>
-<div id="40b484d1" class="cell" data-execution_count="18">
+<div id="5e598b94" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(df[<span class="st">"decision"</span>] <span class="op">==</span> df[<span class="st">"loan_status"</span>]).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="17">
 <pre><code>0.767</code></pre>
@@ -711,34 +765,38 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 \begin{aligned}
     s_i = \langle \mathbf{w}, \phi(\mathbf{x}_i) \rangle\;.
 \end{aligned}
-\]</span></p><div class="no-row-height column-margin column-container"><span class="">In order for this formula to make sense, we now need <span class="math inline">\(\mathbf{w}\in \mathbb{R}^5\)</span>.</span></div></div>
+\]</span></p><div class="no-row-height column-margin column-container"><span class="margin-aside">In order for this formula to make sense, we now need <span class="math inline">\(\mathbf{w}\in \mathbb{R}^5\)</span>.</span></div></div>
 <p>Here’s an implementation of a score function with quadratic features:</p>
-<div id="06d5268f" class="cell" data-execution_count="19">
+<div id="4d58a498" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> quadratic_score(w, X0, X1):</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> w[<span class="dv">0</span>]<span class="op">*</span>X0 <span class="op">+</span> w[<span class="dv">1</span>]<span class="op">*</span>X1 <span class="op">+</span> w[<span class="dv">2</span>]<span class="op">*</span>X0<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> w[<span class="dv">3</span>]<span class="op">*</span>X1<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> w[<span class="dv">4</span>]<span class="op">*</span>X0<span class="op">*</span>X1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we can set a new vector of weights <span class="math inline">\(\mathbf{w}\in \mathbb{R}^5\)</span> and a threshold <span class="math inline">\(t\)</span>.</p>
-<div id="cadfa2f0" class="cell" data-execution_count="20">
+<div id="010b525c" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([<span class="fl">0.01</span>, <span class="dv">1</span>, <span class="fl">0.0005</span>, <span class="fl">0.6</span>, <span class="fl">0.001</span>])</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>threshold <span class="op">=</span> <span class="fl">0.5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Our classification now looks like this:</p>
-<div id="cell-fig-quadratic-score" class="cell" data-execution_count="21">
+<div id="cell-fig-quadratic-score" class="cell" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>plot_score(ax, quadratic_score, w, df)</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>scatter_data(ax, df)</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>plot_threshold(ax, quadratic_score, w,  df, threshold)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<div id="fig-quadratic-score" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="03-score-based-classification_files/figure-html/fig-quadratic-score-output-1.png" width="569" height="428" class="figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;3.2: quadratic score-based classification.</figcaption>
+<div id="fig-quadratic-score" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-quadratic-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="03-score-based-classification_files/figure-html/fig-quadratic-score-output-1.png" width="569" height="428" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-quadratic-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.2: quadratic score-based classification.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <p>How accurate were we?</p>
-<div id="282ace38" class="cell" data-execution_count="22">
+<div id="979c8108" class="cell" data-execution_count="21">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"decision"</span>] <span class="op">=</span> predict(quadratic_score, w, threshold, df)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>(df[<span class="st">"decision"</span>] <span class="op">==</span> df[<span class="st">"loan_status"</span>]).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="21">
@@ -847,6 +905,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -881,7 +957,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
@@ -896,15 +976,28 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
     stripColumnClz(note)
-    if (id.startsWith('sec-')) {
+    if (id === null || id.startsWith('sec-')) {
       // Special case sections, only their first couple elements
       const container = document.createElement("div");
       if (note.children && note.children.length > 2) {
-        for (let i = 0; i < 2; i++) {
-          container.appendChild(note.children[i].cloneNode(true));
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
         }
         return container.innerHTML
       } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
         return note.innerHTML;
       }
     } else {
@@ -913,7 +1006,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (anchorLink) {
         anchorLink.remove();
       }
-      return note.innerHTML;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
     }
   }
   for (var i=0; i<xrefs.length; i++) {
@@ -955,6 +1056,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
       }
     }, function(instance) {
     });
@@ -1030,7 +1154,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     window.addEventListener(
       "resize",
       throttle(() => {
-        console.log("RESIZE");
         elRect = undefined;
         if (selectedAnnoteEl) {
           selectCodeLines(selectedAnnoteEl);
@@ -1114,12 +1237,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../chapters/02-black-box-classification.html" class="pagination-link">
+      <a href="../chapters/02-black-box-classification.html" class="pagination-link" aria-label="Classification as a Black Box">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Classification as a Black Box</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../chapters/04-decision-theory.html" class="pagination-link">
+      <a href="../chapters/04-decision-theory.html" class="pagination-link" aria-label="Decision Theory in Classification">
         <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Decision Theory in Classification</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
