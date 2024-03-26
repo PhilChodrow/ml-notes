@@ -327,7 +327,7 @@ window.Quarto = {
 &amp; - &amp; \mathbf{x}_{n} &amp; - \end{matrix}\right]
 \]</span></p>
 <div class="page-columns page-full"><p>We also have a <em>target vector</em> <span class="math inline">\(\mathbf{y} \in \{0,1\}^n\)</span>.  Here’s an example of how our training data might look:</p><div class="no-row-height column-margin column-container"><span class="margin-aside">For convenience, we will continue to assume that the final column of <span class="math inline">\(\mathbf{X}\)</span> is a column of 1s; i.e.&nbsp;<span class="math inline">\(x_{ip} = 1\)</span> for all <span class="math inline">\(i = 1,\ldots,n\)</span>.</span></div></div>
-<div id="cell-fig-scatter" class="cell page-columns page-full" data-execution_count="1">
+<div id="cell-fig-scatter" class="cell page-columns page-full" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -406,14 +406,14 @@ L(\mathbf{w}) = \frac{1}{n}\sum_{i = 1}^n \mathbb{1}[s_i (2y_i-1) &lt; 0]
 \ell(s, y) = \mathbb{1}[s (2y-1) &lt; 0]\;.
 \]</span></p>
 <p>We’ll call this the <em>0-1 loss function</em>. Here’s a plot of this function for each of the two possible values of <span class="math inline">\(y\)</span>:</p>
-<div id="203a2fc0" class="cell" data-execution_count="3">
+<div id="203a2fc0" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> zero_one_loss(s, y): </span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span><span class="op">*</span>(s<span class="op">*</span>(<span class="dv">2</span><span class="op">*</span>y<span class="op">-</span><span class="dv">1</span>)<span class="op">&lt;</span> <span class="dv">0</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># or </span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># hinge_loss = lambda s, y: 1*(s*(2*y-1) &lt; 0)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-fig-0-1-loss" class="cell page-columns page-full" data-execution_count="4">
+<div id="cell-fig-0-1-loss" class="cell page-columns page-full" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt </span>
@@ -464,7 +464,7 @@ Figure&nbsp;8.2: The 0-1 loss function.
 </div>
 </div>
 <p>Surprsingly, the problem with this loss function <span class="math inline">\(\ell\)</span> is that we can “draw lines under the function.” What this means is that we can pick two points on the graph of the function, connect them with a line, and find that the line lies <em>under</em> the graph of the function in some regions:</p>
-<div id="cell-fig-0-1-loss-nonconvex" class="cell page-columns page-full" data-execution_count="5">
+<div id="cell-fig-0-1-loss-nonconvex" class="cell page-columns page-full" data-execution_count="14">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plot_loss(loss_fun <span class="op">=</span> zero_one_loss, show_line <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -486,7 +486,7 @@ Figure&nbsp;8.3: The 0-1 loss function with a line demonstrating that this funct
 </section>
 <section id="convex-loss-functions" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="convex-loss-functions">Convex Loss Functions</h2>
-<p>In order to develop convex loss functions, we need to define two concepts:</p>
+<p>In order to develop <em>good</em> properties of loss functions, we need to define two concepts: convex sets, which we mostly won’t need to worry about, and convex functions.</p>
 <div class="callout callout-style-simple callout-note">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -520,7 +520,7 @@ f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) &lt; \lambda f( \mathbf{z}_1 )
 </div>
 </div>
 <p>Roughly, a convex function is “bowl-shaped,” in the sense that any line connecting two points on its graph must lie above the graph. The most familiar example of a convex function is our good friend the convex parabola:</p>
-<div id="cell-fig-parabola" class="cell page-columns page-full" data-execution_count="6">
+<div id="cell-fig-parabola" class="cell page-columns page-full" data-execution_count="15">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">10001</span>)</span>
@@ -545,19 +545,19 @@ Figure&nbsp;8.4: The convex parabola <span class="math inline">\(f(x) = x^2\)</s
 <p>Note that any straight line connecting two points on this graph always stays above the graph of the parabola. As we saw above, the 0-1 loss function <span class="math inline">\(\ell(s, y) = \mathbb{1}[s(2y-1)&lt;0]\)</span> does not have this property.</p>
 <p>We can also define convex functions to replace the nonconvex 0-1 loss function from earlier. Here’s an example, which is usually called the <em>hinge loss</em>, which is defined by the formula</p>
 <p><span class="math display">\[
-\ell(s, y) = y \max \{0, s\} + (1 - y) \max\{0, -s\}\;.
+\ell(s, y) = y\max\{0, -s\}  + (1 - y) \max \{0, s\}\;.
 \]</span></p>
-<div id="fd6716f0" class="cell" data-execution_count="7">
+<div id="fd6716f0" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hinge_loss(s, y):</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    first_term  <span class="op">=</span>  y    <span class="op">*</span> (torch.<span class="bu">max</span>(torch.zeros_like(s),  s))  </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    second_term <span class="op">=</span> (<span class="dv">1</span><span class="op">-</span>y) <span class="op">*</span> (torch.<span class="bu">max</span>(torch.zeros_like(s), <span class="op">-</span>s))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    first_term  <span class="op">=</span>  y    <span class="op">*</span> (torch.<span class="bu">max</span>(torch.zeros_like(s),  <span class="op">-</span>s))  </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    second_term <span class="op">=</span> (<span class="dv">1</span><span class="op">-</span>y) <span class="op">*</span> (torch.<span class="bu">max</span>(torch.zeros_like(s), s))</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> first_term <span class="op">+</span> second_term</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># hinge_loss = lambda s, y: y * (torch.max(torch.zeros_like(s), s))  + (1-y) * (torch.max(torch.zeros_like(s), -s))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-fig-hinge-loss" class="cell page-columns page-full" data-execution_count="8">
+<div id="cell-fig-hinge-loss" class="cell page-columns page-full" data-execution_count="17">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plot_loss(loss_fun <span class="op">=</span> hinge_loss, show_line <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -581,7 +581,7 @@ Figure&nbsp;8.5: The hinge loss function.
 \ell(s, y) &amp;=  -y \log \sigma(s) - (1-y)\log (1-\sigma(s))\;,
 \end{aligned}
 \]</span></p><div class="no-row-height column-margin column-container"><span class="margin-aside">In this formula, <span class="math inline">\(\sigma(s) = \frac{1}{1 + e^{-s}}\)</span> is the logistic sigmoid function.</span></div></div>
-<div id="1326f8d2" class="cell" data-execution_count="9">
+<div id="1326f8d2" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sig(s):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> torch.exp(<span class="op">-</span>s))</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -592,7 +592,7 @@ Figure&nbsp;8.5: The hinge loss function.
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># sig = lambda s: 1 / (1 + torch.exp(-s))</span></span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># binary_cross_entropy = lambda s, y: -(y * sig(s).log() + (1 - y)*(1-sig(s)).log())</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-fig-cross-entropy-loss" class="cell page-columns page-full" data-execution_count="10">
+<div id="cell-fig-cross-entropy-loss" class="cell page-columns page-full" data-execution_count="19">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sig <span class="op">=</span> <span class="kw">lambda</span> s: <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> torch.exp(<span class="op">-</span>s))</span>
@@ -614,7 +614,7 @@ Figure&nbsp;8.6: The binary cross-entropy loss function.
 </div>
 <p>This function is also convex, and has the considerable benefit of being everywhere differentiable.</p>
 <p>We intentionally formulated our definition of convexity for functions of many variables. Here is a convex function <span class="math inline">\(f:\mathbb{R}^2 \rightarrow \mathbb{R}\)</span>.</p>
-<div id="cell-fig-quadratic-3d" class="cell page-columns page-full" data-execution_count="11">
+<div id="cell-fig-quadratic-3d" class="cell page-columns page-full" data-execution_count="20">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(subplot_kw<span class="op">=</span>{<span class="st">"projection"</span>: <span class="st">"3d"</span>})</span>
@@ -759,14 +759,14 @@ f(\mathbf{z}) &amp;= f(\lambda \mathbf{z}' + (1-\lambda)\mathbf{z}^*) &amp;\quad
 <p>But this is a contradiction, since we constructed <span class="math inline">\(\mathbf{z}\)</span> to be in the neighborhood <span class="math inline">\(T\)</span> where <span class="math inline">\(\mathbf{z}^*\)</span> is a local minimizer. We conclude that there is no <span class="math inline">\(\mathbf{z}'\)</span> such that <span class="math inline">\(f(\mathbf{z}') &lt; f(\mathbf{z}^*)\)</span>, and therefore that <span class="math inline">\(\mathbf{z}^*\)</span> is a global minimizer.</p>
 <p>The proof of the third part follows a very similar argument to the proof of the second part.</p>
 </div>
-<p>These properties of convex functions have very important implications for our fundamental questions on empirical risk minimization. If we choose a convex per-observation loss function <span class="math inline">\(\ell\)</span>, then our empirical risk <span class="math inline">\(L\)</span> will also be convex, and:</p>
+<p>These properties of convex functions have very important implications for our fundamental questions on empirical risk minimization. If we choose a strictly convex per-observation loss function <span class="math inline">\(\ell\)</span>, then our empirical risk <span class="math inline">\(L\)</span> will also be strictly convex, and:</p>
 <p><strong>Existence</strong>. The minimizer <span class="math inline">\(\hat{\mathbf{w}} = \argmin_{\mathbf{w}}L(\mathbf{w})\)</span> will exist.</p>
 <p><strong>Uniqueness</strong>: The minimizer <span class="math inline">\(\hat{\mathbf{w}} = \argmin_{\mathbf{w}}L(\mathbf{w})\)</span> will be unique: if we run a minimization algorithm repeatedly, we’ll get the same answer every time.</p>
 <div class="page-columns page-full"><p><strong>Searchability</strong>: When <span class="math inline">\(L\)</span> is convex, there are also no local minimizers other than the global minimizer. Algorithmically, <strong><em>this is the most important property of convexity</em></strong>. It means that if I manage to find any local minimizer at all, that point <em>must</em> be the global minimizer.  <strong>Performance</strong>: Convexity significantly reduces the difficulty of our task: instead of trying to find “the best” solution, it’s sufficient for us to find any local optimum. This means that we can design our algorithms to be “greedy local minimizer hunters.” There are lots of fast algorithms to do this. An especially important class of algorithms are <em>gradient descent methods</em>, which we’ll discuss soon.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">If you’ve taken an algorithms class, one way of thinking of convexity is that it guarantees that <em>greedy methods work</em> for solving minimization problems.</span></div></div>
 </section>
 <section id="demo-logistic-regression" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="demo-logistic-regression">Demo: Logistic Regression</h2>
-<p>You may have heard of <em>logistic regression</em> in a course on statistics or data science. Logistic regression is simply binary classification using the binary cross-entropy loss function which we saw above:</p>
+<p>You may have heard of <em>logistic regression</em> in a course on statistics or data science. Logistic regression is simply binary classification using a linear model and the binary cross-entropy loss function which we saw above:</p>
 <p><span class="math display">\[
 \begin{aligned}
 \ell(s, y) &amp;=  -y \log \sigma(s) - (1-y)\log (1-\sigma(s))\;,
@@ -781,7 +781,7 @@ f(\mathbf{z}) &amp;= f(\lambda \mathbf{z}' + (1-\lambda)\mathbf{z}^*) &amp;\quad
 \end{aligned}
 \]</span></p>
 <p>So, let’s do convex empirical risk minimization! We’ll use the following data set. Note that this data is not linearly separable and therefore the perceptron algorithm would not converge.</p>
-<div id="cell-fig-LR-data" class="cell page-columns page-full" data-execution_count="12">
+<div id="cell-fig-LR-data" class="cell page-columns page-full" data-execution_count="21">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
@@ -803,27 +803,28 @@ Figure&nbsp;8.8: Data for logistic regression.
 </div>
 <p>Let’s go ahead and train a logistic regression model. For the purposes of today, we can do this in a very simple way that doesn’t even involve an explicit training loop. Next time, we’ll learn how to write an explicit training loop.</p>
 <p>First, we’ll define a complete function for calculating the empirical risk for a given value of <span class="math inline">\(\mathbf{w}\)</span>. Since we already implemented <code>binary_cross_entropy</code>, this implementation is very quick:</p>
-<div id="3b2b9dec" class="cell" data-execution_count="28">
+<div id="3b2b9dec" class="cell" data-execution_count="22">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> empirical_risk(w, X, y):</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> X<span class="op">@</span>w</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> binary_cross_entropy(s, y).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we’ll use the <code>minimize</code> function from <code>scipy.optimize</code> to find the value of <span class="math inline">\(\mathbf{w}\)</span> that makes this function smallest:</p>
-<div id="3de84042" class="cell" data-execution_count="52">
+<div id="3de84042" class="cell" data-execution_count="28">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> minimize</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>w0 <span class="op">=</span> torch.tensor([<span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.0</span>])</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> minimize(<span class="kw">lambda</span> w: empirical_risk(w, X, y), x0 <span class="op">=</span> w0)</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> result.x</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Learned parameter vector w = </span><span class="sc">{</span>w<span class="sc">}</span><span class="ss">.</span><span class="ch">\n</span><span class="ss">The empirical risk is </span><span class="sc">{</span>result<span class="sc">.</span>fun<span class="sc">:.4f}</span><span class="ss">."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"""Learned parameter vector w = </span><span class="sc">{</span>w<span class="sc">}</span><span class="ss">.</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="ss">The empirical risk is </span><span class="sc">{</span>result<span class="sc">.</span>fun<span class="sc">:.4f}</span><span class="ss">."""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Learned parameter vector w = [ 3.88016032  4.915439   -4.37486882].
-The empirical risk is 0.1712.</code></pre>
+<pre><code>Learned parameter vector w = [ 4.30124525  5.0754567  -4.55870966].
+The empirical risk is 0.1670.</code></pre>
 </div>
 </div>
 <p>How does it look?</p>
-<div id="cell-fig-LR-line" class="cell page-columns page-full" data-execution_count="43">
+<div id="cell-fig-LR-line" class="cell page-columns page-full" data-execution_count="24">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> draw_line(w, X, y, x_min, x_max, ax, <span class="op">**</span>kwargs):</span>
@@ -859,7 +860,7 @@ Figure&nbsp;8.9: The separating line learned by logistic regression.
 <h3 class="anchored" data-anchor-id="optional-a-logistic-regression-training-loop">(Optional): A Logistic Regression Training Loop</h3>
 <p>How would we do this if we didn’t have access to the <code>minimize</code> function? We’ll soon discuss this question much more. For now, we can take a look at the code block below, which implements such a loop using a framework very similar to the one we learned for perceptron. This model <em>also</em> inherits from the <code>LinearModel</code> class that you previously started implementing. The training loop is also <em>very</em> similar to our training loop for the perceptron. The main difference is that the loss is calculated using the <code>binary_cross_entropy</code> function above, and the <code>step</code> function of the <code>GradientDescentOptimizer</code> works differently in a way that we will discuss in the following section.</p>
 <p><em>Starting with the code block below, you won’t be able to follow along in coding these notes unless you have sneakily implemented logistic regression in a <code>hidden</code> module.</em></p>
-<div id="cell-fig-LR-loss-iterations" class="cell page-columns page-full" data-execution_count="37">
+<div id="cell-fig-LR-loss-iterations" class="cell page-columns page-full" data-execution_count="25">
 <div class="sourceCode cell-code" id="cb16" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hidden.logistic <span class="im">import</span> LogisticRegression, GradientDescentOptimizer</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># instantiate a model and an optimizer</span></span>
@@ -896,8 +897,13 @@ Figure&nbsp;8.10: Evolution of the binary cross entropy loss function in the log
 </div>
 <p>The loss quickly levels out to a constant value (which is the same as we learned with <code>scipy.optimize.minimize</code>). Because our theory tells us that the loss function is convex, we know that the value of <span class="math inline">\(\mathbf{w}\)</span> we have found is the best possible, in the sense of minimizing the loss.</p>
 <p>Let’s take a look at the separating line we found:</p>
-<div id="a69b15d0" class="cell" data-execution_count="44">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>draw_line(LR.w, X, y, x_min <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, x_max <span class="op">=</span> <span class="fl">1.5</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>, linestyle <span class="op">=</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="a69b15d0" class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>draw_line(LR.w, X, y, </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>          x_min <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>          x_max <span class="op">=</span> <span class="fl">1.5</span>, </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>          ax <span class="op">=</span> ax, </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>          color <span class="op">=</span> <span class="st">"black"</span>, </span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>          linestyle <span class="op">=</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -908,10 +914,10 @@ Figure&nbsp;8.10: Evolution of the binary cross entropy loss function in the log
 </div>
 <p>Yep, that’s the same line as we found earlier!</p>
 <p>Although our data is not linearly separable, the separating line we have learned appears to do a reasonable job of separating the points from each other. Let’s check our accuracy:</p>
-<div id="71a03bb7" class="cell" data-execution_count="45">
+<div id="71a03bb7" class="cell" data-execution_count="27">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(<span class="fl">1.0</span><span class="op">*</span>(LR.predict(X) <span class="op">==</span> y)).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="45">
-<pre><code>tensor(0.9133)</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="27">
+<pre><code>tensor(0.9267)</code></pre>
 </div>
 </div>
 <p>Not too bad! In the next section, we’ll learn much, much more about what’s behind that <code>opt.step()</code> call.</p>

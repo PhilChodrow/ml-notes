@@ -359,7 +359,7 @@ window.Quarto = {
 <p>Our data set for these notes is Palmer Penguins. This data set contains physiological measurements and species labels for several populations of Adelie, Chinstrap, and Gentoo penguins.</p>
 <div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">The Palmer Penguins data was originally collected by <span class="citation" data-cites="gormanEcologicalSexualDimorphism2014">Gorman, Williams, and Fraser (<a href="#ref-gormanEcologicalSexualDimorphism2014" role="doc-biblioref">2014</a>)</span> and was nicely packaged and released for use in the data science community by <span class="citation" data-cites="horstAllisonhorstPalmerpenguinsV02020">Horst, Hill, and Gorman (<a href="#ref-horstAllisonhorstPalmerpenguinsV02020" role="doc-biblioref">2020</a>)</span>. You can find <a href="https://jakevdp.github.io/PythonDataScienceHandbook/05.02-introducing-scikit-learn.html#Supervised-learning-example:-Iris-classification">a very concise summary</a> of the main workflow using a similar data set in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>.</span></div></div>
 <p>Let’s go ahead and acquire the data.</p>
-<div id="b9a36e2b" class="cell" data-execution_count="1">
+<div id="d352f224" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
@@ -367,15 +367,15 @@ window.Quarto = {
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>np.set_printoptions(precision <span class="op">=</span> <span class="dv">3</span>)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="6c32e1e6" class="cell" data-execution_count="2">
+<div id="119a1c71" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/palmer-penguins/palmer-penguins.csv"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="5fd3feb5" class="cell" data-execution_count="3">
+<div id="431e1dee" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="page-columns page-full"><p> The <code>df</code> variable holds a <code>pandas.DataFrame</code> object. You can think of a data frame as a table of data with a variety of useful behaviors for data manipulation and visualization.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">You can learn much more about the capabilities of <code>pandas.DataFrame</code> objects in <a href="https://jakevdp.github.io/PythonDataScienceHandbook/03.00-introduction-to-pandas.html">Chapter 3</a> of <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span></span></div></div>
 <p>Let’s take a look:</p>
-<div id="43824ae7" class="cell" data-execution_count="4">
+<div id="45abe8a2" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df.head() <span class="co"># first 5 rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <div>
@@ -514,14 +514,14 @@ window.Quarto = {
 </div>
 </div>
 <p>It’s always useful to get acquainted with the “basics” of the data. For example, how many rows and columns do we have?</p>
-<div id="d53d791a" class="cell" data-execution_count="5">
+<div id="a97f08bf" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.shape <span class="co"># (rows, columns)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>(344, 17)</code></pre>
 </div>
 </div>
 <div class="page-columns page-full"><p>What are the data types of the columns? </p><div class="no-row-height column-margin column-container"><span class="margin-aside"><code>str</code> columns are represented with the generic <code>object</code> in Pandas.</span></div></div>
-<div id="e7a8cd01" class="cell" data-execution_count="6">
+<div id="34d813d7" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df.dtypes </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>studyName               object
@@ -553,7 +553,7 @@ dtype: object</code></pre>
 <h2 class="anchored" data-anchor-id="data-preparation">Data Preparation</h2>
 <div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">We can select our desired columns from the data frame, operate on them, and make assignments to them using the <a href="https://jakevdp.github.io/PythonDataScienceHandbook/03.02-data-indexing-and-selection.html#Data-Selection-in-DataFrame">data-frame-as-dictionary paradigm</a> explored in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>.</span></div></div>
 <p>In applied data science, at least 80% of the work is typically spent acquiring and preparing data. Here, we’re going to do some simple data preparation directed by our question. It’s going to be convenient to shorten the <code>Species</code> column for each penguin. Furthermore, for visualization purposes today we are going to focus on the <code>Culmen Length (mm)</code> and <code>Culmen Depth (mm)</code> columns.</p>
-<div id="f980b335" class="cell" data-execution_count="7">
+<div id="fc96016d" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># use only these three columns</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df[[<span class="st">"Culmen Length (mm)"</span>, <span class="st">"Culmen Depth (mm)"</span>, <span class="st">"Species"</span>]] </span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -565,7 +565,7 @@ dtype: object</code></pre>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"Species"</span>] <span class="op">=</span> df[<span class="st">"Species"</span>].<span class="bu">str</span>.split().<span class="bu">str</span>.get(<span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s take a look at what we’ve done so far:</p>
-<div id="a1a1fde7" class="cell" data-execution_count="8">
+<div id="b2a66508" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <div>
@@ -620,7 +620,7 @@ dtype: object</code></pre>
 </div>
 </div>
 <p>As another preprocessing step, we are going to add transformed labels represented as integers.</p>
-<div id="33ab8e2e" class="cell" data-execution_count="9">
+<div id="4536b673" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for later: assign an integer to each species</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> LabelEncoder</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -636,7 +636,7 @@ Class number 2 represents Gentoo penguins.</code></pre>
 </div>
 </div>
 <p>Now our data looks like this:</p>
-<div id="1fe23b59" class="cell" data-execution_count="10">
+<div id="c6a7098d" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <div>
@@ -699,13 +699,13 @@ Class number 2 represents Gentoo penguins.</code></pre>
 <section id="train-test-split" class="level3">
 <h3 class="anchored" data-anchor-id="train-test-split">Train-Test Split</h3>
 <p>When designing predictive models, it’s important to <em>evaluate</em> them in a context that simulates the prediction application as accurately as possible. One important way we do this is by performing a <em>train-test split</em>. We keep most of the data as <em>training data</em> which we’ll use to design the model. We’ll hold out a bit of the data as <em>testing data</em>, which we’ll treat as unseen and only use once we are ready to evaluate our final design. The testing data simulates the idea of “new, unseen data” – exactly the kind of data on which it would be useful for us to make predictions!</p>
-<div id="5902356c" class="cell" data-execution_count="11">
+<div id="8348dfa0" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>df_train, df_test <span class="op">=</span> train_test_split(df, test_size <span class="op">=</span> <span class="fl">0.2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s check the size of our two split data sets:</p>
-<div id="1b44eff3" class="cell" data-execution_count="12">
+<div id="d9e5bd68" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df_train.shape, df_test.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>((273, 4), (69, 4))</code></pre>
@@ -718,30 +718,30 @@ Class number 2 represents Gentoo penguins.</code></pre>
 <h2 class="anchored" data-anchor-id="data-analysis-and-visualization">Data Analysis and Visualization</h2>
 <p>As a first step, it’s useful to understand how many of each species there are in the training data:</p>
 <div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">This is an example of a “split-apply-combine” operation <span class="citation" data-cites="wickhamSplitApplyCombineStrategyData2011">(<a href="#ref-wickhamSplitApplyCombineStrategyData2011" role="doc-biblioref">Wickham 2011</a>)</span>. We split the dataframe into three groups depending on the species label, apply an operation (in this case, computing the number of rows), and then combine the results into a single object. Pandas implements split-apply-combine primarily through the <a href="https://pandas.pydata.org/docs/user_guide/groupby.html"><code>groupby</code> method</a> and several associated functions. There are <a href="https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html">some nice examples of split-apply-combine</a> in Pandas in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>.</span></div></div>
-<div id="26a0587d" class="cell" data-execution_count="13">
+<div id="b60c0620" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df_train.groupby(<span class="st">"Species"</span>).size()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
 <pre><code>Species
-Adelie       118
-Chinstrap     56
-Gentoo        99
+Adelie       121
+Chinstrap     52
+Gentoo       100
 dtype: int64</code></pre>
 </div>
 </div>
 <p>There are more Adelie penguins than Chintraps or Gentoos in this data set. Here are the proportions:</p>
-<div id="d4d7e5f1" class="cell" data-execution_count="14">
+<div id="8667d705" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>df_train.groupby(<span class="st">"Species"</span>).size() <span class="op">/</span> df_train.shape[<span class="dv">0</span>] <span class="co"># divide by total rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <pre><code>Species
-Adelie       0.432234
-Chinstrap    0.205128
-Gentoo       0.362637
+Adelie       0.443223
+Chinstrap    0.190476
+Gentoo       0.366300
 dtype: float64</code></pre>
 </div>
 </div>
 <p>So, over 40% of the penguins in the data are Adelie penguins. One important consequence of this proportion is the <em>base rate</em> of the classification problem. The base rate refers to how well we could perform at prediction if we did not use any kind of predictive modeling, but instead simply predicted the most common class for every penguin. Here, if we always predicted “Adelie” for the species, we’d expect to be right more than 40% of the time. So, a minimal expectation of anything fancier we do is that it should be correct much more than 40% of the time.</p>
 <p>Now let’s take a look at our (training) data and see whether our chosen columns look like they have a chance of predicting the penguin species. We’ll show the plot both without and with the species labels.</p>
-<div id="cfa647a3" class="cell page-columns page-full" data-execution_count="15">
+<div id="a0b00301" class="cell page-columns page-full" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -764,13 +764,13 @@ dtype: float64</code></pre>
 <section id="modeling-and-model-selection" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="modeling-and-model-selection">Modeling and Model Selection</h2>
 <p>Let’s go ahead and fit some models! We’re going to fit two models that are pre-implemented in the package <code>scikit-learn</code>. For now, you can think of these models as black-box algorithms that accept <em>predictor variables</em> as inputs and return a <em>predicted target</em> as an output. In our case, the predictor variables are the culmen length and culmen depth columns, while the target we are attempting to predict is the species. Later on, we’ll learn more about how some of these models actually work.</p>
-<div id="245e7341" class="cell" data-execution_count="16">
+<div id="b941c332" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.svm <span class="im">import</span> SVC <span class="co"># support vector classifier</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mlxtend.plotting <span class="im">import</span> plot_decision_regions <span class="co"># for visualization later</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>It’s convenient to split our data into predictors <span class="math inline">\(\mathbf{X}\)</span> and targets <span class="math inline">\(\mathbf{y}\)</span>. We need to do this once for each of the training and test sets.</p>
-<div id="d46426ae" class="cell" data-execution_count="17">
+<div id="47450ab8" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>predictor_cols <span class="op">=</span> [<span class="st">"Culmen Length (mm)"</span>, <span class="st">"Culmen Depth (mm)"</span>]</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>target_col <span class="op">=</span> <span class="st">"species_label"</span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -781,7 +781,7 @@ dtype: float64</code></pre>
 <span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> df_test[target_col]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s take a quick look at <code>X_train</code></p>
-<div id="8e0f6c9f" class="cell" data-execution_count="18">
+<div id="d1543b59" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>X_train</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="18">
 <div>
@@ -798,29 +798,29 @@ dtype: float64</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">341</td>
-<td>50.4</td>
-<td>15.7</td>
+<td data-quarto-table-cell-role="th">134</td>
+<td>38.1</td>
+<td>17.6</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">245</td>
-<td>46.1</td>
-<td>15.1</td>
+<td data-quarto-table-cell-role="th">301</td>
+<td>52.5</td>
+<td>15.6</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">168</td>
-<td>50.3</td>
-<td>20.0</td>
+<td data-quarto-table-cell-role="th">262</td>
+<td>45.3</td>
+<td>13.7</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">45</td>
-<td>39.6</td>
-<td>18.8</td>
+<td data-quarto-table-cell-role="th">188</td>
+<td>47.6</td>
+<td>18.3</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">156</td>
-<td>52.7</td>
-<td>19.8</td>
+<td data-quarto-table-cell-role="th">112</td>
+<td>39.7</td>
+<td>17.7</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">...</td>
@@ -828,29 +828,29 @@ dtype: float64</code></pre>
 <td>...</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">253</td>
-<td>59.6</td>
-<td>17.0</td>
+<td data-quarto-table-cell-role="th">295</td>
+<td>48.6</td>
+<td>16.0</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">87</td>
-<td>36.9</td>
-<td>18.6</td>
+<td data-quarto-table-cell-role="th">307</td>
+<td>51.3</td>
+<td>14.2</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">108</td>
-<td>38.1</td>
-<td>17.0</td>
+<td data-quarto-table-cell-role="th">25</td>
+<td>35.3</td>
+<td>18.9</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">249</td>
-<td>50.0</td>
-<td>15.3</td>
+<td data-quarto-table-cell-role="th">247</td>
+<td>47.8</td>
+<td>15.0</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">14</td>
-<td>34.6</td>
-<td>21.1</td>
+<td data-quarto-table-cell-role="th">20</td>
+<td>37.8</td>
+<td>18.3</td>
 </tr>
 </tbody>
 </table>
@@ -862,21 +862,21 @@ dtype: float64</code></pre>
 </div>
 <div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">We’ll go in-depth on logistic regression later in this course.</span></div></div>
 <p>Now we’re ready to fit our first machine learning model. Let’s try logistic regression! In the Scikit-learn API, we first need to instantiate the <code>LogisticRegression()</code> class, and then call the <code>fit()</code> method of this class on the training predictors and targets.</p>
-<div id="274078c8" class="cell" data-execution_count="19">
+<div id="9e7984da" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression()</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> LR.fit(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>So, uh, did it work? The <code>LogisticRegression()</code> class includes a handy method to compute the accuracy of the classifier:</p>
-<div id="cd506e65" class="cell" data-execution_count="20">
+<div id="a39eacbe" class="cell" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>LR.score(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="20">
-<pre><code>0.9743589743589743</code></pre>
+<pre><code>0.9597069597069597</code></pre>
 </div>
 </div>
 <p>Wow! Much better than the base rate. Note that this is the accuracy on the <em>training data</em>. In theory, accuracy on the test data could look very different.</p>
 <p>A useful way to visualize models with two numerical predictors is via <em>decision regions</em>. Each region describes the set of possible measurements that would result in a given classification.</p>
 <div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">You can unfold this code to see a simple implementation of a function for plotting decision regions which wraps <a href="https://rasbt.github.io/mlxtend/user_guide/plotting/plot_decision_regions/">the <code>plot_decision_regions</code> function</a> of the <code>mlxtend</code> package.</span></div></div>
-<div id="ed5ee7b8" class="cell" data-execution_count="21">
+<div id="6909d01b" class="cell" data-execution_count="21">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> decision_regions(X, y, model, title):</span>
@@ -904,7 +904,7 @@ dtype: float64</code></pre>
 </div>
 <div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">You can <a href="https://jakevdp.github.io/PythonDataScienceHandbook/05.07-support-vector-machines.html">learn more about how support vector machines</a> work in <span class="citation" data-cites="vanderplasPythonDataScience2016">Vanderplas (<a href="#ref-vanderplasPythonDataScience2016" role="doc-biblioref">2016</a>)</span>. We’ll also study these models later in the course.</span></div></div>
 <p>While we’re at it, let’s try fitting a different classifier, also supplied by Scikit-learn. This classifier is called <em>support vector machine</em> (SVM).</p>
-<div id="c42bbfae" class="cell" data-execution_count="22">
+<div id="cc8154e0" class="cell" data-execution_count="22">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>SVM <span class="op">=</span> SVC(gamma <span class="op">=</span> <span class="dv">5</span>)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>SVM.fit(X_train, y_train)</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>decision_regions(X_train, y_train, SVM, <span class="st">"Decision Regions for Support Vector Machine"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -930,42 +930,30 @@ dtype: float64</code></pre>
 </figure>
 </div>
 <p>We could do this with a janky for-loop, but the nice <code>scikit-learn</code> developers have implemented this for us. Here’s an example of cross-validation with 5 folds. This can take a little while, as there are actually 5 calls to <code>model.fit()</code> happening under the hood each time.</p>
-<div id="3cf1699e" class="cell" data-execution_count="23">
+<div id="cc30f9d2" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_val_score</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>First let’s compute the cross-validation accuracies for logistic regression:</p>
-<div id="43967365" class="cell" data-execution_count="24">
+<div id="36dfbf99" class="cell" data-execution_count="24">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>cv_scores_LR <span class="op">=</span> cross_val_score(LR, X_train, y_train, cv<span class="op">=</span><span class="dv">5</span>)</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>cv_scores_LR</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>/Users/philchodrow/opt/anaconda3/envs/ml-0451/lib/python3.9/site-packages/sklearn/linear_model/_logistic.py:444: ConvergenceWarning:
-
-lbfgs failed to converge (status=1):
-STOP: TOTAL NO. of ITERATIONS REACHED LIMIT.
-
-Increase the number of iterations (max_iter) or scale the data as shown in:
-    https://scikit-learn.org/stable/modules/preprocessing.html
-Please also refer to the documentation for alternative solver options:
-    https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
-</code></pre>
-</div>
 <div class="cell-output cell-output-display" data-execution_count="24">
-<pre><code>array([0.982, 0.945, 0.982, 0.963, 0.981])</code></pre>
+<pre><code>array([0.927, 1.   , 0.945, 0.944, 0.963])</code></pre>
 </div>
 </div>
 <p>A convenient way to summarize these results is by computing the average:</p>
-<div id="4fcd3d9b" class="cell" data-execution_count="25">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>cv_scores_LR.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="56a26fd4" class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>cv_scores_LR.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="25">
-<pre><code>0.9707070707070707</code></pre>
+<pre><code>0.9560269360269359</code></pre>
 </div>
 </div>
 <p>Let’s compare to SVM:</p>
-<div id="721d23eb" class="cell" data-execution_count="26">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>cv_scores_SVM <span class="op">=</span> cross_val_score(SVM, X_train, y_train, cv<span class="op">=</span><span class="dv">5</span>)</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>cv_scores_SVM.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="fd2d9c05" class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>cv_scores_SVM <span class="op">=</span> cross_val_score(SVM, X_train, y_train, cv<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>cv_scores_SVM.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="26">
-<pre><code>0.8462626262626263</code></pre>
+<pre><code>0.8427609427609427</code></pre>
 </div>
 </div>
 <p>Ah! It looks like our SVM classifier was indeed <em>too flexible</em> to do well in predicting data that it hasn’t seen before. Although the SVM had better training accuracy than the logistic regression model, it failed to <em>generalize</em> to the task of unseen prediction. This phenomenon is called <em>overfitting</em>. Dealing with overfitting is one of the fundamental modeling challenges in applied machine learning.</p>
@@ -974,44 +962,44 @@ Please also refer to the documentation for alternative solver options:
 <section id="model-evaluation" class="level2">
 <h2 class="anchored" data-anchor-id="model-evaluation">Model Evaluation</h2>
 <p>So far, we’ve fit a logistic regression model and a support vector machine model; compared the two on a cross-validation task; and determined that the logistic regression model is most likely to generalize. Let’s now retrain the logistic regression model on the complete training data and finally evaluate it on the test set:</p>
-<div id="bb2edd6a" class="cell" data-execution_count="27">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>LR.fit(X_train,y_train) </span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>LR.score(X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="bd8e2b19" class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>LR.fit(X_train,y_train) </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>LR.score(X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="27">
-<pre><code>0.927536231884058</code></pre>
+<pre><code>0.9855072463768116</code></pre>
 </div>
 </div>
 <p>Not bad! This is our final estimate for the accuracy of our model as a classification tool on unseen penguin data.</p>
 <section id="beyond-accuracy" class="level3">
 <h3 class="anchored" data-anchor-id="beyond-accuracy">Beyond Accuracy</h3>
 <p>Accuracy is a simple measure of how many errors a model makes. In many applications, it’s important to understand what <em>kind</em> of errors the model makes, a topic which we’ll study much more when we come to decision theory in the near future. We can get a quick overview of the kinds of mistakes that a model makes by computing the <em>confusion matrix</em> between the true labels and predictions. This matrix cross-tabulates all the true labels with all the predicted ones.</p>
-<div id="e246995f" class="cell" data-execution_count="28">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>y_test_pred <span class="op">=</span> LR.predict(X_test)</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> confusion_matrix(y_test, y_test_pred)</span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>C</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="752a0cca" class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>y_test_pred <span class="op">=</span> LR.predict(X_test)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> confusion_matrix(y_test, y_test_pred)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>C</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="28">
-<pre><code>array([[33,  0,  0],
-       [ 4,  7,  1],
-       [ 0,  0, 24]])</code></pre>
+<pre><code>array([[30,  0,  0],
+       [ 1, 15,  0],
+       [ 0,  0, 23]])</code></pre>
 </div>
 </div>
 <p>The entry in the <code>i</code>th row and <code>j</code>th column of the confusion matrix gives the number of data points that have true label <code>i</code> and predicted label <code>j</code> from our model.</p>
-<div id="8b99840d" class="cell" data-execution_count="29">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"There were </span><span class="sc">{</span>C[i,j]<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>le<span class="sc">.</span>classes_[i]<span class="sc">}</span><span class="ss"> penguin(s) who were classified as </span><span class="sc">{</span>le<span class="sc">.</span>classes_[j]<span class="sc">}</span><span class="ss">."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="74de4113" class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"There were </span><span class="sc">{</span>C[i,j]<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>le<span class="sc">.</span>classes_[i]<span class="sc">}</span><span class="ss"> penguin(s) who were classified as </span><span class="sc">{</span>le<span class="sc">.</span>classes_[j]<span class="sc">}</span><span class="ss">."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>There were 33 Adelie penguin(s) who were classified as Adelie.
+<pre><code>There were 30 Adelie penguin(s) who were classified as Adelie.
 There were 0 Adelie penguin(s) who were classified as Chinstrap.
 There were 0 Adelie penguin(s) who were classified as Gentoo.
-There were 4 Chinstrap penguin(s) who were classified as Adelie.
-There were 7 Chinstrap penguin(s) who were classified as Chinstrap.
-There were 1 Chinstrap penguin(s) who were classified as Gentoo.
+There were 1 Chinstrap penguin(s) who were classified as Adelie.
+There were 15 Chinstrap penguin(s) who were classified as Chinstrap.
+There were 0 Chinstrap penguin(s) who were classified as Gentoo.
 There were 0 Gentoo penguin(s) who were classified as Adelie.
 There were 0 Gentoo penguin(s) who were classified as Chinstrap.
-There were 24 Gentoo penguin(s) who were classified as Gentoo.</code></pre>
+There were 23 Gentoo penguin(s) who were classified as Gentoo.</code></pre>
 </div>
 </div>
 </section>
