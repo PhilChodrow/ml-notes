@@ -1,0 +1,477 @@
+---
+title: |
+  Feature Maps, Regularization, and Generalization
+author: Phil Chodrow
+bibliography: ../refs.bib
+format: 
+  html: 
+    code-fold: false
+    cache: true
+    callout-appearance: minimal
+    cap-location: margin
+---
+
+::: {.hidden}
+$$
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\vy}{\mathbf{y}}
+\newcommand{\vz}{\mathbf{z}}
+\newcommand{\vd}{\mathbf{d}}
+\newcommand{\mX}{\mathbf{X}}
+\newcommand{\mR}{\mathbf{R}}
+\newcommand{\vw}{\mathbf{w}}
+\newcommand{\vr}{\mathbf{r}}
+\newcommand{\vzero}{\mathbf{0}}
+\newcommand{\bracket}[1]{\langle #1 \rangle}
+\newcommand{\paren}[1]{\left( #1 \right)}
+\newcommand{\one}[1]{\mathbb{1}\left[ #1 \right]}
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\cM}{\mathcal{M}}
+\newcommand{\mA}{\mathbf{A}}
+\newcommand{\vtheta}{\boldsymbol{\theta}}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\abs}[1]{\lvert #1 \rvert}
+\newcommand{\prob}[1]{\mathbb{P}\left[#1\right]}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\dd}[2]{\frac{\partial #1}{\partial #2}}
+
+\usepackage{amsmath}
+\DeclareMathOperator*{\argmax}{argmax\;}
+\DeclareMathOperator*{\argmin}{argmin\;}
+$$
+
+```{python}
+#| echo: false
+from warnings import simplefilter
+from sklearn.exceptions import ConvergenceWarning
+simplefilter("ignore", category=ConvergenceWarning)
+```
+
+
+:::
+
+# Quick Recap
+
+[Last time](23-gradient-descent.ipynb), we considered the problem of *empirical risk minimization* with a *convex* loss function. We assumed that we had data, a pair $(\mX, \vy)$ where 
+
+- $\mX \in \R^{n\times p}$ is the *feature matrix*. There are $n$ distinct observations, encoded as rows. Each of the $p$ columns corresponds to a *feature*: something about each observation that we can measure or infer. Each observation is written $\vx_1, \vx_2,\ldots$. 
+$$
+\mX = \left[\begin{matrix} & - & \vx_1 & - \\ 
+& - & \vx_2 & - \\ 
+& \vdots & \vdots & \vdots \\ 
+& - & \vx_{n} & - \end{matrix}\right]
+$$
+- $\vy \in \R^{n}$ is the *target vector*. The target vector gives a label, value, or outcome for each observation. 
+
+Using this data, we defined the empirical risk minimization problem, which had the general form 
+$$
+\hat{\vw} = \argmin_{\vw} \; L(\vw)\;, 
+$${#eq-empirical-risk-minimization}
+where 
+$$
+L(\vw) = \frac{1}{n} \sum_{i = 1}^n \ell(\bracket{\vw, \vx_i}, y_i)\;.
+$$
+
+In our [last lecture](23-gradient-descent.ipynb), we studied how to compute the gradient of $L(\vw)$ in minimize the empirical risk and find a good value $\hat{\vw}$ for the parameter vector. In this lecture we're going to assume that we can cheerfully solve the empirical risk minimization for convex linear models. 
+
+## Nonlinear Decision Boundaries
+
+However, we are still working with an important limitation: for a long time now, we've focused only on *linear* decision boundaries. However, most of the data we care about in practice has *nonlinear* decision boundaries. Here's a dramatic example. For this example, I'm using the implementation of logistic regression from `scikit-learn`. 
+
+[For the purposes of illustration, today I'm going to be primarily relying on the implementation of logistic regression in `scikit-learn`. Toward the end of the notes, I'll highlight where regularization shows up if you want to implement it in e.g. a `torch` model. I'm also using the `plot_decision_regions` function from the `mlxtend` package, which is a handy plotting utility for visualizing the behavior of our models]{.alert}
+
+```{python}
+from sklearn.datasets import make_moons, make_circles
+from mlxtend.plotting import plot_decision_regions
+from sklearn.linear_model import LogisticRegression
+from matplotlib import pyplot as plt
+import numpy as np
+
+def viz_decision_regions(model, X_train, y_train, X_test, y_test):  
+    fig, ax = plt.subplots(1, 2, figsize = (10, 4))
+
+    for i, data in enumerate(["Train", "Test"]):
+        X = [X_train, X_test][i]
+        y = [y_train, y_test][i]
+        plot_decision_regions(X, y, clf = model, ax = ax[i])
+        score = ax[i].set_title(f"{data}ing accuracy = {model.score(X, y)}")
+        ax[i].set(xlabel = r"$x_1$")
+        if i == 0: 
+            ax[i].set(ylabel = r"$x_2$")
+
+def plot_weights(plr): 
+    coefs        = plr.named_steps["LR"].coef_.flatten()
+    frac_zero    = np.isclose(coefs, 0).mean()
+    mean_coef    = np.abs(coefs).mean()
+    coefs_sorted = np.sort(coefs)
+    plt.scatter(np.arange(len(coefs)), coefs_sorted, s = 10, facecolors = "none", edgecolors = "black")
+    plt.gca().set(xlabel = "weight (sorted)", ylabel = "weight value", title = fr"Mean $|w_i|$ = {mean_coef:.2f}, zero weights = {100*frac_zero:.0f}%")
+
+```
+
+```{python}
+#| echo: false
+plt.style.use('seaborn-v0_8-whitegrid')
+np.seterr(all="ignore")
+```
+
+```{python}
+X_train, y_train = make_circles(200, shuffle = True, noise = 0.1, factor = 0.5)
+X_test, y_test   = make_circles(200, shuffle = True, noise = 0.1, factor = 0.5)
+
+LR = LogisticRegression()
+LR.fit(X_train, y_train)
+
+viz_decision_regions(LR, X_train, y_train, X_test, y_test)
+```
+Yikes! 
+
+Visually this *should* be pretty easy data to classify. But the linear decision boundary isn't the way. 
+
+::: {.callout-important}
+
+Given a point $\vx$, what information would you find most useful about that point in determining whether it should have label $0$ or $1$ based on this training data? 
+:::
+
+## Feature Maps
+
+Suppose that we were able to extract from each point its distance from the origin. In 2d, we could take a point $\vx$ and simply compute 
+
+$$
+r^2 = x_1^2 + x_2^2\;. 
+$$
+
+We could then make the classification based on the value of $r^2$. In this data set, it looks like the classification rule that predicts $1$ if $r^2 < 1$ and $0$ otherwise would be a pretty good one. The important insight here is that this is *also* a linear model, with linear predictor function 
+
+$$
+\hat{y} = \bracket{\vw, \phi(\vx)}\;,
+$$
+
+and predicted labels $\mathbb{1}[\hat{y} < 0]$. 
+
+where $\phi(\vx) = (r^2, 1)$ and $\vw = (1, -1)$. We could attempt to find a value of the weight vector close to this one using empirical risk minimization using our standard methods -- we just need to transform the feature matrix $\mX$ first! This means that we can use empirical risk minimization for this problem if we just transform the features $\mX$ first! We need to compute a matrix $\mR$ whose $i$th row is $\vr_i = \phi(\vx) = (r^2_i, 1) = (x_{i1}^2 + x_{i2}^2, 1)$, and then use this matrix in place of $\mX$ for our classification task. 
+
+The transformation $\phi: (x_1, x_2) \mapsto (x_1^2 + x_2^2, 1)$ is an example of a *feature map*. 
+
+::: {.callout-note}
+::: {#def-feature-map}
+
+Let $\mX \in \R^{n \times p}$. A *feature map* $\phi$ is a function $\phi:\R^p \rightarrow \rightarrow \R^q$, We call $\phi(\vx) in \R^q$ the *feature vector* corresponding to $\vx$.  For a given feature map $\phi$, we define the map $\Phi:\R^{n \times p} \rightarrow \R^{n\times q}$ as 
+
+$$
+\Phi(\vx) = \left(\begin{matrix}
+     - & \phi(\vx_1) & - \\
+     - & \phi(\vx_2) & - \\
+     \vdots & \vdots & \vdots \\
+     - & \phi(\vx_n) & - \\
+\end{matrix}\right)
+$$
+
+We can write 
+
+$$
+\mX = \Phi(\vx)
+$$
+
+to say that $\mX$ is the feature matrix for a data set $\vx$. 
+
+:::
+:::
+
+We can think of feature maps in two ways: 
+
+Feature maps can represent **measurement processes**. For example, maybe I am trying to classify penguins by species, based on physiological measurements. The *real data* is the penguin, and the measurements are how I represent that penguin with numbers. In this case, I might write my feature map as 
+$$\phi(🐧) = (\mathrm{height}, \mathrm{weight}, \text{bill length})$$
+Here, $D$ is a set of many penguins $D = \{🐧_1, 🐧_2, 🐧_3, 🐧_4, 🐧_5, 🐧_6, 🐧_7\}$, and $d\in D$ is a specific penguin. 
+The process of transforming an object into a vector via a feature map is often called **vectorization** as well, especially in the context of representing digital data as vectors. We often talk about vectorizing text and images for example; this can be done using feature maps. 
+
+Feature maps can also represent **data processing**, which is more like our example above. There, we're taking some data that's already a vector and turning it into a DIFFERENT vector that we think will be helpful for our learning task. 
+
+## Feature Maps and Linear Separability
+
+We often think of feature maps as taking us from a space in which the data is **not** linearly separable to a space in which it is. For example, consider the feature map 
+
+$$
+\phi: (x_1, x_2) \mapsto (x_1^2, x_2^2)\;. 
+$$
+
+This map is sufficient to express the radius information, since we can represent the radius as 
+
+$$
+r^2 = \bracket{(1, 1), (x_1^2, x_2^2)}\;.
+$$
+
+Let's see how this looks. We'll again show the failed linear separator, and we'll also show a successful separator in a transformed feature space: 
+
+```{python}
+#| code-fold: false
+fig, axarr = plt.subplots(1, 2, figsize=(8, 4))
+
+plot_decision_regions(X_train, y_train, clf = LR, ax = axarr[0])
+score = axarr[0].set_title(f"Accuracy = {LR.score(X_train, y_train)}")
+
+LR2 = LogisticRegression()
+
+X_ = X_train**2
+LR2.fit(X_, y_train)
+plot_decision_regions(X_, y_train, clf = LR2, ax = axarr[1])
+score = axarr[1].set_title(f"Feature space\nAccuracy = {LR2.score(X_, y_train)}")
+```
+
+Just by fitting the logistic regression model in the feature space, we were able to go from essentially random accuracy to accuracy of nearly 100% on training data. 
+
+## Feature Maps in Practice
+
+Going back to our example of trying to classify the two nested circles, we could just compute the radius. In practice, however, we don't really know which features are going to be most useful, and so we just compute *a set* of features. In our case, the square of the radius is an example of a polynomial of degree 2: 
+$$
+r^2 = x_1^2 + x_2^2\;. 
+$$
+
+So, instead of just assuming that the radius is definitely the right thing to compute, we more frequently just compute all the monomials of degree 2 or lower. If $\vx = (x_1, x_2)$, then this is  
+
+$$
+\phi(\vx_i) = (1, x_1, x_2, x_1^2, x_2^2, x_1x_2)\;. 
+$$
+
+We then use a linear model to solve the empirical risk minimization problem
+
+$$
+\hat{\vw} = \argmin_{w} \sum_{i = 1}^n \ell(\bracket{\vw, \phi(\vx_i)}, y_i)\;.
+$$
+
+The important point to keep track of is that the new feature matrix $\mX' = \Phi(\mX)$ generally has a different number of columns from $\mX$. In this case, for example, $\mX$ had just 2 columns but $\Phi(\mX)$ has 6. This means that $\hat{\vw}$ has 6 components, instead of 2! 
+
+Let's now run logistic regression with degree-2 polynomial features on this data set. The most convenient way to make this happen in the `scikit-learn` framework is with at `Pipeline`. The `Pipeline` first applies the feature map and then calls the model during both fitting and evaluation. We'll wrap the pipeline in a simple function for easy reuse. 
+
+```{python}
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import Pipeline
+
+def poly_LR(degree, **kwargs):
+    plr = Pipeline([("poly", PolynomialFeatures(degree = degree)),
+                    ("LR", LogisticRegression(**kwargs))])
+    return plr
+```
+
+Now our decision boundary is much more successful: 
+
+```{python}
+#---
+plr = poly_LR(degree = 2)
+plr.fit(X_train, y_train)
+#---
+viz_decision_regions(plr, X_train, y_train, X_test, y_test)
+```
+
+Let's check the coefficients of the model: 
+
+```{python}
+plr.named_steps["LR"].coef_.round(2)
+```
+
+
+Notice that two coefficients are much larger than the others, and approximately equal. These are the coefficients for the features $x_1^2$ and $x_2^2$. The fact that these are approximately equal means that our model is very close to using the square radius $r^2 = x_1^2 + x_2^2$ as a learned feature for this data, just like we'd expect. The benefit is that we didn't have to hard-code that in; the model just detected on its own the right pattern to find. 
+
+Part of the reason this might be beneficial is that for some data sets, we might not really know what specific features we should try. For example, here's another one where a linear classifier doesn't do so great (degree 1 corresponds to no transformation of the features). We'll keep using this example as we go, and so we'll generate both a training and a test set.  
+```{python}
+np.random.seed(123)
+X_train, y_train = make_moons(200, shuffle = True, noise = 0.3)
+X_test, y_test   = make_moons(200, shuffle = True, noise = 0.3)
+
+#---
+plr = poly_LR(degree = 1)
+plr.fit(X_train, y_train)
+#---
+
+viz_decision_regions(plr, X_train, y_train, X_test, y_test)
+```
+
+It's not as obvious that we should use the radius or any other specific feature for our feature map. Fortunately we don't need to think too much about it -- we can just increase the degree and let the model figure things out: 
+
+```{python}
+#---
+plr = poly_LR(degree = 5)
+plr.fit(X_train, y_train)
+#---
+
+viz_decision_regions(plr, X_train, y_train, X_test, y_test)
+```
+
+Much nicer! 
+
+## Generalization, Feature Selection, Regularization
+
+So, why don't we just use as many features as it takes to get perfect accuracy on the training data? Here's an example where we get perfect accuracy on the training data: 
+
+```{python}
+#---
+plr = poly_LR(degree = 15, penalty = "none", max_iter = 1000000)
+plr.fit(X_train, y_train)
+#---
+
+viz_decision_regions(plr, X_train, y_train, X_test, y_test)
+```
+
+I've had to change some parameters to the `LogisticRegression` in order to ensure that it fully ran the optimization procedure for this many polynomials. 
+
+The problem here is that, although this classifier might achieve perfect *training* accuracy, it doesn't really look like it's captured "the right" pattern. This is why this classifier makes many more mistakes on the test data, even though it had much higher training accuracy. We have *overfit*: our model was so flexible that it was able to learn both some *real* patterns that we wanted it to learn and some *noise* that we didn't. As a result, when it made a prediction on new data, the model's predictions were imperfect, reflecting the noise it learned in the training process. 
+
+In machine learning practice, we don't actually *want* our models to get perfect scores on the training data -- we want them to ***generalize*** to new instances of unseen data. Overfitting is one way in which a model can fail to generalize. 
+
+Let's do an experiment in which we see what happens to the model's generalization ability when we increase the number of polynomial features: 
+
+
+```{python}
+#| code-fold: true
+
+import pandas as pd
+np.random.seed()
+
+degs = range(0, 11)
+
+df = pd.DataFrame({"deg": [], "train" : [], "test" : []})
+
+for rep in range(10):
+    X_train_, y_train_ = make_moons(100, shuffle = True, noise = .4)
+    X_test_, y_test_ = make_moons(100, shuffle = True, noise = .4)
+
+    for deg in degs:
+        plr_ = poly_LR(degree = deg, penalty = "none", max_iter = int(1e3))
+        plr_.fit(X_train_, y_train_)
+        to_add = pd.DataFrame({"deg" : [deg],
+                               "train" : [plr_.score(X_train_, y_train_)],
+                               "test" : [plr_.score(X_test_, y_test_)]})
+
+        df = pd.concat((df, to_add))
+
+        
+means = df.groupby("deg").mean().reset_index()
+
+plt.plot(means["deg"], means["train"], label = "training")
+plt.plot(means["deg"], means["test"], label = "validation")
+plt.legend()
+labs = plt.gca().set(xlabel = "Degree of polynomial feature",
+              ylabel = "Accuracy (mean over 20 runs)")
+```
+
+We observe that there is an optimal number of features for which the model is most able to generalize: around 3 or so. More features than that is actually *harmful* to the model's predictive performance. 
+
+So, one way to promote generalization is to try to find "the right" or "the right number" of features and use them for prediction. This problem is often called **feature selection** and can be done with cross-validation. 
+
+Another common approach to avoid overfitting is called *regularization*. Regularization proceeds from the insight that wiggly decision boundaries often come from *large entries in the weight vector $\vw$*. Let's check this for the degree-15 polynomial features model that we trained previously: 
+
+```{python}
+#---
+plot_weights(plr)
+#---
+```
+
+Yikes! Not only are there *many* weights, but many of them are extremely large. 
+
+Can we fix this? In regularization, we add a term to the empirical risk objective function that encourages entries of $\mathbf{w}$ to be small. We  consider the modified objective function 
+$$
+L'(\vw) = L(\vw) + \lambda R(\vw)\;,
+$$
+
+where $\lambda$ is a *regularization strength* and $R(\vw)$ is a *regularization function* that aims to shrink the entries of $\vw$ in some way. Common choices of regularization function include the square Euclidean norm $R(\vw) = \norm{\vw}_2^2 = \sum_{j = 1}^p w_i^2$ and the $\ell_1$ norm $R(\vw) = \sum_{j = 1}^p \abs{w_j}$. To see regularization in action, let's go back to our logistic regression model with a large number of polynomial features. We can see the presence of overfitting in the excessive "wiggliness" of the decision boundary. [If $\vx$ is defined in such a way that it has a constant column (e.g. $x_{in} = 1$ for all $n$), then it is important  *not to regularize the entries of $\vw$ that correspond to the constant column*. ]{.aside}
+
+Fortunately for us, we can actually use regularization directly from inside the `scikit-learn` implementation of `LogisticRegression`. We specify the penalty (the $\ell_1$ regularization), the strength of the penalty (in the `scikit-learn` implementation, you specify $C = \frac{1}{\lambda}$ so that larger $C$ means less regularization) and the optimization solver (not all solvers work with all penalties).  
+
+This model did much better on the test data than the overfit model. 
+
+```{python}
+#---
+plr = poly_LR(degree = 15, penalty = "l2", solver = "lbfgs", C = 10)
+plr.fit(X_train, y_train)
+#---
+viz_decision_regions(plr, X_train, y_train, X_test, y_test)
+```
+
+One reason for this success is that the entries of the weight vector are now much smaller: 
+```{python}
+#---
+plot_weights(plr)
+#---
+```
+
+In fact, we can even force some of the coefficients of the weight vector to be exactly 0. This is achieved through the use of the $\ell_1$ regularization term $R(\vw) = \sum_{j = 1}^p \abs{w_j}$. 
+
+```{python}
+#---
+plr = poly_LR(degree = 15, penalty = "l1", solver = "liblinear", C = 1)
+plr.fit(X_train, y_train)
+#---
+viz_decision_regions(plr, X_train, y_train, X_test, y_test)
+```
+
+How do the weights look now?
+
+```{python}
+#---
+plot_weights(plr)
+#---
+```
+
+The benefit of having many weights exactly equal to zero is that it is not necessary to even *compute* the relevant features in order to make a prediction -- we're just going to multiply them by zero later! 
+
+
+## Gradients of Regularizers
+
+Suppose that we wish to solve the regularized empirical minimization problem with features: 
+
+$$
+\begin{aligned}
+    \hat{\vw} &= L'(\vw) \\ 
+              &= \argmin_{\vw} L(\vw) + \lambda R(\vw) \\ 
+              &= \argmin_{\vw} \frac{1}{n}\sum_{i = 1}^n \ell(\bracket{\vw, \phi(\vx_i)}) + \lambda R(\vw)\;,
+\end{aligned}
+$$
+
+where $R(\vw)$ is the regularization term. The gradient of the regularization term. The gradient of this expression is 
+
+$$
+\begin{aligned}
+    \nabla L'(\vw) = \nabla L(\vw) + \lambda \nabla R(\vw)\;.  
+\end{aligned}
+$$
+So, to compute the gradient of the regularized empirical risk, we just need the gradient of (a) the standard unregularized empirical risk and the regularization term. Here are two examples of gradients for the regularization term. Suppose that $w_i$ is the coefficient of the constant feature in $\vw$, and let $\vw_{-i}$ be the vector of entries of $\vw$ *excluding $w_i$*. [Usually, data processing pipelines are set up so that $i = 1$ or $i = n$.]{.aside} Then, the gradients for the two most common regularization terms are given by the derivatives:  
+
+$$
+\begin{aligned}
+    R(\vw) &= \lVert \vw_{-i} \rVert_2^2 = \sum_{j \neq i} w_j^2\;, &\quad \frac{\partial R(\vw)}{\partial w_j} &= \begin{cases}
+        0 &\quad j = i \\ 
+        2w_j  &\quad j \neq i \end{cases} &\quad \text{($\ell_2$ regularization)} \\ 
+    R(\vw) &= \lVert \vw_{-i} \rVert_{1} = \sum_{j \neq i} \abs{w_j}\;, &\quad \frac{\partial R(\vw)}{\partial w_j} &= \begin{cases}
+        0 &\quad j = i \\ 
+        \mathrm{sign}(w_j)  &\quad j \neq i, w_j \neq 0 \\ 
+        0  &\quad j \neq i, w_j = 0
+         \end{cases} &\quad \text{($\ell_1$ regularization)}
+\end{aligned}
+$$
+
+*Technically,* the derivative of $\abs{w_j}$ is not defined when $w_j = 0$. It is ok to pretend that it is and equal to zero for the purposes of optimization due to the theory of [subdifferentials](https://en.wikipedia.org/wiki/Subderivative). 
+
+
+
+## Reflecting on Empirical Risk Minimization 
+
+We have now introduced all the fundamental features of modern empirical risk minimization for training machine learning models. We aim to find a weight vector $\hat{\vw}$ that solves the problem
+
+$$
+\begin{aligned}
+    \hat{\vw} = \argmin_{\vw} \frac{1}{n} \sum_{i = 1}^n \ell (\bracket{\vw, \phi(\vx_i), y_i}) + \lambda R(\vw)\;. 
+\end{aligned}
+$${#eq-regularized-erm}
+
+Until roughly 2005 or so, @eq-regularized-erm was the state of the art for a wide array of classification and regression problems. Common questions would include: 
+
+1. What *loss functions* $\ell$ should be used for model scoring? 
+2. What *feature maps* $\phi$ should be used for extracting useful features from the data? 
+3. What *regularization terms* should be used to guard against overfitting? 
+
+[It's not the case that all of machine learning fit into this framework; important supervised techniques that don't fall into this category include probabilistic machine learning and tree-based methods like decision trees and random forests.]{.aside}
+
+
+

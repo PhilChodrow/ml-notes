@@ -23,3 +23,4 @@ book:
         - chapters/20-perceptron.ipynb
         - chapters/22-convex-erm.ipynb 
         - chapters/23-gradient-descent.ipynb
+        - chapters/30-features-regularization.qmd
