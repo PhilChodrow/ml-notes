@@ -65,6 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../chapters/40-linear-regression.html" rel="next">
 <link href="../chapters/23-gradient-descent.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -278,6 +279,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Feature Maps, Regularization, and Generalization</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/40-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Linear Regression</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -358,7 +365,7 @@ L(\mathbf{w}) = \frac{1}{n} \sum_{i = 1}^n \ell(\langle \mathbf{w}, \mathbf{x}_i
 <h2 class="anchored" data-anchor-id="nonlinear-decision-boundaries">Nonlinear Decision Boundaries</h2>
 <p>However, we are still working with an important limitation: for a long time now, we’ve focused only on <em>linear</em> decision boundaries. However, most of the data we care about in practice has <em>nonlinear</em> decision boundaries. Here’s a dramatic example. For this example, I’m using the implementation of logistic regression from <code>scikit-learn</code>.</p>
 <p><span class="alert">For the purposes of illustration, today I’m going to be primarily relying on the implementation of logistic regression in <code>scikit-learn</code>. Toward the end of the notes, I’ll highlight where regularization shows up if you want to implement it in e.g.&nbsp;a <code>torch</code> model. I’m also using the <code>plot_decision_regions</code> function from the <code>mlxtend</code> package, which is a handy plotting utility for visualizing the behavior of our models</span></p>
-<div id="c83da33d" class="cell" data-execution_count="2">
+<div id="af827456" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_moons, make_circles</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mlxtend.plotting <span class="im">import</span> plot_decision_regions</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
@@ -366,7 +373,7 @@ L(\mathbf{w}) = \frac{1}{n} \sum_{i = 1}^n \ell(\langle \mathbf{w}, \mathbf{x}_i
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> viz_decision_regions(model, X_train, y_train, X_test, y_test):  </span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">8</span>, <span class="fl">3.5</span>), sharex <span class="op">=</span> <span class="va">True</span>, sharey <span class="op">=</span> <span class="va">True</span>)</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, data <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="st">"Train"</span>, <span class="st">"Test"</span>]):</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        X <span class="op">=</span> [X_train, X_test][i]</span>
@@ -385,23 +392,18 @@ L(\mathbf{w}) = \frac{1}{n} \sum_{i = 1}^n \ell(\langle \mathbf{w}, \mathbf{x}_i
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    plt.scatter(np.arange(<span class="bu">len</span>(coefs)), coefs_sorted, s <span class="op">=</span> <span class="dv">10</span>, facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"black"</span>)</span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"weight (sorted)"</span>, ylabel <span class="op">=</span> <span class="st">"weight value"</span>, title <span class="op">=</span> <span class="vs">fr"Mean $|w_i|$ = </span><span class="sc">{</span>mean_coef<span class="sc">:.2f}</span><span class="vs">, zero weights = </span><span class="sc">{</span><span class="dv">100</span><span class="op">*</span>frac_zero<span class="sc">:.0f}</span><span class="vs">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="3de4c33a" class="cell" data-execution_count="3">
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>{'divide': 'warn', 'over': 'warn', 'under': 'ignore', 'invalid': 'warn'}</code></pre>
-</div>
-</div>
-<div id="64cc96ad" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>X_train, y_train <span class="op">=</span> make_circles(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.1</span>, factor <span class="op">=</span> <span class="fl">0.5</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>X_test, y_test   <span class="op">=</span> make_circles(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.1</span>, factor <span class="op">=</span> <span class="fl">0.5</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression()</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>LR.fit(X_train, y_train)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(LR, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="41894397" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>X_train, y_train <span class="op">=</span> make_circles(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.1</span>, factor <span class="op">=</span> <span class="fl">0.5</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>X_test, y_test   <span class="op">=</span> make_circles(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.1</span>, factor <span class="op">=</span> <span class="fl">0.5</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression()</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>LR.fit(X_train, y_train)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(LR, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="30-features-regularization_files/figure-html/cell-5-output-1.png" class="figure-img" width="812" height="368"></p>
+<p><img src="30-features-regularization_files/figure-html/cell-5-output-1.png" class="figure-img" width="663" height="331"></p>
 </figure>
 </div>
 </div>
@@ -472,18 +474,18 @@ r^2 = x_1^2 + x_2^2\;.
 r^2 = \langle (1, 1), (x_1^2, x_2^2) \rangle\;.
 \]</span></p>
 <p>Let’s see how this looks. We’ll again show the failed linear separator, and we’ll also show a successful separator in a transformed feature space:</p>
-<div id="b63d7723" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>plot_decision_regions(X_train, y_train, clf <span class="op">=</span> LR, ax <span class="op">=</span> axarr[<span class="dv">0</span>])</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> axarr[<span class="dv">0</span>].set_title(<span class="ss">f"Accuracy = </span><span class="sc">{</span>LR<span class="sc">.</span>score(X_train, y_train)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>LR2 <span class="op">=</span> LogisticRegression()</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>X_ <span class="op">=</span> X_train<span class="op">**</span><span class="dv">2</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>LR2.fit(X_, y_train)</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>plot_decision_regions(X_, y_train, clf <span class="op">=</span> LR2, ax <span class="op">=</span> axarr[<span class="dv">1</span>])</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> axarr[<span class="dv">1</span>].set_title(<span class="ss">f"Feature space</span><span class="ch">\n</span><span class="ss">Accuracy = </span><span class="sc">{</span>LR2<span class="sc">.</span>score(X_, y_train)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="7aced4cc" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>plot_decision_regions(X_train, y_train, clf <span class="op">=</span> LR, ax <span class="op">=</span> axarr[<span class="dv">0</span>])</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> axarr[<span class="dv">0</span>].set_title(<span class="ss">f"Accuracy = </span><span class="sc">{</span>LR<span class="sc">.</span>score(X_train, y_train)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>LR2 <span class="op">=</span> LogisticRegression()</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>X_ <span class="op">=</span> X_train<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>LR2.fit(X_, y_train)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>plot_decision_regions(X_, y_train, clf <span class="op">=</span> LR2, ax <span class="op">=</span> axarr[<span class="dv">1</span>])</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> axarr[<span class="dv">1</span>].set_title(<span class="ss">f"Feature space</span><span class="ch">\n</span><span class="ss">Accuracy = </span><span class="sc">{</span>LR2<span class="sc">.</span>score(X_, y_train)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -509,64 +511,64 @@ r^2 = x_1^2 + x_2^2\;.
 \]</span></p>
 <p>The important point to keep track of is that the new feature matrix <span class="math inline">\(\mathbf{X}' = \Phi(\mathbf{X})\)</span> generally has a different number of columns from <span class="math inline">\(\mathbf{X}\)</span>. In this case, for example, <span class="math inline">\(\mathbf{X}\)</span> had just 2 columns but <span class="math inline">\(\Phi(\mathbf{X})\)</span> has 6. This means that <span class="math inline">\(\hat{\mathbf{w}}\)</span> has 6 components, instead of 2!</p>
 <p>Let’s now run logistic regression with degree-2 polynomial features on this data set. The most convenient way to make this happen in the <code>scikit-learn</code> framework is with at <code>Pipeline</code>. The <code>Pipeline</code> first applies the feature map and then calls the model during both fitting and evaluation. We’ll wrap the pipeline in a simple function for easy reuse.</p>
-<div id="436b7065" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PolynomialFeatures</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> poly_LR(degree, <span class="op">**</span>kwargs):</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    plr <span class="op">=</span> Pipeline([(<span class="st">"poly"</span>, PolynomialFeatures(degree <span class="op">=</span> degree)),</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                    (<span class="st">"LR"</span>, LogisticRegression(<span class="op">**</span>kwargs))])</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> plr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="8fc16551" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PolynomialFeatures</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> poly_LR(degree, <span class="op">**</span>kwargs):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    plr <span class="op">=</span> Pipeline([(<span class="st">"poly"</span>, PolynomialFeatures(degree <span class="op">=</span> degree)),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                    (<span class="st">"LR"</span>, LogisticRegression(<span class="op">**</span>kwargs))])</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> plr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now our decision boundary is much more successful:</p>
-<div id="7b4e4b91" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">2</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="b7309ba1" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">2</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="30-features-regularization_files/figure-html/cell-8-output-1.png" class="figure-img" width="812" height="368"></p>
+<p><img src="30-features-regularization_files/figure-html/cell-8-output-1.png" class="figure-img" width="663" height="331"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Let’s check the coefficients of the model:</p>
-<div id="83f3fb2f" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plr.named_steps[<span class="st">"LR"</span>].coef_.<span class="bu">round</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="ba3494ce" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>plr.named_steps[<span class="st">"LR"</span>].coef_.<span class="bu">round</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
-<pre><code>array([[ 0.  , -0.04, -0.16, -4.68,  0.21, -4.82]])</code></pre>
+<pre><code>array([[-0.  ,  0.07, -0.05, -4.74, -0.07, -4.88]])</code></pre>
 </div>
 </div>
 <p>Notice that two coefficients are much larger than the others, and approximately equal. These are the coefficients for the features <span class="math inline">\(x_1^2\)</span> and <span class="math inline">\(x_2^2\)</span>. The fact that these are approximately equal means that our model is very close to using the square radius <span class="math inline">\(r^2 = x_1^2 + x_2^2\)</span> as a learned feature for this data, just like we’d expect. The benefit is that we didn’t have to hard-code that in; the model just detected on its own the right pattern to find.</p>
 <p>Part of the reason this might be beneficial is that for some data sets, we might not really know what specific features we should try. For example, here’s another one where a linear classifier doesn’t do so great (degree 1 corresponds to no transformation of the features). We’ll keep using this example as we go, and so we’ll generate both a training and a test set.</p>
-<div id="f6a0f76a" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">123</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>X_train, y_train <span class="op">=</span> make_moons(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.3</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>X_test, y_test   <span class="op">=</span> make_moons(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.3</span>)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">1</span>)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="91b1630b" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">123</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>X_train, y_train <span class="op">=</span> make_moons(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.3</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>X_test, y_test   <span class="op">=</span> make_moons(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.3</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="30-features-regularization_files/figure-html/cell-10-output-1.png" class="figure-img" width="800" height="368"></p>
+<p><img src="30-features-regularization_files/figure-html/cell-10-output-1.png" class="figure-img" width="663" height="331"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>It’s not as obvious that we should use the radius or any other specific feature for our feature map. Fortunately we don’t need to think too much about it – we can just increase the degree and let the model figure things out:</p>
-<div id="697b3bf5" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">5</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="7d423781" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">5</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="30-features-regularization_files/figure-html/cell-11-output-1.png" class="figure-img" width="800" height="368"></p>
+<p><img src="30-features-regularization_files/figure-html/cell-11-output-1.png" class="figure-img" width="663" height="331"></p>
 </figure>
 </div>
 </div>
@@ -576,15 +578,15 @@ r^2 = x_1^2 + x_2^2\;.
 <section id="generalization-feature-selection-regularization" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="generalization-feature-selection-regularization">Generalization, Feature Selection, Regularization</h2>
 <p>So, why don’t we just use as many features as it takes to get perfect accuracy on the training data? Here’s an example where we get perfect accuracy on the training data:</p>
-<div id="63914280" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">15</span>, penalty <span class="op">=</span> <span class="st">"none"</span>, max_iter <span class="op">=</span> <span class="dv">1000000</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="86c7f53c" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">15</span>, penalty <span class="op">=</span> <span class="st">"none"</span>, max_iter <span class="op">=</span> <span class="dv">1000000</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="30-features-regularization_files/figure-html/cell-12-output-1.png" class="figure-img" width="800" height="368"></p>
+<p><img src="30-features-regularization_files/figure-html/cell-12-output-1.png" class="figure-img" width="663" height="331"></p>
 </figure>
 </div>
 </div>
@@ -593,42 +595,42 @@ r^2 = x_1^2 + x_2^2\;.
 <p>The problem here is that, although this classifier might achieve perfect <em>training</em> accuracy, it doesn’t really look like it’s captured “the right” pattern. This is why this classifier makes many more mistakes on the test data, even though it had much higher training accuracy. We have <em>overfit</em>: our model was so flexible that it was able to learn both some <em>real</em> patterns that we wanted it to learn and some <em>noise</em> that we didn’t. As a result, when it made a prediction on new data, the model’s predictions were imperfect, reflecting the noise it learned in the training process.</p>
 <p>In machine learning practice, we don’t actually <em>want</em> our models to get perfect scores on the training data – we want them to <strong><em>generalize</em></strong> to new instances of unseen data. Overfitting is one way in which a model can fail to generalize.</p>
 <p>Let’s do an experiment in which we see what happens to the model’s generalization ability when we increase the number of polynomial features:</p>
-<div id="e455bf74" class="cell" data-execution_count="12">
+<div id="106472a8" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>np.random.seed()</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>degs <span class="op">=</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">11</span>)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame({<span class="st">"deg"</span>: [], <span class="st">"train"</span> : [], <span class="st">"test"</span> : []})</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> rep <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    X_train_, y_train_ <span class="op">=</span> make_moons(<span class="dv">100</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">.4</span>)</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    X_test_, y_test_ <span class="op">=</span> make_moons(<span class="dv">100</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">.4</span>)</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> deg <span class="kw">in</span> degs:</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        plr_ <span class="op">=</span> poly_LR(degree <span class="op">=</span> deg, penalty <span class="op">=</span> <span class="st">"none"</span>, max_iter <span class="op">=</span> <span class="bu">int</span>(<span class="fl">1e3</span>))</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        plr_.fit(X_train_, y_train_)</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        to_add <span class="op">=</span> pd.DataFrame({<span class="st">"deg"</span> : [deg],</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"train"</span> : [plr_.score(X_train_, y_train_)],</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"test"</span> : [plr_.score(X_test_, y_test_)]})</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> pd.concat((df, to_add))</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>means <span class="op">=</span> df.groupby(<span class="st">"deg"</span>).mean().reset_index()</span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>plt.plot(means[<span class="st">"deg"</span>], means[<span class="st">"train"</span>], label <span class="op">=</span> <span class="st">"training"</span>)</span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>plt.plot(means[<span class="st">"deg"</span>], means[<span class="st">"test"</span>], label <span class="op">=</span> <span class="st">"validation"</span>)</span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Degree of polynomial feature"</span>,</span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>              ylabel <span class="op">=</span> <span class="st">"Accuracy (mean over 20 runs)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>np.random.seed()</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>degs <span class="op">=</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">11</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame({<span class="st">"deg"</span>: [], <span class="st">"train"</span> : [], <span class="st">"test"</span> : []})</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> rep <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    X_train_, y_train_ <span class="op">=</span> make_moons(<span class="dv">100</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">.4</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    X_test_, y_test_ <span class="op">=</span> make_moons(<span class="dv">100</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">.4</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> deg <span class="kw">in</span> degs:</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        plr_ <span class="op">=</span> poly_LR(degree <span class="op">=</span> deg, penalty <span class="op">=</span> <span class="st">"none"</span>, max_iter <span class="op">=</span> <span class="bu">int</span>(<span class="fl">1e3</span>))</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        plr_.fit(X_train_, y_train_)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        to_add <span class="op">=</span> pd.DataFrame({<span class="st">"deg"</span> : [deg],</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"train"</span> : [plr_.score(X_train_, y_train_)],</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"test"</span> : [plr_.score(X_test_, y_test_)]})</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> pd.concat((df, to_add))</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>means <span class="op">=</span> df.groupby(<span class="st">"deg"</span>).mean().reset_index()</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>plt.plot(means[<span class="st">"deg"</span>], means[<span class="st">"train"</span>], label <span class="op">=</span> <span class="st">"training"</span>)</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>plt.plot(means[<span class="st">"deg"</span>], means[<span class="st">"test"</span>], label <span class="op">=</span> <span class="st">"validation"</span>)</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Degree of polynomial feature"</span>,</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>              ylabel <span class="op">=</span> <span class="st">"Accuracy (mean over 20 runs)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="30-features-regularization_files/figure-html/cell-13-output-1.png" class="figure-img" width="581" height="425"></p>
+<p><img src="30-features-regularization_files/figure-html/cell-13-output-1.png" class="figure-img" width="581" height="423"></p>
 </figure>
 </div>
 </div>
@@ -636,8 +638,8 @@ r^2 = x_1^2 + x_2^2\;.
 <p>We observe that there is an optimal number of features for which the model is most able to generalize: around 3 or so. More features than that is actually <em>harmful</em> to the model’s predictive performance.</p>
 <p>So, one way to promote generalization is to try to find “the right” or “the right number” of features and use them for prediction. This problem is often called <strong>feature selection</strong> and can be done with cross-validation.</p>
 <p>Another common approach to avoid overfitting is called <em>regularization</em>. Regularization proceeds from the insight that wiggly decision boundaries often come from <em>large entries in the weight vector <span class="math inline">\(\mathbf{w}\)</span></em>. Let’s check this for the degree-15 polynomial features model that we trained previously:</p>
-<div id="b260e3be" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>plot_weights(plr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="ffcbcc1d" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>plot_weights(plr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -653,21 +655,21 @@ L'(\mathbf{w}) = L(\mathbf{w}) + \lambda R(\mathbf{w})\;,
 <div class="page-columns page-full"><p>where <span class="math inline">\(\lambda\)</span> is a <em>regularization strength</em> and <span class="math inline">\(R(\mathbf{w})\)</span> is a <em>regularization function</em> that aims to shrink the entries of <span class="math inline">\(\mathbf{w}\)</span> in some way. Common choices of regularization function include the square Euclidean norm <span class="math inline">\(R(\mathbf{w}) = \lVert \mathbf{w} \rVert_2^2 = \sum_{j = 1}^p w_i^2\)</span> and the <span class="math inline">\(\ell_1\)</span> norm <span class="math inline">\(R(\mathbf{w}) = \sum_{j = 1}^p \lvert w_j \rvert\)</span>. To see regularization in action, let’s go back to our logistic regression model with a large number of polynomial features. We can see the presence of overfitting in the excessive “wiggliness” of the decision boundary. </p><div class="no-row-height column-margin column-container"><span class="margin-aside">If <span class="math inline">\(\mathbf{x}\)</span> is defined in such a way that it has a constant column (e.g.&nbsp;<span class="math inline">\(x_{in} = 1\)</span> for all <span class="math inline">\(n\)</span>), then it is important <em>not to regularize the entries of <span class="math inline">\(\mathbf{w}\)</span> that correspond to the constant column</em>.</span></div></div>
 <p>Fortunately for us, we can actually use regularization directly from inside the <code>scikit-learn</code> implementation of <code>LogisticRegression</code>. We specify the penalty (the <span class="math inline">\(\ell_1\)</span> regularization), the strength of the penalty (in the <code>scikit-learn</code> implementation, you specify <span class="math inline">\(C = \frac{1}{\lambda}\)</span> so that larger <span class="math inline">\(C\)</span> means less regularization) and the optimization solver (not all solvers work with all penalties).</p>
 <p>This model did much better on the test data than the overfit model.</p>
-<div id="fd3a3cef" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">15</span>, penalty <span class="op">=</span> <span class="st">"l2"</span>, solver <span class="op">=</span> <span class="st">"lbfgs"</span>, C <span class="op">=</span> <span class="dv">10</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="0e87dd7f" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">15</span>, penalty <span class="op">=</span> <span class="st">"l2"</span>, solver <span class="op">=</span> <span class="st">"lbfgs"</span>, C <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="30-features-regularization_files/figure-html/cell-15-output-1.png" class="figure-img" width="800" height="368"></p>
+<p><img src="30-features-regularization_files/figure-html/cell-15-output-1.png" class="figure-img" width="663" height="331"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>One reason for this success is that the entries of the weight vector are now much smaller:</p>
-<div id="edf60aed" class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plot_weights(plr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="14543374" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plot_weights(plr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -677,21 +679,21 @@ L'(\mathbf{w}) = L(\mathbf{w}) + \lambda R(\mathbf{w})\;,
 </div>
 </div>
 <p>In fact, we can even force some of the coefficients of the weight vector to be exactly 0. This is achieved through the use of the <span class="math inline">\(\ell_1\)</span> regularization term <span class="math inline">\(R(\mathbf{w}) = \sum_{j = 1}^p \lvert w_j \rvert\)</span>.</p>
-<div id="40e8f4e6" class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">15</span>, penalty <span class="op">=</span> <span class="st">"l1"</span>, solver <span class="op">=</span> <span class="st">"liblinear"</span>, C <span class="op">=</span> <span class="dv">1</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="c005c3f4" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">15</span>, penalty <span class="op">=</span> <span class="st">"l1"</span>, solver <span class="op">=</span> <span class="st">"liblinear"</span>, C <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="30-features-regularization_files/figure-html/cell-17-output-1.png" class="figure-img" width="800" height="368"></p>
+<p><img src="30-features-regularization_files/figure-html/cell-17-output-1.png" class="figure-img" width="663" height="331"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>How do the weights look now?</p>
-<div id="3e47f723" class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plot_weights(plr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="78eac2c6" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plot_weights(plr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -737,10 +739,10 @@ L'(\mathbf{w}) = L(\mathbf{w}) + \lambda R(\mathbf{w})\;,
 <p>We have now introduced all the fundamental features of modern empirical risk minimization for training machine learning models. We aim to find a weight vector <span class="math inline">\(\hat{\mathbf{w}}\)</span> that solves the problem</p>
 <p><span id="eq-regularized-erm"><span class="math display">\[
 \begin{aligned}
-    \hat{\mathbf{w}} = \mathop{\mathrm{argmin\;}}_{\mathbf{w}} \frac{1}{n} \sum_{i = 1}^n \ell (\langle \mathbf{w}, \phi(\mathbf{x}_i), y_i \rangle) + \lambda R(\mathbf{w})\;.
+    \hat{\mathbf{w}} = \mathop{\mathrm{argmin\;}}_{\mathbf{w}} \frac{1}{n} \sum_{i = 1}^n \ell (\langle \mathbf{w}, \phi(\mathbf{x}_i) \rangle, y_i) + \lambda R(\mathbf{w})\;.
 \end{aligned}
 \tag{11.2}\]</span></span></p>
-<p>Until roughly 2005 or so, <a href="#eq-regularized-erm" class="quarto-xref">Equation&nbsp;<span>11.2</span></a> was the state of the art for a wide array of classification and regression problems. Common questions would include:</p>
+<p>Until roughly 2005 or so, <a href="40-linear-regression.html#eq-regularized-erm" class="quarto-xref">Equation&nbsp;<span>11.1</span></a> was the state of the art for a wide array of classification and regression problems. Common questions would include:</p>
 <ol type="1">
 <li>What <em>loss functions</em> <span class="math inline">\(\ell\)</span> should be used for model scoring?</li>
 <li>What <em>feature maps</em> <span class="math inline">\(\phi\)</span> should be used for extracting useful features from the data?</li>
@@ -1169,6 +1171,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="../chapters/40-linear-regression.html" class="pagination-link" aria-label="Linear Regression">
+        <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Linear Regression</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->

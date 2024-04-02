@@ -18,4 +18,5 @@ book:
         - source/20-perceptron.ipynb
         - source/22-convex-erm.ipynb
         - source/23-gradient-descent.ipynb
-        - source/30-features-regularization.ipynb
+        - source/30-features-regularization.qmd
+        - source/40-linear-regression.ipynb

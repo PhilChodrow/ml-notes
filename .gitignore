@@ -5,3 +5,4 @@ chapters
 *.DS_Store
 */hidden
 source/*_files
+*/*.vdoc.pyg
