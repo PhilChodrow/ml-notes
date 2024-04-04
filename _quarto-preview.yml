@@ -20,3 +20,4 @@ book:
         - source/23-gradient-descent.ipynb
         - source/30-features-regularization.qmd
         - source/40-linear-regression.ipynb
+        - source/50-kernel-methods.ipynb

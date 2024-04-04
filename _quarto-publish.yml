@@ -25,3 +25,4 @@ book:
         - chapters/23-gradient-descent.ipynb
         - chapters/30-features-regularization.qmd
         - chapters/40-linear-regression.ipynb
+        - chapters/50-kernel-methods.ipynb

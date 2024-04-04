@@ -284,6 +284,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Linear Regression</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/50-kernel-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Kernel Methods</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -347,7 +353,7 @@ window.Quarto = {
 &amp; - &amp; \mathbf{x}_{n} &amp; - \end{matrix}\right]
 \]</span></p>
 <p>and <span class="math inline">\(\mathbf{y}\)</span> is the vector of targets, which we usually assume to be binary in the context of classification. The per-observation <em>loss function</em> <span class="math inline">\(\ell: \mathbb{R}\times \mathbb{R}\rightarrow \mathbb{R}\)</span> measures the quality of the score <span class="math inline">\(s_i = \langle \mathbf{w}, \mathbf{x}_i \rangle\)</span> assigned to data point <span class="math inline">\(i\)</span> by comparing it to <span class="math inline">\(y_i\)</span> and outputing a real number <span class="math inline">\(\ell(s_i, y_i)\)</span>.</p>
-<p>So, our mathematical task is to find a vector of weights <span class="math inline">\(\mathbf{w}\)</span> that solves <a href="#eq-erm" class="quarto-xref">Equation&nbsp;<span>9.1</span></a>. How do we do it? The modern answer is <em>gradient descent</em>, and this set of lecture notes is about what that means and why it works.</p>
+<p>So, our mathematical task is to find a vector of weights <span class="math inline">\(\mathbf{w}\)</span> that solves <a href="50-kernel-methods.html#eq-erm" class="quarto-xref">Equation&nbsp;<span>12.1</span></a>. How do we do it? The modern answer is <em>gradient descent</em>, and this set of lecture notes is about what that means and why it works.</p>
 <section id="linear-approximations-of-single-variable-functions" class="level2">
 <h2 class="anchored" data-anchor-id="linear-approximations-of-single-variable-functions">Linear Approximations of Single-Variable Functions</h2>
 <p>Recall the limit definition of a derivative of a single-variable function. Let <span class="math inline">\(g:\mathbb{R} \rightarrow \mathbb{R}\)</span>. The derivative of <span class="math inline">\(g\)</span> at point <span class="math inline">\(w_0\)</span>, if it exists, is</p>
@@ -626,8 +632,8 @@ g(\mathbf{w}_0 + \delta \mathbf{w}) = g(\mathbf{w}_0) + \langle \nabla g(\mathbf
 </section>
 <section id="gradient-of-the-empirical-risk" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="gradient-of-the-empirical-risk">Gradient of the Empirical Risk</h2>
-<p>Remember that our big objective here was to solve <a href="#eq-erm" class="quarto-xref">Equation&nbsp;<span>9.1</span></a> using gradient descent. To do this, we need to be able to calculate <span class="math inline">\(\nabla L(\mathbf{w})\)</span>, where the gradient is with respect to the entries of <span class="math inline">\(\mathbf{w}\)</span>. Fortunately, the specific <em>linear</em> structure of the score function <span class="math inline">\(s_i = \langle \mathbf{w}, \mathbf{x}_i \rangle\)</span> makes this relatively simple: indeed, we actually only need to worry about the <em>single</em> variable derivatives of the per-observation loss <span class="math inline">\(\ell\)</span>. To see this, we can compute</p>
-<p><span class="math display">\[
+<p>Remember that our big objective here was to solve <a href="50-kernel-methods.html#eq-erm" class="quarto-xref">Equation&nbsp;<span>12.1</span></a> using gradient descent. To do this, we need to be able to calculate <span class="math inline">\(\nabla L(\mathbf{w})\)</span>, where the gradient is with respect to the entries of <span class="math inline">\(\mathbf{w}\)</span>. Fortunately, the specific <em>linear</em> structure of the score function <span class="math inline">\(s_i = \langle \mathbf{w}, \mathbf{x}_i \rangle\)</span> makes this relatively simple: indeed, we actually only need to worry about the <em>single</em> variable derivatives of the per-observation loss <span class="math inline">\(\ell\)</span>. To see this, we can compute</p>
+<p><span id="eq-empirical-risk-gradient"><span class="math display">\[
 \begin{align}
 \nabla L(\mathbf{w}) &amp;= \nabla \left(\frac{1}{n} \sum_{i = 1}^n \ell(\langle \mathbf{w}, \mathbf{x}_i\rangle , y_i)\right) \\
               &amp;= \frac{1}{n} \sum_{i = 1}^n \nabla \ell(\langle \mathbf{w}, \mathbf{x}_i\rangle , y_i) \\
@@ -635,7 +641,7 @@ g(\mathbf{w}_0 + \delta \mathbf{w}) = g(\mathbf{w}_0) + \langle \nabla g(\mathbf
               &amp;= \frac{1}{n} \sum_{i = 1}^n  \frac{d\ell(s_i, y_i)}{ds}  \mathbf{x}_i &amp;\quad \text{(gradient of a linear function)} \\
               &amp;= \frac{1}{n} \sum_{i = 1}^n  \frac{d\ell(s_i, y_i)}{ds} \mathbf{x}_i &amp;\quad \text{($s_i = \langle \mathbf{w}, \mathbf{x}_i\rangle$)} \\
 \end{align}
-\]</span></p>
+\tag{9.4}\]</span></span></p>
 <p>The good news here is that for linear models, we don’t actually need to be able to compute more gradients: we just need to be able to compute derivatives of the form <span class="math inline">\(\frac{d\ell(s_i, y_i)}{ds}\)</span> and then plug in <span class="math inline">\(s_i = \langle \mathbf{w}, \mathbf{x}_i\rangle\)</span>.</p>
 <p>Let’s do an example with the logistic loss:</p>
 <p><span class="math display">\[\ell(s, y) = -y \log \sigma(s) - (1-y)\log (1-\sigma(s))\;.\]</span></p>
@@ -654,7 +660,7 @@ g(\mathbf{w}_0 + \delta \mathbf{w}) = g(\mathbf{w}_0) + \langle \nabla g(\mathbf
 \nabla L(\mathbf{w}) &amp;= \frac{1}{n} \sum_{i = 1}^n (\sigma(s_i) - y_i)\mathbf{x}_i \\
               &amp;=\frac{1}{n} \sum_{i = 1}^n (\sigma(\langle \mathbf{w}, \mathbf{x}_i\rangle) - y_i)\mathbf{x}_i\;.
 \end{align}
-\tag{9.4}\]</span></span></p><div class="no-row-height column-margin column-container"><span class="margin-aside">An important note about this formula that can easily trip one up: this looks a bit like a matrix multiplication or dot product, but it isn’t!</span></div></div>
+\tag{9.5}\]</span></span></p><div class="no-row-height column-margin column-container"><span class="margin-aside">An important note about this formula that can easily trip one up: this looks a bit like a matrix multiplication or dot product, but it isn’t!</span></div></div>
 <p>This gives us all the math that we need in order to learn logistic regression by choosing a learning rate and iterating the update <span class="math inline">\(\mathbf{w}^{(t+1)} \gets \mathbf{w}^{(t)} - \alpha \nabla L(\mathbf{w}^{(t)})\)</span> until convergence.</p>
 </section>
 <section id="example-logistic-regression" class="level2 page-columns page-full">
@@ -681,7 +687,7 @@ g(\mathbf{w}_0 + \delta \mathbf{w}) = g(\mathbf{w}_0) + \langle \nabla g(\mathbf
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> step(<span class="va">self</span>, X, y, lr <span class="op">=</span> <span class="fl">0.01</span>):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.model.w <span class="op">-=</span> lr<span class="op">*</span><span class="va">self</span>.model.grad(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The method <code>model.grad()</code> is the challenging part of the implementation: this is where we actually need to turn <a href="#eq-logistic-gradient" class="quarto-xref">Equation&nbsp;<span>9.4</span></a> into code.</p>
+<p>The method <code>model.grad()</code> is the challenging part of the implementation: this is where we actually need to turn <a href="#eq-logistic-gradient" class="quarto-xref">Equation&nbsp;<span>9.5</span></a> into code.</p>
 <p>Here’s the complete training loop. This loop is <em>very</em> similar to our perceptron training loop – we’re just using a different loss and a different implementation of <code>grad</code>.</p>
 <div id="cell-fig-LR-loss-iterations" class="cell page-columns page-full" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb6" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hidden.logistic <span class="im">import</span> LogisticRegression, GradientDescentOptimizer</span>
