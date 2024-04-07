@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Petrona:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Red+Hat+Text:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Petrona:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600;1,800&family=Red+Hat+Text:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
 
 
 
@@ -120,6 +120,26 @@ tr {
   font-style: italic;
   color: #444444;
 }
+
+.menu-text {
+  font-weight: bold;
+  font-family: "Red Hat Text";
+  /* color: #444444; */
+}
+
+.chapter-title {
+  font-weight: normal;
+  /* color: #444444; */
+  font-family: "Petrona";
+}
+
+.chapter-number {
+  font-weight: extra-bold;
+  /* color: #444444; */
+  font-family: "Petrona";
+}
+
+
 
 
 @media only screen and (max-width: 700px) {

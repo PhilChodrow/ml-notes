@@ -26,3 +26,4 @@ book:
         - chapters/30-features-regularization.qmd
         - chapters/40-linear-regression.ipynb
         - chapters/50-kernel-methods.ipynb
+        - chapters/51-vectorization.ipynb
