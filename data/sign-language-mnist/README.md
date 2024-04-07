@@ -1,0 +1,1 @@
+This data set was originally retrieved [from Kaggle](https://www.kaggle.com/datasets/datamunge/sign-language-mnist).
