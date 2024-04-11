@@ -1,0 +1,248 @@
+---
+mermaid: 
+    theme: neutral
+---
+
+# The Problem of Features
+
+Let's begin by recalling and slightly expanding the empirical risk minimization framework that we've developed throughout this course. In the simplest approach to empirical risk minimization, we began with a matrix of features $\mathbf{X} \in \mathbb{R}^{n\times p}$ and a vector of targets $\mathbf{y} \in \mathbb{R}^n$. We defined a linear score  $s =  \langle \mathbf{w}, \mathbf{x}\rangle$ which we interpreted as producing predictions of the value of $y$. We then defined a loss function $\ell: \mathbb{R}\times \mathbb{R} \rightarrow \mathbb{R}$ that told us the quality of the prediction $s$ by comparing it to a true target $y$. Our learning problem was to find $\mathbf{w}$ by minimizing the *empirical risk*: the mean (or sum) of the risk across all data points:  
+
+$$
+\DeclareMathOperator*{\argmin}{argmin}
+\begin{aligned}
+\hat{\mathbf{w}} &= \argmin_{\mathbf{w} \in \mathbb{R}^p} \frac{1}{n}\sum_{i = 1}^n \ell(s_i, y_i) \\ 
+                 &= \argmin_{\mathbf{w} \in \mathbb{R}^p} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \mathbf{x}_i \rangle, y_i)\;. 
+\end{aligned}
+$$
+
+At first, we solved this problem using gradient descent. However, we soon ran into an issue -- the linear score $s = \langle \mathbf{w}, \mathbf{x}\rangle$ is only capable of describing linear structures in the data. 
+
+So far, we've addressed nonlinearity in two ways. First, we tried *manual feature engineering*. In manual feature engineering, we apply a feature map $\phi: \mathbb{R}^p \rightarrow \mathbb{R}^q$ to the rows of the data matrix $\mathbf{X}$ to produce a new matrix $\Phi(\mathbf{X})$:  
+
+$$
+\begin{aligned}
+    \Phi(\mathbf{X}) \triangleq \left[\begin{matrix}\phi(\mathbf{x}_1) \\ \phi(\mathbf{x}_2) \\ \vdots \\ \phi(\mathbf{x}_n)\end{matrix}\right] 
+\end{aligned}
+$$
+
+Our problem then became to solve the empirical risk minimization problem 
+
+$$
+\begin{aligned}
+\hat{\mathbf{w}} &= \argmin_{\mathbf{w} \in \mathbb{R}^p} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \phi(\mathbf{x}_i) \rangle, y_i)\;, 
+\end{aligned}
+$${#eq-ERM}
+
+where $\mathbf{w}$ had as many entries as the number of features which we generated using $\phi$. Later on, we saw that we could actually solve this problem in some cases using *kernel methods*, which allowed us to use complex feature maps without ever explicitly calculating them. A limitation of both manual feature engineering and kernel methods is that the practitioner needs to make a choice about what features to engineer or what kernels to use. For some data sets it might be relatively easy to make this choice, while for others it might be much harder. For extremely large data sets with very complex patterns, it may be very difficult to figure out what features will facilitate the learning task. 
+
+Manual feature engineering and kernel methods were state-of-the-art for many machine learning tasks up until the advent of practical deep learning early in the 21st century. 
+
+## Optimizing the Features
+
+Here's a superficially simple question about @eq-ERM: what if we could learn both the weights $\mathbf{w}$ *and* the feature map $\phi$ simultaneously? That is, what if we could solve a problem like 
+
+$$
+\begin{aligned}
+\hat{\mathbf{w}} &= \argmin_{\mathbf{w} \in \mathbb{R}^p, \color{blue}{\phi \in \mathcal{F}}} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \phi(\mathbf{x}_i) \rangle, y_i)\;, 
+\end{aligned}
+$${#eq-ERM-feature}
+
+where $\mathcal{F}$ is some space of possible feature maps? 
+
+
+When we extended to the setting of multiple label classification (e.g. three penguin species), we modified this setup slightly. We let $\mathbf{Y} \in \mathbb{R}^{n\times \ell}$ be a matrix of targets, where each of the $\ell$ columns represents a possible category, $y_{i\ell} = 1$ means that observation $i$ has label $\ell$. We then needed to replace the prediction rule $f(\mathbf{x}) = \langle \mathbf{w}, \mathbf{x}\rangle$ with a matrix-vector multiplication $f(\mathbf{x}) = \mathbf{x}_i\mathbf{W}$, where $\mathbf{W} \in \mathbb{R}^{p \times \ell}$. This produced a vector $\hat{\mathbf{y}}$ which we could compare to $\mathbf{y}$ using an appropriately modified loss function. 
+
+$$
+\hat{\mathbf{W}} = \argmin_{\mathbf{W} \in \mathbb{R}^{p \times \ell}} \sum_{i = 1}^n \ell(\mathbf{x}_i\mathbf{W} , \mathbf{y}_i)\;.
+$$
+
+However, we soon discovered a limitation: this method can only discover *linear* patterns in data, e.g. linear decision boundaries for classification or linear trends for regression. But most interesting patterns in data are *nonlinear*. We addressed this limitation using *feature engineering*: define a feature map $\phi: \mathbb{R}^p \rightarrow \mathbb{R}^{q}$ and then solve the modified problem 
+
+$$
+\hat{\mathbf{W}} = \argmin_{\mathbf{W} \in \mathbb{R}^{q\times \ell}} \sum_{i = 1}^n \ell(\phi(\mathbf{x}_i)\mathbf{W}, \mathbf{y}_i)\;.
+$$
+
+## Sidebar: Notation Update
+
+Before we proceed further, let's make a notation update. It is about to become very convenient for us to abuse mathematical notation slightly by "vectorizing functions over rows of matrices." What this means is that, if $f:\mathbb{R}^p \rightarrow \mathbb{R}^q$ we will define things like this: [This kind of definition is sometimes called *vectorizing* the function $f$, not to be confused with our discussion of vectorizing data in a [different lecture](vectorization.qmd).]{.aside}
+
+$$
+\begin{aligned}
+f(\mathbf{X}) &\triangleq \left[\begin{matrix} f(\mathbf{x}_1) \\ f(\mathbf{x}_2) \\ \vdots \\ f(\mathbf{x}_n) \end{matrix}\right] 
+\end{aligned}
+$$
+
+So, evaluating $f:\mathbb{R}^p \rightarrow \mathbb{R}^q$ on $\mathbf{X}\in \mathbb{R}^{n\times p}$ produces a matrix $f(\mathbf{X}) \in \mathbb{R}^{n\times q}$. 
+
+Similarly, we'll define 
+
+$$
+\begin{aligned}
+    \phi(\mathbf{X}) \triangleq \left[\begin{matrix}\phi(\mathbf{x}_1) \\ \phi(\mathbf{x}_2) \\ \vdots \\ \phi(\mathbf{x}_n)\end{matrix}\right] \quad \text{and} 
+    \quad \ell(\hat{\mathbf{Y}}, \mathbf{Y}) &\triangleq \left(\begin{matrix} \ell(\hat{\mathbf{y}}_1, \mathbf{y}_1) \\ \ell(\hat{\mathbf{y}}_2, \mathbf{y}_2) \\ \vdots \\ \ell(\hat{\mathbf{y}}_n, \mathbf{y}_n) \end{matrix}\right)\;.
+\end{aligned}
+$$
+
+This allows us to write our prediction rule compactly as 
+$$
+\begin{aligned}
+\hat{\mathbf{Y}} = f(\mathbf{X}) = \left[\begin{matrix} f(\mathbf{x}_1) \\ f(\mathbf{x}_2) \\ \vdots \\ f(\mathbf{x}_n) \end{matrix}\right] 
+       = \left[\begin{matrix} \phi(\mathbf{x}_1)\mathbf{W} \\ \phi(\mathbf{x}_2)\mathbf{W} \\ \vdots \\ \phi(\mathbf{x}_n)\mathbf{W} \end{matrix}\right] 
+       = \left[\begin{matrix} \phi(\mathbf{x}_1) \\ \phi(\mathbf{x}_2) \\ \vdots \\ \phi(\mathbf{x}_n) \end{matrix}\right] \mathbf{W} 
+       = \phi(\mathbf{X})\mathbf{W} 
+\end{aligned}
+$$
+
+Let's also define $\mathcal{L}(\hat{\mathbf{Y}}, \mathbf{Y}) = \sum_{i = 1}^n \ell(\hat{\mathbf{y}}_i, \mathbf{y}_i)$. Then, we can write our generalized empirical risk as 
+
+$$
+R = \mathcal{L}(\phi(\mathbf{X})\mathbf{W}, \mathbf{Y})\;,
+$$
+
+and our learning problem is 
+
+$$
+\hat{\mathbf{W}} = \argmin_{\mathbf{W}} \; \mathcal{L}(\phi(\mathbf{X})\mathbf{W}, \mathbf{Y})\;,
+$$
+
+## The Network View
+
+We can express the process of obtaining a prediction from logistic regression using a *computational graph*. Here's an example of a computational graph for logistic regression in which we have two input features and wish to perform 3-way classification by outputing for each input $\mathbf{x}$ a vector $\vp$ of probabilities for each label: 
+
+```{mermaid}
+flowchart LR
+  subgraph input
+    direction TB  
+    x_1 
+    x_2
+  end
+
+  subgraph feature_map[features]
+    f_1
+    f_2
+  end
+
+  subgraph raw predictions[raw predictions/logits]
+    y_hat_1
+    y_hat_2 
+    y_hat_3
+  end
+
+  subgraph label_preds[label probabilities]
+    p_1
+    p_2
+    p_3
+  end
+
+  x_1 & x_2 --> x
+
+  x --phi--> f_1 & f_2
+
+  f_1 --w_1--> y_hat_1
+  f_2 --w_1--> y_hat_1
+  f_1 --w_2--> y_hat_2
+  f_2 --w_2--> y_hat_2
+  f_1 --w_3--> y_hat_3
+  f_2 --w_3--> y_hat_3
+
+  y_hat_1 & y_hat_2 & y_hat_3 --> softmax
+
+  softmax --> p_1 & p_2 & p_3
+```
+
+
+
+
+
+## Back to Recap
+
+We have a problem that we never addressed in a fully satisfactory way. On the one hand, in order to describe complex, nonlinear patterns in our data, we want a *lot* of features. [Kernel methods like [kernel logistic](../assignments/blog-posts/blog-post-kernel-logistic.qmd) regression or support vector machine can actually use infinitely many features!]{.aside} However, the more features we engineer, the more likely we are to encounter overfitting. 
+
+One of the most common approaches to this problem around 15 years ago was to engineer many features but *regularize*, which forced entries of $\mathbf{w}$ to remain small. This is a useful approach that is still used today, especially in statistics and econometrics. However, when our data points are very complex (audio files, images, text), it might still be very difficult for us to manually engineer the right sets of features to use even in this approach. 
+
+The fundamental idea of *deep learning* is to take a different tack: instead of only learning $\mathbf{w}$ in the empirical risk minimization problem, we are *also* going to learn the feature map $\phi$. That is, we want to find 
+
+$$
+\hat{\mathbf{W}}, \hat{\phi} = \argmin_{\mathbf{W}, \phi} \; \mathcal{L}(\phi(\mathbf{X})\mathbf{W}, \mathbf{Y})\;,
+$$
+
+and our learned predictor is $f(\mathbf{X}) = \hat{\phi}(\mathbf{X})\hat{\mathbf{W}}$. 
+
+The need to learn the feature map $\phi$ as well as weights $\mathbf{w}$ makes this problem *much* harder, both mathematically and computationally. A major enabler of the deep learning revolution has been the development of hardware that is up to the task (especially GPUs), as well as algorithms that make good use of this hardware. 
+
+# Hidden Layers
+
+Ok, so we know that we want to figure out a feature map $\phi:\mathbb{R}^p\rightarrow \mathbb{R}^q$ to make the empirical risk small. There's no hope of optimizing over all possible feature maps, so instead we need to parameterize our feature map in some way. Here's what we do: 
+
+Let $\alpha_1:\R \rightarrow \R$ be any *nonlinear* function, and let $\mU_1 \in \mathbb{R}^{p} \rightarrow \mathbb{R}^q$. We'll define: [$\alpha_1$ is often called an *activation function.*]{.aside}
+
+$$
+\phi(\mathbf{X}) = \alpha_1(\mathbf{X}\mU_1)\;.
+$$
+
+Our new prediction rule is 
+
+$$
+\hat{\mathbf{Y}} = f(\mathbf{X}) = \phi(\mathbf{X})\mathbf{W} = \alpha_1(\mathbf{X}\mU_1)\mathbf{W}\;, 
+$$
+
+and our empirical risk minimization problem is 
+
+$$
+\hat{\mathbf{W}}, \hat{\mU}_1 = \argmin_{\mathbf{W} \in \mathbb{R}^{q\times \ell}, \mU_1 \in \mathbb{R}^{p\times q}} \; \mathcal{L}(\alpha_1(\mathbf{X}\mU_1)\mathbf{W}, \mathbf{Y})\;.
+$${#eq-single-layer}
+
+@eq-single-layer is an example of a machine learning problem for a neural network with a single ***hidden layer***. The hidden layer refers to the "layer" of computation $\alpha_1(\mathbf{X}\mU_1)$. This layer is "hidden" because it's not the input of the model (that would be $\mathbf{X}$) nor is it the output (that would be $\alpha_1(\mathbf{X}\mU_1)\mathbf{W}$). The computational graph is now more complicated: we need to substitute in the explicit computations for $\phi$: 
+
+```{mermaid}
+flowchart LR
+  subgraph input
+    direction TB  
+    x_1 
+    x_2
+  end
+
+  subgraph hidden_activations
+    a_1
+    a_2
+  end
+
+  subgraph feature_map[features]
+    f_1
+    f_2
+  end
+
+  subgraph raw predictions[raw predictions/logits]
+    y_hat_1
+    y_hat_2 
+    y_hat_3
+  end
+
+  subgraph label_preds[label probabilities]
+    p_1
+    p_2
+    p_3
+  end
+
+  x_1 --u_1-->a_1
+  x_1 --u_2-->a_2
+  x_2 --u_1-->a_1
+  x_2 --u_2-->a_2
+
+  a_1--alpha_1-->f_1
+  a_2--alpha_1-->f_2
+
+  f_1 --w_1--> y_hat_1
+  f_2 --w_1--> y_hat_1
+  f_1 --w_2--> y_hat_2
+  f_2 --w_2--> y_hat_2
+  f_1 --w_3--> y_hat_3
+  f_2 --w_3--> y_hat_3
+
+  y_hat_1 & y_hat_2 & y_hat_3 --> softmax
+
+  softmax --> p_1 & p_2 & p_3
+```
+
+
+As you can see, we have to deal with a lot of matrix multiplications and vectorized function operations. We will also, soon, need to think about how to perform the empirical risk minimization problem, which in turn poses questions about things like how to do gradient descent for this kind of problem. While it's important for us to understand some of the theory, it's not a great use of anyone's time to do large amounts of bookkeeping. This is why specialized deep learning libraries exist to help us along. 

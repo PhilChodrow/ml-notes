@@ -369,9 +369,10 @@ window.Quarto = {
 \DeclareMathOperator*{\argmin}{argmin}
 \begin{aligned}
 \hat{\mathbf{w}} &amp;= \argmin_{\mathbf{w}} L(\mathbf{w}) \\
-&amp;= \argmin_{\mathbf{w}} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \phi(\mathbf{x}_i)\rangle, y_i) + \lambda R(\mathbf{w})\;.
+&amp;= \argmin_{\mathbf{w}} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \phi(\mathbf{x}_i)\rangle, y_i) + \lambda R(\mathbf{w})\;,
 \end{aligned}
 \tag{12.1}\]</span></span></p>
+<p>where <span class="math inline">\(R(\mathbf{w})\)</span> is a regularizer such as the <span class="math inline">\(\ell_1\)</span> or <span class="math inline">\(\ell_2\)</span> norm.</p>
 <div class="callout callout-style-simple callout-note">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
@@ -379,7 +380,7 @@ window.Quarto = {
 </div>
 <div class="callout-body-container">
 <div id="thm-span" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 12.1 (<span class="math inline">\(\hat{\mathbf{w}}\)</span> is spanned by the predictor data)</strong></span> Let <span class="math inline">\(\hat{\mathbf{w}}\)</span> be the solution to <a href="#eq-erm" class="quarto-xref">Equation&nbsp;<span>12.1</span></a>. Then, there exists a vector <span class="math inline">\(\mathbf{a} \in \mathbb{R}^n\)</span> such that <span class="math inline">\(\hat{\mathbf{w}} = \sum_{i = 1}^{n} a_{i} \phi(\mathbf{x}_i)  = \Phi(\mathbf{X})^T\mathbf{a}\)</span>.</p>
+<p><span class="theorem-title"><strong>Theorem 12.1 (<span class="math inline">\(\hat{\mathbf{w}}\)</span> is spanned by the predictor data)</strong></span> Let <span class="math inline">\(\hat{\mathbf{w}}\)</span> be the solution to <a href="#eq-erm" class="quarto-xref">Equation&nbsp;<span>12.1</span></a>. Then, there exists a vector <span class="math inline">\(\hat{\mathbf{a}} \in \mathbb{R}^n\)</span> such that <span class="math inline">\(\hat{\mathbf{w}} = \sum_{i = 1}^{n} \hat{a}_{i} \phi(\mathbf{x}_i)  = \Phi(\mathbf{X})^T\hat{\mathbf{a}}\)</span>.</p>
 </div>
 </div>
 </div>
@@ -406,11 +407,11 @@ window.Quarto = {
     \mathbf{w}^{(t)} = \sum_{i = 1}^n a_{i}^{(t)} \phi(\mathbf{x}_i)
 \end{aligned}
 \]</span></p>
-<div class="page-columns page-full"><p>for some constants <span class="math inline">\(a_i^{(t)}\)</span>. Continuing in this fashion and passing to the limit <span class="math inline">\(a_{i}^{(t)} \rightarrow a_i\)</span> as <span class="math inline">\(t\rightarrow \infty\)</span> ,</p><div class="no-row-height column-margin column-container"><span class="margin-aside">In our argument above, <span class="math inline">\(a_{i}^{(1)} = b_i^{(0)}\)</span> and <span class="math inline">\(a_{i}^{(2)} = (1 - 2\alpha) b_i^{(0)} + b_i^{(1)}\)</span>.</span><span class="margin-aside">Passing to the limit is justified because we assume <span class="math inline">\(\alpha\)</span> to be small enough that gradient descent converges</span></div></div>
+<div class="page-columns page-full"><p>for some constants <span class="math inline">\(\hat{a}_i^{(t)}\)</span>. Continuing in this fashion and passing to the limit <span class="math inline">\(\hat{a}_{i}^{(t)} \rightarrow \hat{a}_i\)</span> as <span class="math inline">\(t\rightarrow \infty\)</span> ,</p><div class="no-row-height column-margin column-container"><span class="margin-aside">In our argument above, <span class="math inline">\(a_{i}^{(1)} = b_i^{(0)}\)</span> and <span class="math inline">\(\hat{a}_{i}^{(2)} = (1 - 2\alpha) b_i^{(0)} + b_i^{(1)}\)</span>.</span><span class="margin-aside">Passing to the limit is justified because we assume <span class="math inline">\(\alpha\)</span> to be small enough that gradient descent converges</span></div></div>
 <p><span class="math display">\[
 \begin{aligned}
-    \hat{\mathbf{w}} &amp;= \sum_{i = 1}^n a_i \phi(\mathbf{x}_i) \\
-                     &amp;= \Phi(\mathbf{X})^T\mathbf{a}\;,
+    \hat{\mathbf{w}} &amp;= \sum_{i = 1}^n \hat{a}_i \phi(\mathbf{x}_i) \\
+                     &amp;= \Phi(\mathbf{X})^T\hat{\mathbf{a}}\;,
 \end{aligned}
 \]</span></p>
 <p>as was to be shown. In the last line, we have used the definition of matrix multiplication.</p>
@@ -424,7 +425,7 @@ window.Quarto = {
     &amp;= \lVert \Phi(\mathbf{X})\mathbf{w} - \mathbf{y} \rVert_2^2 + \lambda \mathbf{w}^T\mathbf{w}\;.
 \end{aligned}
 \]</span></p>
-<p>Let’s plug in the equation <span class="math inline">\(\mathbf{w} = \Phi(\mathbf{X})^T\mathbf{a}\)</span> from <a href="#thm-span" class="quarto-xref">Theorem&nbsp;<span>12.1</span></a>:</p>
+<p>Let’s plug in the equation <span class="math inline">\(\mathbf{w} = \Phi(\mathbf{X})^T\mathbf{a}\)</span> from <a href="#thm-span" class="quarto-xref">Theorem&nbsp;<span>12.1</span></a>. This allows us to re-express the loss as a function of the vector <span class="math inline">\(\mathbf{a}\)</span>.</p>
 <p><span class="math display">\[
 \begin{aligned}
     L(\mathbf{a}) &amp;= \lVert\Phi(\mathbf{X})\Phi(\mathbf{X})^T\mathbf{a} - \mathbf{y}\rVert_2^2+ \lambda \mathbf{a}^T\Phi(\mathbf{X})\Phi(\mathbf{X})^T\mathbf{a}\;.
@@ -456,14 +457,15 @@ window.Quarto = {
 \begin{aligned}
 s &amp;= \langle \phi(\mathbf{x}), \hat{\mathbf{w}} \rangle \\
   &amp;= \langle \phi(\mathbf{x}), \Phi(\mathbf{X})^T\hat{\mathbf{a}}\rangle \\
-  &amp;= \sum_{i = 1}^n \hat{a}_i k(\mathbf{x}, \mathbf{x}_i)\;.
+  &amp;= \sum_{i = 1}^n \hat{a}_i k(\mathbf{x}, \mathbf{x}_i)\;,
 \end{aligned}
 \tag{12.3}\]</span></span></p>
+<p>where again each <span class="math inline">\(k(\mathbf{x}, \mathbf{x}_i) = \langle \phi(\mathbf{x}), \phi(\mathbf{x}_i) \rangle\)</span>.</p>
 <p>So far, this is all just different notation for the same ridge regression that we talked about previously. What’s the point?</p>
 </section>
 <section id="the-kernel-trick" class="level2">
 <h2 class="anchored" data-anchor-id="the-kernel-trick">The Kernel Trick</h2>
-<p>Let’s remind ourselves: where is the feature matrix <span class="math inline">\(\Phi(\mathbf{X})\)</span> in <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>12.2</span></a>? It appears only through the kernel matrix <span class="math inline">\(\mathbf{K} = \Phi(\mathbf{X})\Phi(\mathbf{X})^T\)</span> with entries <span class="math inline">\(k_{ij} = \langle \phi(\mathbf{x}_i), \phi(\mathbf{x}_j) \rangle\)</span>. This means that as long as we know how to calculate these inner products, we never actually have to explicitly compute any of the features <span class="math inline">\(\phi(\mathbf{x})\)</span>. This idea, though simple, is so fundamental that it has an informal name – it’s the “kernel trick.”</p>
+<p>Let’s remind ourselves: where is the feature matrix <span class="math inline">\(\Phi(\mathbf{X})\)</span> in <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>12.2</span></a>? It appears only through the kernel matrix <span class="math inline">\(\mathbf{K} = \Phi(\mathbf{X})\Phi(\mathbf{X})^T\)</span> with entries <span class="math inline">\(k_{ij} = k(\mathbf{x}_i, \mathbf{x}_j) = \langle \phi(\mathbf{x}_i), \phi(\mathbf{x}_j) \rangle\)</span>. This means that as long as we know how to calculate these inner products, we never actually have to explicitly compute any of the features <span class="math inline">\(\phi(\mathbf{x})\)</span>. This idea, though simple, is so fundamental that it has an informal name – it’s the “kernel trick.”</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -474,13 +476,13 @@ Kernel Trick
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Suppose that we can find some function <span class="math inline">\(k:\mathbb{R}^p\times \mathbb{R}^p \rightarrow \mathbb{R}\)</span> with the property that <span class="math inline">\(k(\mathbf{x}_i, \mathbf{x}_j) = \langle \phi(\mathbf{x}_i), \phi(\mathbf{x}_j) \rangle\)</span>. Then, computing <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>12.2</span></a> and making predictions via <a href="#eq-kernel-predictor" class="quarto-xref">Equation&nbsp;<span>12.3</span></a> is equivalent to doing regular ridge regression with feature map <span class="math inline">\(\phi\)</span>.</p>
+<p>Suppose that we can find some function <span class="math inline">\(k:\mathbb{R}^p\times \mathbb{R}^p \rightarrow \mathbb{R}\)</span> and some feature map <span class="math inline">\(\phi\)</span> with the property that <span class="math inline">\(k(\mathbf{x}_i, \mathbf{x}_j) = \langle \phi(\mathbf{x}_i), \phi(\mathbf{x}_j) \rangle\)</span>. Then, computing <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>12.2</span></a> and making predictions via <a href="#eq-kernel-predictor" class="quarto-xref">Equation&nbsp;<span>12.3</span></a> is equivalent to doing regular ridge regression with feature map <span class="math inline">\(\phi\)</span>.</p>
 </div>
 </div>
 </section>
 <section id="positive-definite-kernels" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="positive-definite-kernels">Positive-Definite Kernels</h2>
-<p>When does a candidate function <span class="math inline">\(k\)</span> has the property that <span class="math inline">\(k(\mathbf{x}_i, \mathbf{x}_j) = \langle \phi(\mathbf{x}_i), \phi(\mathbf{x}_j) \rangle\)</span> for some <span class="math inline">\(\phi\)</span>? The fundamental property is positive-definiteness:</p>
+<p>When does a candidate function <span class="math inline">\(k\)</span> have the property that <span class="math inline">\(k(\mathbf{x}_i, \mathbf{x}_j) = \langle \phi(\mathbf{x}_i), \phi(\mathbf{x}_j) \rangle\)</span> for some <span class="math inline">\(\phi\)</span>? The fundamental property for which we can check is called <em>positive-definiteness</em>:</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -492,51 +494,42 @@ Positive-Definite Kernel
 </div>
 <div class="callout-body-container callout-body">
 <p>A matrix <span class="math inline">\(\mathbf{K} \in \mathbb{R}^{n\times n}\)</span> is <em>positive definite</em> if, for any vector <span class="math inline">\(\mathbf{z} \in \mathbb{R}^n\)</span>, <span class="math inline">\(\mathbf{z}^T\mathbf{K}\mathbf{z} &gt; 0\)</span>.</p>
-<p>A function <span class="math inline">\(k:\mathbb{R}^p \times \mathbb{R}^p \rightarrow \mathbb{R}\)</span> is a <em>positive definite kernel</em> if, for any matrix <span class="math inline">\(\mathbf{X}\in \mathbb{R}^{n \times p}\)</span>, the matrix <span class="math inline">\(\mathbf{K}\)</span> with entries <span class="math inline">\(k_{ij} = k(\mathbf{x}_i, \mathbf{x}_j)\)</span> is a positive definite matrix.</p>
+<p>A function <span class="math inline">\(k:\mathbb{R}^p \times \mathbb{R}^p \rightarrow \mathbb{R}\)</span> is a <em>positive definite kernel</em> if, for any matrix <span class="math inline">\(\mathbf{X}\in \mathbb{R}^{n \times p}\)</span>, the matrix <span class="math inline">\(\mathbf{K} \in \mathbb{R}^{n\times n}\)</span> with entries <span class="math inline">\(k_{ij} = k(\mathbf{x}_i, \mathbf{x}_j)\)</span> is a positive definite matrix.</p>
 </div>
 </div>
 <p>There are a number of rules for deriving examples of positive-definite kernels, as well as some famous examples (for a fairly complete guide, see <a href="https://www.microsoft.com/en-us/research/uploads/prod/2006/01/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf#page=314">Section 6.2</a> of <span class="citation" data-cites="bishopPatternRecognitionMachine2006">Bishop (<a href="#ref-bishopPatternRecognitionMachine2006" role="doc-biblioref">2006</a>)</span>).</p>
-<p>In fact, it’s not even necessary that <span class="math inline">\(k\)</span> give inner products for <em>finite</em> feature spaces? For example, the Gaussian radial basis function (RBF) kernel has formula</p>
+<p>In fact, it’s not even necessary that <span class="math inline">\(k\)</span> give inner products for <em>finite</em> feature spaces! For example, the Gaussian radial basis function (RBF) kernel has formula</p>
 <p><span class="math display">\[
 \begin{aligned}
-    k(\mathbf{x}_1, \mathbf{x}_2) = e^{-\gamma\lVert \mathbf{x}_1 - \mathbf{x}_2 \rVert^2_2}\;.
+    k(\mathbf{x}_i, \mathbf{x}_j) = e^{-\gamma\lVert \mathbf{x}_i - \mathbf{x}_j \rVert^2_2}\;.
 \end{aligned}
 \]</span></p>
-<div class="page-columns page-full"><p>Here, <span class="math inline">\(\gamma\)</span> is a tunable parameter. It may not be obvious that this is a valid positive-definite kernel, but you can check <span class="citation" data-cites="bishopPatternRecognitionMachine2006">Bishop (<a href="#ref-bishopPatternRecognitionMachine2006" role="doc-biblioref">2006</a>)</span> for an argument that it is. However, this kernel does not correspond to any finite-dimensional feature space – it actually gives the inner product for an <em>infinite</em>-dimensional vector space.  So, if we can calculate the RBF kernel, then we can use <em>infinitely</em> many features with finite compute time.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">Technically, it describes the inner product in a certain Hilbert space.</span></div></div>
+<div class="page-columns page-full"><p>Here, <span class="math inline">\(\gamma\)</span> is a tunable parameter called the <em>bandwidth</em>. It may not be obvious that this is a valid positive-definite kernel, but you can check <span class="citation" data-cites="bishopPatternRecognitionMachine2006">Bishop (<a href="#ref-bishopPatternRecognitionMachine2006" role="doc-biblioref">2006</a>)</span> for an argument that it is. The RBF kernel does not correspond to any finite-dimensional feature space – it actually gives the inner product for an <em>infinite</em>-dimensional vector space.  So, if we can calculate the RBF kernel, then we can use <em>infinitely</em> many features with finite compute time.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">Technically, it describes the inner product in a certain Hilbert space.</span></div></div>
 <p>Here’s an implementation of the RBF kernel:</p>
-<div id="cell-1" class="cell" data-execution_count="157">
+<div id="cell-1" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> string</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> nltk</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nltk.corpus <span class="im">import</span> stopwords</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> itertools <span class="im">import</span> product</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># nltk.download('stopwords')</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> itertools <span class="im">import</span> product</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>[nltk_data] Downloading package stopwords to
-[nltk_data]     /Users/philchodrow/nltk_data...
-[nltk_data]   Package stopwords is already up-to-date!</code></pre>
 </div>
-</div>
-<div id="cell-2" class="cell" data-execution_count="158">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rbf_kernel(X_1, X_2, gamma):</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> torch.exp(<span class="op">-</span>gamma<span class="op">*</span>torch.cdist(X_1, X_2)<span class="op">**</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-2" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rbf_kernel(X_1, X_2, gamma):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> torch.exp(<span class="op">-</span>gamma<span class="op">*</span>torch.cdist(X_1, X_2)<span class="op">**</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here is a visualization of the RBF kernel for an array of values of <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>.</p>
-<div id="cell-4" class="cell" data-execution_count="159">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>x1 <span class="op">=</span> torch.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">101</span>)[:, <span class="va">None</span>]</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>x2 <span class="op">=</span> torch.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">101</span>)[:, <span class="va">None</span>]</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>plt.imshow(rbf_kernel(x1, x2, <span class="dv">10</span>), cmap <span class="op">=</span> <span class="st">"inferno"</span>, extent <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>])</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"$x_2$"</span>, ylabel <span class="op">=</span> <span class="vs">r"$x_1$"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-4" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>x1 <span class="op">=</span> torch.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">101</span>)[:, <span class="va">None</span>]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>x2 <span class="op">=</span> torch.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">101</span>)[:, <span class="va">None</span>]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>plt.imshow(rbf_kernel(x1, x2, <span class="dv">10</span>), cmap <span class="op">=</span> <span class="st">"inferno"</span>, extent <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>])</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"$x_2$"</span>, ylabel <span class="op">=</span> <span class="vs">r"$x_1$"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -549,56 +542,56 @@ Positive-Definite Kernel
 </section>
 <section id="implementing-kernel-ridge-regression" class="level2">
 <h2 class="anchored" data-anchor-id="implementing-kernel-ridge-regression">Implementing Kernel Ridge Regression</h2>
-<p>Let’s now implement kernel ridge regression. Here’s some data with a nonlinear trend.</p>
-<div id="cell-6" class="cell" data-execution_count="160">
+<p>Let’s now implement kernel ridge regression from <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>12.2</span></a>. Here’s some data with a nonlinear trend.</p>
+<div id="cell-6" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> regression_data(n <span class="op">=</span> <span class="dv">100</span>, w <span class="op">=</span> torch.Tensor([<span class="op">-</span><span class="fl">0.7</span>, <span class="fl">0.5</span>]), phi <span class="op">=</span> <span class="kw">lambda</span> x: x, x_max <span class="op">=</span> <span class="dv">1</span>):</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> torch.zeros(n, <span class="dv">2</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> torch.rand(n)<span class="op">*</span>x_max</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    x, ix <span class="op">=</span> torch.sort(x)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    X[:, <span class="dv">1</span>] <span class="op">=</span> x</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    X[:, <span class="dv">0</span>] <span class="op">=</span> torch.ones(n)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> X <span class="op">-</span> X.mean(dim <span class="op">=</span> <span class="dv">0</span>,keepdims <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> phi(X)<span class="op">@</span>w <span class="op">+</span> <span class="fl">0.05</span><span class="op">*</span>torch.randn(n)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> y <span class="op">-</span> y.mean()</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X, y</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_regression_data(X, y, ax <span class="op">=</span> <span class="va">None</span>, legend <span class="op">=</span> <span class="va">True</span>, xlabel <span class="op">=</span> <span class="va">True</span>, ylabel <span class="op">=</span> <span class="va">True</span>, title <span class="op">=</span> <span class="va">None</span>):</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ax <span class="kw">is</span> <span class="va">None</span>: </span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> xlabel: </span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature (x)"</span>)</span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ylabel: </span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> ax.<span class="bu">set</span>(ylabel <span class="op">=</span> <span class="st">"Target (y)"</span>)</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> title: </span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        t <span class="op">=</span> ax.<span class="bu">set</span>(title <span class="op">=</span> title)</span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    ax.scatter(X[:,<span class="dv">1</span>], y, facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"steelblue"</span>, label <span class="op">=</span> <span class="st">"data"</span>)</span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> w <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: </span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>        m_points <span class="op">=</span> <span class="dv">1001</span></span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        X_ <span class="op">=</span> torch.zeros(m_points, <span class="dv">2</span>)</span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.linspace(X[:,<span class="dv">1</span>].<span class="bu">min</span>().item()<span class="op">-</span><span class="fl">0.01</span>, X[:,<span class="dv">1</span>].<span class="bu">max</span>().item()<span class="op">+</span><span class="fl">0.01</span>, m_points)</span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        X_[:,<span class="dv">1</span>] <span class="op">=</span> x</span>
-<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>        X_[:, <span class="dv">0</span>] <span class="op">=</span> torch.ones(m_points)</span>
-<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>        X_ <span class="op">=</span> X_ <span class="op">-</span> X_.mean(dim <span class="op">=</span> <span class="dv">0</span>,keepdims <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> regression_data(n <span class="op">=</span> <span class="dv">100</span>, w <span class="op">=</span> torch.Tensor([<span class="op">-</span><span class="fl">0.7</span>, <span class="fl">0.5</span>]), phi <span class="op">=</span> <span class="kw">lambda</span> x: x, x_max <span class="op">=</span> <span class="dv">1</span>):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> torch.zeros(n, <span class="dv">2</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> torch.rand(n)<span class="op">*</span>x_max</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    x, ix <span class="op">=</span> torch.sort(x)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    X[:, <span class="dv">1</span>] <span class="op">=</span> x</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    X[:, <span class="dv">0</span>] <span class="op">=</span> torch.ones(n)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> X <span class="op">-</span> X.mean(dim <span class="op">=</span> <span class="dv">0</span>,keepdims <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> phi(X)<span class="op">@</span>w <span class="op">+</span> <span class="fl">0.05</span><span class="op">*</span>torch.randn(n)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> y <span class="op">-</span> y.mean()</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X, y</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_regression_data(X, y, ax <span class="op">=</span> <span class="va">None</span>, legend <span class="op">=</span> <span class="va">True</span>, xlabel <span class="op">=</span> <span class="va">True</span>, ylabel <span class="op">=</span> <span class="va">True</span>, title <span class="op">=</span> <span class="va">None</span>):</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ax <span class="kw">is</span> <span class="va">None</span>: </span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> xlabel: </span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature (x)"</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ylabel: </span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> ax.<span class="bu">set</span>(ylabel <span class="op">=</span> <span class="st">"Target (y)"</span>)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> title: </span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        t <span class="op">=</span> ax.<span class="bu">set</span>(title <span class="op">=</span> title)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    ax.scatter(X[:,<span class="dv">1</span>], y, facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"steelblue"</span>, label <span class="op">=</span> <span class="st">"data"</span>)</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> w <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: </span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        m_points <span class="op">=</span> <span class="dv">1001</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>        X_ <span class="op">=</span> torch.zeros(m_points, <span class="dv">2</span>)</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.linspace(X[:,<span class="dv">1</span>].<span class="bu">min</span>().item()<span class="op">-</span><span class="fl">0.01</span>, X[:,<span class="dv">1</span>].<span class="bu">max</span>().item()<span class="op">+</span><span class="fl">0.01</span>, m_points)</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>        X_[:,<span class="dv">1</span>] <span class="op">=</span> x</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>        X_[:, <span class="dv">0</span>] <span class="op">=</span> torch.ones(m_points)</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>        X_ <span class="op">=</span> X_ <span class="op">-</span> X_.mean(dim <span class="op">=</span> <span class="dv">0</span>,keepdims <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="cell-7" class="cell" data-execution_count="161">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> torch.Tensor([<span class="fl">0.4</span>, <span class="fl">0.5</span>])</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> regression_data(w <span class="op">=</span> w, phi <span class="op">=</span> torch.sin, x_max <span class="op">=</span> <span class="dv">4</span><span class="op">*</span>torch.pi)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>plot_regression_data(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-7" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> torch.Tensor([<span class="fl">0.4</span>, <span class="fl">0.5</span>])</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> regression_data(w <span class="op">=</span> w, phi <span class="op">=</span> torch.sin, x_max <span class="op">=</span> <span class="dv">4</span><span class="op">*</span>torch.pi)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>plot_regression_data(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -607,63 +600,72 @@ Positive-Definite Kernel
 </div>
 </div>
 </div>
-<p>Now we’ll implement kernelized ridge regression. We’ll implement a class to hold instance variables and implement the mathematics described by <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>12.2</span></a> and <span class="quarto-unresolved-ref">?eq-kernel-predict</span>. Since we don’t need to do any gradient descent with this class, we’ll implement it using the standard <code>sklearn</code> API.</p>
-<div id="cell-9" class="cell" data-execution_count="162">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> KernelRidgeRegression:</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, kernel, lam, <span class="op">**</span>kwargs):</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lam    <span class="op">=</span> lam     <span class="co"># regularization strength</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.kernel <span class="op">=</span> kernel  <span class="co"># kernel used</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.kwargs <span class="op">=</span> kwargs  <span class="co"># keyword arguments passed to kernel</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> fit(<span class="va">self</span>, X, y):</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">        finds optimal weights using the analytic ridge-regression formula and saves them as an instance variable. Also saves the training data, since this is needed for prediction</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> X.size(<span class="dv">0</span>) <span class="cf">if</span> <span class="bu">isinstance</span>(X, torch.Tensor) <span class="cf">else</span> <span class="bu">len</span>(X)</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># compute the kernel matrix</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        K <span class="op">=</span> <span class="va">self</span>.kernel(X, X, <span class="op">**</span><span class="va">self</span>.kwargs)</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># perform the fit</span></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.a <span class="op">=</span> torch.inverse(K <span class="op">+</span> <span class="va">self</span>.lam<span class="op">*</span>torch.eye(n))<span class="op">@</span>y</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        <span class="co"># save the training data: we'll need it for prediction</span></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.X_train <span class="op">=</span> X</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> predict(<span class="va">self</span>, X):</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># compute the kernel matrix of the new data with the training data</span></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        k <span class="op">=</span> <span class="va">self</span>.kernel(X, <span class="va">self</span>.X_train, <span class="op">**</span><span class="va">self</span>.kwargs)</span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># compute the predictions</span></span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        s <span class="op">=</span> k<span class="op">@</span>self.a</span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> s </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now we’ll implement kernelized ridge regression. We’ll implement a class to hold instance variables and implement the mathematics described by <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>12.2</span></a> and <a href="#eq-kernel-predictor" class="quarto-xref">Equation&nbsp;<span>12.3</span></a>. Since we don’t need to do any gradient descent with this class, we’ll implement it using the standard <code>sklearn</code> API.</p>
+<div id="cell-9" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> KernelRidgeRegression:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, kernel, lam, <span class="op">**</span>kwargs):</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lam    <span class="op">=</span> lam     <span class="co"># regularization strength</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.kernel <span class="op">=</span> kernel  <span class="co"># kernel used</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.kwargs <span class="op">=</span> kwargs  <span class="co"># keyword arguments passed to kernel</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> fit(<span class="va">self</span>, X, y):</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">        implements eq. 12.2</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">        Also saves the training data, since this is needed for prediction</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> X.size(<span class="dv">0</span>) <span class="cf">if</span> <span class="bu">isinstance</span>(X, torch.Tensor) <span class="cf">else</span> <span class="bu">len</span>(X)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        I <span class="op">=</span> torch.eye(n)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                <span class="co"># compute the kernel matrix</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        K <span class="op">=</span> <span class="va">self</span>.kernel(X, X, <span class="op">**</span><span class="va">self</span>.kwargs)                       </span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># perform the fit</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.a <span class="op">=</span> torch.inverse(K <span class="op">+</span> <span class="va">self</span>.lam<span class="op">*</span>I)<span class="op">@</span>y</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        <span class="co"># save the training data: we'll need it for prediction</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.X_train <span class="op">=</span> X</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> predict(<span class="va">self</span>, X):</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co">        implements eq. 12.3</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># compute the kernel matrix of the new data with the training data</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>                k <span class="op">=</span> <span class="va">self</span>.kernel(X, <span class="va">self</span>.X_train, <span class="op">**</span><span class="va">self</span>.kwargs)</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># compute the predictions</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        s <span class="op">=</span> k<span class="op">@</span>self.a</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> s </span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We’ll use the <code>rbf_kernel</code> from before to fit our model.</p>
-<div id="cell-11" class="cell" data-execution_count="163">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>KR <span class="op">=</span> KernelRidgeRegression(rbf_kernel, lam <span class="op">=</span> <span class="fl">.1</span>, gamma <span class="op">=</span> <span class="fl">0.02</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>KR.fit(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-11" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>KR <span class="op">=</span> KernelRidgeRegression(rbf_kernel, lam <span class="op">=</span> <span class="fl">.1</span>, gamma <span class="op">=</span> <span class="fl">0.02</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>KR.fit(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now let’s visualize:</p>
-<div id="cell-13" class="cell" data-execution_count="164">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_pattern(X, y, KR, <span class="op">**</span>kwargs):</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)    </span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    plot_regression_data(X, y, ax)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    m_points <span class="op">=</span> <span class="dv">101</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    X_ <span class="op">=</span> torch.zeros(m_points, <span class="dv">2</span>)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> torch.linspace(X[:,<span class="dv">1</span>].<span class="bu">min</span>().item()<span class="op">-</span><span class="fl">0.01</span>, X[:,<span class="dv">1</span>].<span class="bu">max</span>().item()<span class="op">+</span><span class="fl">0.01</span>, m_points)</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    X_[:,<span class="dv">1</span>] <span class="op">=</span> x</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    X_[:, <span class="dv">0</span>] <span class="op">=</span> torch.ones(m_points)</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># X_ = X_ - X_.mean(dim = 0,keepdims = True)</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> KR.predict(X_)</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    ax.plot(x, s, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-13" class="cell" data-execution_count="18">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_model(X, y, KR, <span class="op">**</span>kwargs):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)    </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    plot_regression_data(X, y, ax)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    m_points <span class="op">=</span> <span class="dv">101</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    X_ <span class="op">=</span> torch.zeros(m_points, <span class="dv">2</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> torch.linspace(X[:,<span class="dv">1</span>].<span class="bu">min</span>().item()<span class="op">-</span><span class="fl">0.01</span>, X[:,<span class="dv">1</span>].<span class="bu">max</span>().item()<span class="op">+</span><span class="fl">0.01</span>, m_points)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    X_[:,<span class="dv">1</span>] <span class="op">=</span> x</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    X_[:, <span class="dv">0</span>] <span class="op">=</span> torch.ones(m_points)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> KR.predict(X_)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    ax.plot(x, s, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
-<div id="cell-14" class="cell" data-execution_count="165">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plot_pattern(X, y, KR, color <span class="op">=</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-14" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plot_model(X, y, KR, color <span class="op">=</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -673,10 +675,10 @@ Positive-Definite Kernel
 </div>
 </div>
 <p>Hmmmm, that doesn’t look so good. Clearly “an attempt was made,” but the model is not flexible enough to model the pattern in the data. Let’s increase <span class="math inline">\(\gamma\)</span>:</p>
-<div id="cell-16" class="cell" data-execution_count="166">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>KR <span class="op">=</span> KernelRidgeRegression(rbf_kernel, lam <span class="op">=</span> <span class="fl">.00001</span>, gamma <span class="op">=</span> <span class="fl">.15</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>KR.fit(X, y)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>plot_pattern(X, y, KR, color <span class="op">=</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-16" class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>KR <span class="op">=</span> KernelRidgeRegression(rbf_kernel, lam <span class="op">=</span> <span class="fl">.1</span>, gamma <span class="op">=</span> <span class="fl">.1</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>KR.fit(X, y)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>plot_model(X, y, KR, color <span class="op">=</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -685,11 +687,11 @@ Positive-Definite Kernel
 </div>
 </div>
 </div>
-<p>Much nicer! As usual, increasing <span class="math inline">\(\gamma\)</span> too much results in undesirably wiggly models that may reflect overfitting or numerical issues.</p>
-<div id="cell-18" class="cell" data-execution_count="167">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>KR <span class="op">=</span> KernelRidgeRegression(rbf_kernel, lam <span class="op">=</span> <span class="fl">0.0000001</span>, gamma <span class="op">=</span> <span class="fl">.4</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>KR.fit(X, y)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>plot_pattern(X, y, KR, color <span class="op">=</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Much nicer! As usual, other combinations of <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\lambda\)</span> can result in undesirably wiggly models that may reflect overfitting or numerical issues. These issues can often be addressed via cross-validation.</p>
+<div id="cell-18" class="cell" data-execution_count="42">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>KR <span class="op">=</span> KernelRidgeRegression(rbf_kernel, lam <span class="op">=</span> <span class="fl">0.000001</span>, gamma <span class="op">=</span> <span class="fl">.5</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>KR.fit(X, y)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>plot_model(X, y, KR, color <span class="op">=</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -705,107 +707,169 @@ Positive-Definite Kernel
 </section>
 <section id="application-kernelized-sentiment-analysis" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="application-kernelized-sentiment-analysis">Application: Kernelized Sentiment Analysis</h2>
-<div class="page-columns page-full"><p>In addition to giving us a flexible way to model nonlinear patterns in data, the kernel trick also gives us a helpful way to represent predictor data that isn’t natively in the form of a feature matrix. For example, let’s use kernel ridge regression to perform <em>sentiment analysis</em> on a small data set of Yelp reviews.  Our task is to predict the score (from 0 to 4) based on the words in the review.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">I retrieved this data from <a href="https://huggingface.co/datasets/yelp_review_full/blob/main/yelp_review_full/train-00000-of-00001.parquet">HuggingFace.co</a>.</span></div></div>
-<div id="cell-20" class="cell" data-execution_count="168">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/yelp-reviews/reviews-subset.csv"</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(url)</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> df[<span class="st">"text"</span>], df[<span class="st">"label"</span>]</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>x_train, x_test, y_train, y_test <span class="op">=</span> train_test_split(x, y, train_size <span class="op">=</span> <span class="fl">0.6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="page-columns page-full"><p>In addition to giving us a flexible way to model nonlinear patterns in data, the kernel trick also gives us a helpful way to represent predictor data that isn’t natively in the form of a feature matrix. For example, let’s use kernel ridge regression to perform <em>sentiment analysis</em> on a small data set of Yelp reviews.  Our task is to predict the score (from 0 to 4) based on the words in the review. </p><div class="no-row-height column-margin column-container"><span class="margin-aside">I retrieved this data from <a href="https://huggingface.co/datasets/yelp_review_full/blob/main/yelp_review_full/train-00000-of-00001.parquet">HuggingFace.co</a>.</span><span class="margin-aside">The first time you work with stopwords in the NLTK package, you may need to run <code>nltk.download('stopwords')</code>.</span></div></div>
+<div id="cell-20" class="cell" data-execution_count="43">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> nltk</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nltk.corpus <span class="im">import</span> stopwords</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> string</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>nltk.download(<span class="st">'stopwords'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Here’s how the data looks:</p>
-<div id="cell-22" class="cell" data-execution_count="169">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(y.iloc[i], x_train.iloc[i])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>2 This place is awesome food here is excellent. I would really recommend getting the ribs they are so good. They fall right off the bone yet still retains a nice bite that you would want to get from a good piece of meat. Their sides are also really good the cheesy mac is super creamy and cheesy. \n\nThe prices here are also pretty good. I would not consider it cheap but its a good value for the quality and amount of food you get. \n\nService here is really good too. Everybody is really nice and helpful. Sometimes when it gets really busy it gets a little chaotic due to the tight space they have but you can still tell everybody there is giving it their all to try and provide the best service they can.
-0 Warning: This place is not for the neat, tidy, or sensitive. This is a place to get rowdy, get messed up, and plain out be a total douche.\n\nI didn't get any food here since the food prices are pretty crazy and just spent my time nursing a pitcher of beer. They had a pretty good cover band playing and that was probably the highlight of my experience here (besides the explicit message written on our bill haha).\n\nService here is definitely more for the entertainment and almost borders on being disservice. \n\nNot sure I'd come back .. we'll see.
-2 I've had BBQ all over the Bay Area and in the South but this was the best I've ever had.\n\nWe had ribs, pulled pork, chicken and brisket.  I couldn't believe how moist everything was.  I didn't use the sauce because is was absolutely but needed.  Its a new \"must stop\" on our Vegas trips.
-3 This is where I go to get my tea. I don't care if I have to drive out of my way, I'm not going to settle for less. They have the best selection of loose leaf tea. The staff is friendly and helpful and have great tea recommendations. Thanks to Fleur de Teas, I am branching out into iced teas. Never before have I tasted an ice tea blend that was worth drinking. \nFleur de Teas, I love you.
-2 Fun atmosphere, visually stimulating. Tons of things to look at.\nA good mix of restaurants and watering holes. Checking in and out was a breeze.\nThe problem I have is about security. On the second night sometime shortly after 1:30 there was a jiggling at are door. There was a dude putting in door card trying to enter. We called the desk and said they would notify security. Meanwhile this guys trying other doors down the hall. 15 minutes later we call the desk again! In the meanwhile he comes back to our door and is shuffling through a handful of door cards to find one that might work. We yell through the door at the punk a few times to no avail. Security shows up 5 minutes later and confronts the guy. We opened our door to say that's the dude and were told by security that they got it. There was no further contact with security or the desk. So we were left in the dark to what was happening. Scarey\nSecurity at the elevators like other resorts is a good thing after midnight.</code></pre>
+<p>First let’s download the data and do a train-test split.</p>
+<div id="cell-22" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/yelp-reviews/reviews-subset.csv"</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(url)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> df[<span class="st">"text"</span>], df[<span class="st">"label"</span>]</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>x_train, x_test, y_train, y_test <span class="op">=</span> train_test_split(x, y, train_size <span class="op">=</span> <span class="fl">0.6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We have a total of 3000 reviews in the training set:</p>
+<div id="cell-24" class="cell" data-execution_count="46">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>x_train</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="46">
+<pre><code>4979    Don't call this landscaping company unless you...
+3942    Starting Off The Night.... They forced me to r...
+4443    Thank you for making a beautiful ring! Sylvia ...
+3016    It's a bar...like the movie Coyote Ugly.  Girl...
+3852    These guys don't seem to be able to keep staff...
+                              ...                        
+465     For my birthday, the wife planned a trip to tr...
+3433    Haven't been here in like 3 years because last...
+1943    The food was brought out HOT, just what you'd ...
+4685    The kind of Thai food you want in the neighbor...
+3204    All the previous reviews on here are for dinin...
+Name: text, Length: 3000, dtype: object</code></pre>
+</div>
+</div>
+<p>Each review is accompanied by a numerical rating from 0 to 4.</p>
+<div id="cell-26" class="cell" data-execution_count="48">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>y_train</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="48">
+<pre><code>4979    0
+3942    1
+4443    3
+3016    1
+3852    1
+       ..
+465     2
+3433    0
+1943    0
+4685    3
+3204    3
+Name: label, Length: 3000, dtype: int64</code></pre>
 </div>
 </div>
 <div class="page-columns page-full"><p>To use kernelized ridge regression, all we need to do is define a positive-definite kernel function that accepts two strings of text as inputs. For today, we’ll simplistically model a string as a set of unique words, ignoring repetition and word order.  To compare two sets of words, we’ll use the <em>cosine similarity kernel</em>. If <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> are two sets, the cosine similarity of <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> is <span class="math display">\[
 \begin{aligned}
-    k(A, B) = \frac{\lvert A\cap B \rvert}{\lvert A \lvert \cdot \lvert B\rvert}\;.
+    k(A, B) = \frac{\lvert A\cap B \rvert}{\sqrt{\lvert A \lvert \times \lvert B\rvert}}\;.
 \end{aligned}
 \]</span></p><div class="no-row-height column-margin column-container"><span class="margin-aside">If you would like to learn to make better assumptions about how to handle text, take a course in natural language processing!</span></div></div>
+<p>For example, let sentence $s_1 = $ “I love cats” and let $s_2 = $ “I love dogs”. There are two words shared between these sentences, and each has length <span class="math inline">\(3\)</span>. So, the cosine similarity is <span class="math inline">\(\frac{2}{\sqrt{3\times 3}} = \frac{2}{3}\)</span>.</p>
 <p>The following functions implement cosine similarity for sets of words. There is some minimal text processing to be done: we remove common stopwords, punctuation, and casing.</p>
-<div id="cell-24" class="cell" data-execution_count="170">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>stopwords <span class="op">=</span> stopwords.words(<span class="st">'english'</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>translator <span class="op">=</span> <span class="bu">str</span>.maketrans(<span class="st">''</span>, <span class="st">''</span>, string.punctuation)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># data prep: remove stopwords and punctuation, and transform sentence into set of words. </span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_text(t):</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> t.translate(translator)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="bu">set</span>(t.split())</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> {word <span class="cf">for</span> word <span class="kw">in</span> s <span class="cf">if</span> word <span class="kw">not</span> <span class="kw">in</span> stopwords}</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co"># implement the kernel. </span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="co"># sadly, this one has to be done with for-loops. </span></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cosine_similarity_kernel(X_1, X_2):</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># initialize empty kernel matrix</span></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> torch.zeros((<span class="bu">len</span>(X_1), <span class="bu">len</span>(X_2)))</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># lists of processed sets of words</span></span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    S_1 <span class="op">=</span> [process_text(X_1.iloc[i]) <span class="cf">for</span>  i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(X_1))]</span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    S_2 <span class="op">=</span> [process_text(X_2.iloc[i]) <span class="cf">for</span>  i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(X_2))]</span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># all the math is here! </span></span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, j <span class="kw">in</span> product(<span class="bu">range</span>(<span class="bu">len</span>(S_1)), <span class="bu">range</span>(<span class="bu">len</span>(S_2))):</span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>        s1, s2 <span class="op">=</span> S_1[i], S_2[j]</span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>        K[i, j] <span class="op">=</span> <span class="bu">len</span>(s1.intersection(s2)) <span class="op">/</span> (<span class="bu">len</span>(s1)<span class="op">*</span><span class="bu">len</span>(s2))</span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> K</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-28" class="cell" data-execution_count="50">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>stopwords <span class="op">=</span> stopwords.words(<span class="st">'english'</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>translator <span class="op">=</span> <span class="bu">str</span>.maketrans(<span class="st">''</span>, <span class="st">''</span>, string.punctuation)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># data prep: remove stopwords and punctuation, and transform sentence into set of words. </span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_text(t):</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> t.translate(translator)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="bu">set</span>(t.split())</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> {word <span class="cf">for</span> word <span class="kw">in</span> s <span class="cf">if</span> word <span class="kw">not</span> <span class="kw">in</span> stopwords}</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co"># implement the kernel. </span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="co"># sadly, this one has to be done with for-loops. </span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cosine_similarity_kernel(X_1, X_2):</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># initialize empty kernel matrix</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> torch.zeros((<span class="bu">len</span>(X_1), <span class="bu">len</span>(X_2)))</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># lists of processed sets of words</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    S_1 <span class="op">=</span> [process_text(X_1.iloc[i]) <span class="cf">for</span>  i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(X_1))]</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    S_2 <span class="op">=</span> [process_text(X_2.iloc[i]) <span class="cf">for</span>  i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(X_2))]</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># all the math is here! </span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, j <span class="kw">in</span> product(<span class="bu">range</span>(<span class="bu">len</span>(S_1)), <span class="bu">range</span>(<span class="bu">len</span>(S_2))):</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>        s1, s2 <span class="op">=</span> S_1[i], S_2[j]</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>        K[i, j] <span class="op">=</span> <span class="bu">len</span>(s1.intersection(s2)) <span class="op">/</span> (math.sqrt(<span class="bu">len</span>(s1)<span class="op">*</span><span class="bu">len</span>(s2)))</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> K</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now that we’ve implemented a kernel, we can fit our kernel ridge regression <em>directly on the list of reviews</em>:</p>
-<div id="cell-26" class="cell" data-execution_count="171">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>KR <span class="op">=</span> KernelRidgeRegression(cosine_similarity_kernel, lam <span class="op">=</span> <span class="fl">0.01</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>KR.fit(x_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This kernel accepts text as input – no feature matrix required!</p>
+<div id="cell-30" class="cell" data-execution_count="53">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> x_train.head(<span class="dv">5</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="53">
+<pre><code>4979    Don't call this landscaping company unless you...
+3942    Starting Off The Night.... They forced me to r...
+4443    Thank you for making a beautiful ring! Sylvia ...
+3016    It's a bar...like the movie Coyote Ugly.  Girl...
+3852    These guys don't seem to be able to keep staff...
+Name: text, dtype: object</code></pre>
 </div>
-<p>We can similarly extract predictions on the test data:</p>
-<div id="cell-28" class="cell" data-execution_count="172">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>preds <span class="op">=</span> KR.predict(x_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-31" class="cell" data-execution_count="54">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>cosine_similarity_kernel(x, x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="54">
+<pre><code>tensor([[1.0000, 0.0473, 0.0434, 0.0280, 0.0833],
+        [0.0473, 1.0000, 0.0000, 0.0000, 0.1113],
+        [0.0434, 0.0000, 1.0000, 0.0000, 0.0383],
+        [0.0280, 0.0000, 0.0000, 1.0000, 0.0000],
+        [0.0833, 0.1113, 0.0383, 0.0000, 1.0000]])</code></pre>
+</div>
+</div>
+<p>Now that we’ve implemented a kernel that accepts text directly, we can fit our kernel ridge regression <em>directly on the list of reviews</em>. This is our first and really only time in this course where we will be able to fit a model directly on a data set without first transforming it into a feature matrix.</p>
+<div id="cell-33" class="cell" data-execution_count="55">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>KR <span class="op">=</span> KernelRidgeRegression(cosine_similarity_kernel, lam <span class="op">=</span> <span class="fl">0.01</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>KR.fit(x_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This calculation is relatively slow. Why? The two computational bottlenecks are:</p>
+<ol type="1">
+<li>Computing the kernel matrix, which has <span class="math inline">\(3000^2 = 9,000,000\)</span> entries.</li>
+<li>Inverting the kernel matrix, which has complexity of roughly <span class="math inline">\(O(n^3)\)</span>.</li>
+</ol>
+<p>We can similarly extract predictions on the test data, which will again take some time.</p>
+<div id="cell-35" class="cell" data-execution_count="56">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>preds <span class="op">=</span> KR.predict(x_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>It can be hard to visualize these predictions because we never explicitly formed a feature matrix. One way to visually assess quality is to view the mean of the predictions as a function of the observed scores on the test set.</p>
-<div id="cell-30" class="cell" data-execution_count="173">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>plt.scatter(y_test, preds, alpha <span class="op">=</span> <span class="fl">0.01</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    mean_pred <span class="op">=</span> preds.numpy()[y_test <span class="op">==</span> i].mean()</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    plt.scatter([i], [mean_pred], color <span class="op">=</span> <span class="st">"black"</span>)</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"True Review Rating"</span>, ylabel <span class="op">=</span> <span class="st">"Predicted Review Rating"</span>, ylim <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-37" class="cell" data-execution_count="57">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>plt.scatter(y_test, preds, alpha <span class="op">=</span> <span class="fl">0.01</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    mean_pred <span class="op">=</span> preds.numpy()[y_test <span class="op">==</span> i].mean()</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    plt.scatter([i], [mean_pred], color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"True Review Rating"</span>, ylabel <span class="op">=</span> <span class="st">"Predicted Review Rating"</span>, ylim <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="50-kernel-methods_files/figure-html/cell-18-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="50-kernel-methods_files/figure-html/cell-22-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>The predictions are pretty noisy and not perfectly lined up with the actual ratings. That said, we observe a consistent trend in which the model gives higher predicted ratings to reviews that did indeed have higher ratings.</p>
 <p>To confirm, let’s look at some of the best and worst reviews.</p>
-<div id="cell-32" class="cell" data-execution_count="174">
+<div id="cell-39" class="cell" data-execution_count="174">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>bottom_reviews <span class="op">=</span> top_reviews <span class="op">=</span> x_test.iloc[preds.argsort().numpy()[:<span class="dv">5</span>]]</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>top_reviews <span class="op">=</span> x_test.iloc[preds.argsort().numpy()[<span class="op">-</span><span class="dv">5</span>:]]</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"BEST REVIEWS"</span>)</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"------------"</span>)</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> text <span class="kw">in</span> top_reviews: </span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(text)</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">WORST REVIEWS"</span>)</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"------------"</span>)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> text <span class="kw">in</span> bottom_reviews: </span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>bottom_reviews <span class="op">=</span> x_test.iloc[preds.argsort().numpy()[:<span class="dv">5</span>]]</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>top_reviews    <span class="op">=</span> x_test.iloc[preds.argsort().numpy()[<span class="op">-</span><span class="dv">5</span>:]]</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"BEST REVIEWS"</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"------------"</span>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> text <span class="kw">in</span> top_reviews: </span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(text)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">WORST REVIEWS"</span>)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"------------"</span>)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> text <span class="kw">in</span> bottom_reviews: </span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>BEST REVIEWS

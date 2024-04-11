@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.551">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>intro-deep</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="60-intro-deep_files/libs/clipboard/clipboard.min.js"></script>
+<script src="60-intro-deep_files/libs/quarto-html/quarto.js"></script>
+<script src="60-intro-deep_files/libs/quarto-html/popper.min.js"></script>
+<script src="60-intro-deep_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="60-intro-deep_files/libs/quarto-html/anchor.min.js"></script>
+<link href="60-intro-deep_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="60-intro-deep_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="60-intro-deep_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="60-intro-deep_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="60-intro-deep_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<meta name="mermaid-theme" content="neutral">
+<script src="60-intro-deep_files/libs/quarto-diagram/mermaid.min.js"></script>
+<script src="60-intro-deep_files/libs/quarto-diagram/mermaid-init.js"></script>
+<link href="60-intro-deep_files/libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+</div>
+<main class="content page-columns page-full" id="quarto-document-content">
+
+
+
+
+<section id="the-problem-of-features" class="level1 page-columns page-full">
+<h1>The Problem of Features</h1>
+<p>Let’s begin by recalling and slightly expanding the empirical risk minimization framework that we’ve developed throughout this course. In the simplest approach to empirical risk minimization, we began with a matrix of features <span class="math inline">\(\mathbf{X} \in \mathbb{R}^{n\times p}\)</span> and a vector of targets <span class="math inline">\(\mathbf{y} \in \mathbb{R}^n\)</span>. We defined a linear score <span class="math inline">\(s =  \langle \mathbf{w}, \mathbf{x}\rangle\)</span> which we interpreted as producing predictions of the value of <span class="math inline">\(y\)</span>. We then defined a loss function <span class="math inline">\(\ell: \mathbb{R}\times \mathbb{R} \rightarrow \mathbb{R}\)</span> that told us the quality of the prediction <span class="math inline">\(s\)</span> by comparing it to a true target <span class="math inline">\(y\)</span>. Our learning problem was to find <span class="math inline">\(\mathbf{w}\)</span> by minimizing the <em>empirical risk</em>: the mean (or sum) of the risk across all data points:</p>
+<p><span class="math display">\[
+\DeclareMathOperator*{\argmin}{argmin}
+\begin{aligned}
+\hat{\mathbf{w}} &amp;= \argmin_{\mathbf{w} \in \mathbb{R}^p} \frac{1}{n}\sum_{i = 1}^n \ell(s_i, y_i) \\
+                 &amp;= \argmin_{\mathbf{w} \in \mathbb{R}^p} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \mathbf{x}_i \rangle, y_i)\;.
+\end{aligned}
+\]</span></p>
+<p>At first, we solved this problem using gradient descent. However, we soon ran into an issue – the linear score <span class="math inline">\(s = \langle \mathbf{w}, \mathbf{x}\rangle\)</span> is only capable of describing linear structures in the data.</p>
+<p>So far, we’ve addressed nonlinearity in two ways. First, we tried <em>manual feature engineering</em>. In manual feature engineering, we apply a feature map <span class="math inline">\(\phi: \mathbb{R}^p \rightarrow \mathbb{R}^q\)</span> to the rows of the data matrix <span class="math inline">\(\mathbf{X}\)</span> to produce a new matrix <span class="math inline">\(\Phi(\mathbf{X})\)</span>:</p>
+<p><span class="math display">\[
+\begin{aligned}
+    \Phi(\mathbf{X}) \triangleq \left[\begin{matrix}\phi(\mathbf{x}_1) \\ \phi(\mathbf{x}_2) \\ \vdots \\ \phi(\mathbf{x}_n)\end{matrix}\right]
+\end{aligned}
+\]</span></p>
+<p>Our problem then became to solve the empirical risk minimization problem</p>
+<p><span id="eq-ERM"><span class="math display">\[
+\begin{aligned}
+\hat{\mathbf{w}} &amp;= \argmin_{\mathbf{w} \in \mathbb{R}^p} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \phi(\mathbf{x}_i) \rangle, y_i)\;,
+\end{aligned}
+\tag{1}\]</span></span></p>
+<p>where <span class="math inline">\(\mathbf{w}\)</span> had as many entries as the number of features which we generated using <span class="math inline">\(\phi\)</span>. Later on, we saw that we could actually solve this problem in some cases using <em>kernel methods</em>, which allowed us to use complex feature maps without ever explicitly calculating them. A limitation of both manual feature engineering and kernel methods is that the practitioner needs to make a choice about what features to engineer or what kernels to use. For some data sets it might be relatively easy to make this choice, while for others it might be much harder. For extremely large data sets with very complex patterns, it may be very difficult to figure out what features will facilitate the learning task.</p>
+<p>Manual feature engineering and kernel methods were state-of-the-art for many machine learning tasks up until the advent of practical deep learning early in the 21st century.</p>
+<section id="optimizing-the-features" class="level2">
+<h2 class="anchored" data-anchor-id="optimizing-the-features">Optimizing the Features</h2>
+<p>Here’s a superficially simple question about <a href="#eq-ERM" class="quarto-xref">Equation&nbsp;1</a>: what if we could learn both the weights <span class="math inline">\(\mathbf{w}\)</span> <em>and</em> the feature map <span class="math inline">\(\phi\)</span> simultaneously? That is, what if we could solve a problem like</p>
+<p><span id="eq-ERM-feature"><span class="math display">\[
+\begin{aligned}
+\hat{\mathbf{w}} &amp;= \argmin_{\mathbf{w} \in \mathbb{R}^p, \color{blue}{\phi \in \mathcal{F}}} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \phi(\mathbf{x}_i) \rangle, y_i)\;,
+\end{aligned}
+\tag{2}\]</span></span></p>
+<p>where <span class="math inline">\(\mathcal{F}\)</span> is some space of possible feature maps?</p>
+<p>When we extended to the setting of multiple label classification (e.g.&nbsp;three penguin species), we modified this setup slightly. We let <span class="math inline">\(\mathbf{Y} \in \mathbb{R}^{n\times \ell}\)</span> be a matrix of targets, where each of the <span class="math inline">\(\ell\)</span> columns represents a possible category, <span class="math inline">\(y_{i\ell} = 1\)</span> means that observation <span class="math inline">\(i\)</span> has label <span class="math inline">\(\ell\)</span>. We then needed to replace the prediction rule <span class="math inline">\(f(\mathbf{x}) = \langle \mathbf{w}, \mathbf{x}\rangle\)</span> with a matrix-vector multiplication <span class="math inline">\(f(\mathbf{x}) = \mathbf{x}_i\mathbf{W}\)</span>, where <span class="math inline">\(\mathbf{W} \in \mathbb{R}^{p \times \ell}\)</span>. This produced a vector <span class="math inline">\(\hat{\mathbf{y}}\)</span> which we could compare to <span class="math inline">\(\mathbf{y}\)</span> using an appropriately modified loss function.</p>
+<p><span class="math display">\[
+\hat{\mathbf{W}} = \argmin_{\mathbf{W} \in \mathbb{R}^{p \times \ell}} \sum_{i = 1}^n \ell(\mathbf{x}_i\mathbf{W} , \mathbf{y}_i)\;.
+\]</span></p>
+<p>However, we soon discovered a limitation: this method can only discover <em>linear</em> patterns in data, e.g.&nbsp;linear decision boundaries for classification or linear trends for regression. But most interesting patterns in data are <em>nonlinear</em>. We addressed this limitation using <em>feature engineering</em>: define a feature map <span class="math inline">\(\phi: \mathbb{R}^p \rightarrow \mathbb{R}^{q}\)</span> and then solve the modified problem</p>
+<p><span class="math display">\[
+\hat{\mathbf{W}} = \argmin_{\mathbf{W} \in \mathbb{R}^{q\times \ell}} \sum_{i = 1}^n \ell(\phi(\mathbf{x}_i)\mathbf{W}, \mathbf{y}_i)\;.
+\]</span></p>
+</section>
+<section id="sidebar-notation-update" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sidebar-notation-update">Sidebar: Notation Update</h2>
+<div class="page-columns page-full"><p>Before we proceed further, let’s make a notation update. It is about to become very convenient for us to abuse mathematical notation slightly by “vectorizing functions over rows of matrices.” What this means is that, if <span class="math inline">\(f:\mathbb{R}^p \rightarrow \mathbb{R}^q\)</span> we will define things like this: </p><div class="no-row-height column-margin column-container"><span class="margin-aside">This kind of definition is sometimes called <em>vectorizing</em> the function <span class="math inline">\(f\)</span>, not to be confused with our discussion of vectorizing data in a <a href="vectorization.qmd">different lecture</a>.</span></div></div>
+<p><span class="math display">\[
+\begin{aligned}
+f(\mathbf{X}) &amp;\triangleq \left[\begin{matrix} f(\mathbf{x}_1) \\ f(\mathbf{x}_2) \\ \vdots \\ f(\mathbf{x}_n) \end{matrix}\right]
+\end{aligned}
+\]</span></p>
+<p>So, evaluating <span class="math inline">\(f:\mathbb{R}^p \rightarrow \mathbb{R}^q\)</span> on <span class="math inline">\(\mathbf{X}\in \mathbb{R}^{n\times p}\)</span> produces a matrix <span class="math inline">\(f(\mathbf{X}) \in \mathbb{R}^{n\times q}\)</span>.</p>
+<p>Similarly, we’ll define</p>
+<p><span class="math display">\[
+\begin{aligned}
+    \phi(\mathbf{X}) \triangleq \left[\begin{matrix}\phi(\mathbf{x}_1) \\ \phi(\mathbf{x}_2) \\ \vdots \\ \phi(\mathbf{x}_n)\end{matrix}\right] \quad \text{and}
+    \quad \ell(\hat{\mathbf{Y}}, \mathbf{Y}) &amp;\triangleq \left(\begin{matrix} \ell(\hat{\mathbf{y}}_1, \mathbf{y}_1) \\ \ell(\hat{\mathbf{y}}_2, \mathbf{y}_2) \\ \vdots \\ \ell(\hat{\mathbf{y}}_n, \mathbf{y}_n) \end{matrix}\right)\;.
+\end{aligned}
+\]</span></p>
+<p>This allows us to write our prediction rule compactly as <span class="math display">\[
+\begin{aligned}
+\hat{\mathbf{Y}} = f(\mathbf{X}) = \left[\begin{matrix} f(\mathbf{x}_1) \\ f(\mathbf{x}_2) \\ \vdots \\ f(\mathbf{x}_n) \end{matrix}\right]
+       = \left[\begin{matrix} \phi(\mathbf{x}_1)\mathbf{W} \\ \phi(\mathbf{x}_2)\mathbf{W} \\ \vdots \\ \phi(\mathbf{x}_n)\mathbf{W} \end{matrix}\right]
+       = \left[\begin{matrix} \phi(\mathbf{x}_1) \\ \phi(\mathbf{x}_2) \\ \vdots \\ \phi(\mathbf{x}_n) \end{matrix}\right] \mathbf{W}
+       = \phi(\mathbf{X})\mathbf{W}
+\end{aligned}
+\]</span></p>
+<p>Let’s also define <span class="math inline">\(\mathcal{L}(\hat{\mathbf{Y}}, \mathbf{Y}) = \sum_{i = 1}^n \ell(\hat{\mathbf{y}}_i, \mathbf{y}_i)\)</span>. Then, we can write our generalized empirical risk as</p>
+<p><span class="math display">\[
+R = \mathcal{L}(\phi(\mathbf{X})\mathbf{W}, \mathbf{Y})\;,
+\]</span></p>
+<p>and our learning problem is</p>
+<p><span class="math display">\[
+\hat{\mathbf{W}} = \argmin_{\mathbf{W}} \; \mathcal{L}(\phi(\mathbf{X})\mathbf{W}, \mathbf{Y})\;,
+\]</span></p>
+</section>
+<section id="the-network-view" class="level2">
+<h2 class="anchored" data-anchor-id="the-network-view">The Network View</h2>
+<p>We can express the process of obtaining a prediction from logistic regression using a <em>computational graph</em>. Here’s an example of a computational graph for logistic regression in which we have two input features and wish to perform 3-way classification by outputing for each input <span class="math inline">\(\mathbf{x}\)</span> a vector <span class="math inline">\(\vp\)</span> of probabilities for each label:</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  subgraph input
+    direction TB  
+    x_1 
+    x_2
+  end
+
+  subgraph feature_map[features]
+    f_1
+    f_2
+  end
+
+  subgraph raw predictions[raw predictions/logits]
+    y_hat_1
+    y_hat_2 
+    y_hat_3
+  end
+
+  subgraph label_preds[label probabilities]
+    p_1
+    p_2
+    p_3
+  end
+
+  x_1 &amp; x_2 --&gt; x
+
+  x --phi--&gt; f_1 &amp; f_2
+
+  f_1 --w_1--&gt; y_hat_1
+  f_2 --w_1--&gt; y_hat_1
+  f_1 --w_2--&gt; y_hat_2
+  f_2 --w_2--&gt; y_hat_2
+  f_1 --w_3--&gt; y_hat_3
+  f_2 --w_3--&gt; y_hat_3
+
+  y_hat_1 &amp; y_hat_2 &amp; y_hat_3 --&gt; softmax
+
+  softmax --&gt; p_1 &amp; p_2 &amp; p_3
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="back-to-recap" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="back-to-recap">Back to Recap</h2>
+<div class="page-columns page-full"><p>We have a problem that we never addressed in a fully satisfactory way. On the one hand, in order to describe complex, nonlinear patterns in our data, we want a <em>lot</em> of features.  However, the more features we engineer, the more likely we are to encounter overfitting.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">Kernel methods like <a href="../assignments/blog-posts/blog-post-kernel-logistic.qmd">kernel logistic</a> regression or support vector machine can actually use infinitely many features!</span></div></div>
+<p>One of the most common approaches to this problem around 15 years ago was to engineer many features but <em>regularize</em>, which forced entries of <span class="math inline">\(\mathbf{w}\)</span> to remain small. This is a useful approach that is still used today, especially in statistics and econometrics. However, when our data points are very complex (audio files, images, text), it might still be very difficult for us to manually engineer the right sets of features to use even in this approach.</p>
+<p>The fundamental idea of <em>deep learning</em> is to take a different tack: instead of only learning <span class="math inline">\(\mathbf{w}\)</span> in the empirical risk minimization problem, we are <em>also</em> going to learn the feature map <span class="math inline">\(\phi\)</span>. That is, we want to find</p>
+<p><span class="math display">\[
+\hat{\mathbf{W}}, \hat{\phi} = \argmin_{\mathbf{W}, \phi} \; \mathcal{L}(\phi(\mathbf{X})\mathbf{W}, \mathbf{Y})\;,
+\]</span></p>
+<p>and our learned predictor is <span class="math inline">\(f(\mathbf{X}) = \hat{\phi}(\mathbf{X})\hat{\mathbf{W}}\)</span>.</p>
+<p>The need to learn the feature map <span class="math inline">\(\phi\)</span> as well as weights <span class="math inline">\(\mathbf{w}\)</span> makes this problem <em>much</em> harder, both mathematically and computationally. A major enabler of the deep learning revolution has been the development of hardware that is up to the task (especially GPUs), as well as algorithms that make good use of this hardware.</p>
+</section>
+</section>
+<section id="hidden-layers" class="level1 page-columns page-full">
+<h1>Hidden Layers</h1>
+<p>Ok, so we know that we want to figure out a feature map <span class="math inline">\(\phi:\mathbb{R}^p\rightarrow \mathbb{R}^q\)</span> to make the empirical risk small. There’s no hope of optimizing over all possible feature maps, so instead we need to parameterize our feature map in some way. Here’s what we do:</p>
+<div class="page-columns page-full"><p>Let <span class="math inline">\(\alpha_1:\R \rightarrow \R\)</span> be any <em>nonlinear</em> function, and let <span class="math inline">\(\mU_1 \in \mathbb{R}^{p} \rightarrow \mathbb{R}^q\)</span>. We’ll define: </p><div class="no-row-height column-margin column-container"><span class="margin-aside"><span class="math inline">\(\alpha_1\)</span> is often called an <em>activation function.</em></span></div></div>
+<p><span class="math display">\[
+\phi(\mathbf{X}) = \alpha_1(\mathbf{X}\mU_1)\;.
+\]</span></p>
+<p>Our new prediction rule is</p>
+<p><span class="math display">\[
+\hat{\mathbf{Y}} = f(\mathbf{X}) = \phi(\mathbf{X})\mathbf{W} = \alpha_1(\mathbf{X}\mU_1)\mathbf{W}\;,
+\]</span></p>
+<p>and our empirical risk minimization problem is</p>
+<p><span id="eq-single-layer"><span class="math display">\[
+\hat{\mathbf{W}}, \hat{\mU}_1 = \argmin_{\mathbf{W} \in \mathbb{R}^{q\times \ell}, \mU_1 \in \mathbb{R}^{p\times q}} \; \mathcal{L}(\alpha_1(\mathbf{X}\mU_1)\mathbf{W}, \mathbf{Y})\;.
+\tag{3}\]</span></span></p>
+<p><a href="#eq-single-layer" class="quarto-xref">Equation&nbsp;3</a> is an example of a machine learning problem for a neural network with a single <strong><em>hidden layer</em></strong>. The hidden layer refers to the “layer” of computation <span class="math inline">\(\alpha_1(\mathbf{X}\mU_1)\)</span>. This layer is “hidden” because it’s not the input of the model (that would be <span class="math inline">\(\mathbf{X}\)</span>) nor is it the output (that would be <span class="math inline">\(\alpha_1(\mathbf{X}\mU_1)\mathbf{W}\)</span>). The computational graph is now more complicated: we need to substitute in the explicit computations for <span class="math inline">\(\phi\)</span>:</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  subgraph input
+    direction TB  
+    x_1 
+    x_2
+  end
+
+  subgraph hidden_activations
+    a_1
+    a_2
+  end
+
+  subgraph feature_map[features]
+    f_1
+    f_2
+  end
+
+  subgraph raw predictions[raw predictions/logits]
+    y_hat_1
+    y_hat_2 
+    y_hat_3
+  end
+
+  subgraph label_preds[label probabilities]
+    p_1
+    p_2
+    p_3
+  end
+
+  x_1 --u_1--&gt;a_1
+  x_1 --u_2--&gt;a_2
+  x_2 --u_1--&gt;a_1
+  x_2 --u_2--&gt;a_2
+
+  a_1--alpha_1--&gt;f_1
+  a_2--alpha_1--&gt;f_2
+
+  f_1 --w_1--&gt; y_hat_1
+  f_2 --w_1--&gt; y_hat_1
+  f_1 --w_2--&gt; y_hat_2
+  f_2 --w_2--&gt; y_hat_2
+  f_1 --w_3--&gt; y_hat_3
+  f_2 --w_3--&gt; y_hat_3
+
+  y_hat_1 &amp; y_hat_2 &amp; y_hat_3 --&gt; softmax
+
+  softmax --&gt; p_1 &amp; p_2 &amp; p_3
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>As you can see, we have to deal with a lot of matrix multiplications and vectorized function operations. We will also, soon, need to think about how to perform the empirical risk minimization problem, which in turn poses questions about things like how to do gradient descent for this kind of problem. While it’s important for us to understand some of the theory, it’s not a great use of anyone’s time to do large amounts of bookkeeping. This is why specialized deep learning libraries exist to help us along.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

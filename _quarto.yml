@@ -34,3 +34,5 @@ profile:
   group: 
     - [preview, publish]
 
+mermaid: 
+  theme: neutral

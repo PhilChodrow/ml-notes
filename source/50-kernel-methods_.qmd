@@ -39,7 +39,7 @@ $$
 \end{aligned}
 $$
 
-Thus, $\mathbf{w}^{(1)}$ is a linear combination of feature vectors $\phi(\mathbf{x}_i)\$. 
+Thus, $\mathbf{w}^{(1)}$ is a linear combination of the feature vectors $\phi(\mathbf{x}_i)$. 
 
 The next iteration is 
 
