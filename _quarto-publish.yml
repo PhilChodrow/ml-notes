@@ -27,3 +27,6 @@ book:
         - chapters/40-linear-regression.ipynb
         - chapters/50-kernel-methods.ipynb
         - chapters/51-vectorization.ipynb
+    - part: "Deep Learning"
+      chapters: 
+        - chapters/60-intro-deep.ipynb

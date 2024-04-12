@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -70,18 +104,31 @@ window.Quarto = {
 
 </head>
 
-<body>
+<body class="fullcontent">
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
-<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">The Problem of Features</h1>
 </div>
-<main class="content page-columns page-full" id="quarto-document-content">
 
 
 
+<div class="quarto-title-meta">
 
-<section id="the-problem-of-features" class="level1 page-columns page-full">
-<h1>The Problem of Features</h1>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
 <p>Let’s begin by recalling and slightly expanding the empirical risk minimization framework that we’ve developed throughout this course. In the simplest approach to empirical risk minimization, we began with a matrix of features <span class="math inline">\(\mathbf{X} \in \mathbb{R}^{n\times p}\)</span> and a vector of targets <span class="math inline">\(\mathbf{y} \in \mathbb{R}^n\)</span>. We defined a linear score <span class="math inline">\(s =  \langle \mathbf{w}, \mathbf{x}\rangle\)</span> which we interpreted as producing predictions of the value of <span class="math inline">\(y\)</span>. We then defined a loss function <span class="math inline">\(\ell: \mathbb{R}\times \mathbb{R} \rightarrow \mathbb{R}\)</span> that told us the quality of the prediction <span class="math inline">\(s\)</span> by comparing it to a true target <span class="math inline">\(y\)</span>. Our learning problem was to find <span class="math inline">\(\mathbf{w}\)</span> by minimizing the <em>empirical risk</em>: the mean (or sum) of the risk across all data points:</p>
 <p><span class="math display">\[
 \DeclareMathOperator*{\argmin}{argmin}
@@ -100,7 +147,7 @@ window.Quarto = {
 <p>Our problem then became to solve the empirical risk minimization problem</p>
 <p><span id="eq-ERM"><span class="math display">\[
 \begin{aligned}
-\hat{\mathbf{w}} &amp;= \argmin_{\mathbf{w} \in \mathbb{R}^p} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \phi(\mathbf{x}_i) \rangle, y_i)\;,
+\hat{\mathbf{w}} &amp;= \argmin_{\mathbf{w} \in \mathbb{R}^q} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \phi(\mathbf{x}_i) \rangle, y_i)\;,
 \end{aligned}
 \tag{1}\]</span></span></p>
 <p>where <span class="math inline">\(\mathbf{w}\)</span> had as many entries as the number of features which we generated using <span class="math inline">\(\phi\)</span>. Later on, we saw that we could actually solve this problem in some cases using <em>kernel methods</em>, which allowed us to use complex feature maps without ever explicitly calculating them. A limitation of both manual feature engineering and kernel methods is that the practitioner needs to make a choice about what features to engineer or what kernels to use. For some data sets it might be relatively easy to make this choice, while for others it might be much harder. For extremely large data sets with very complex patterns, it may be very difficult to figure out what features will facilitate the learning task.</p>
@@ -110,192 +157,52 @@ window.Quarto = {
 <p>Here’s a superficially simple question about <a href="#eq-ERM" class="quarto-xref">Equation&nbsp;1</a>: what if we could learn both the weights <span class="math inline">\(\mathbf{w}\)</span> <em>and</em> the feature map <span class="math inline">\(\phi\)</span> simultaneously? That is, what if we could solve a problem like</p>
 <p><span id="eq-ERM-feature"><span class="math display">\[
 \begin{aligned}
-\hat{\mathbf{w}} &amp;= \argmin_{\mathbf{w} \in \mathbb{R}^p, \color{blue}{\phi \in \mathcal{F}}} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \phi(\mathbf{x}_i) \rangle, y_i)\;,
+\hat{\mathbf{w}} &amp;= \argmin_{\mathbf{w} \in \mathbb{R}^q, \color{blue}{\phi \in \mathcal{F}}} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \phi(\mathbf{x}_i) \rangle, y_i)\;,
 \end{aligned}
 \tag{2}\]</span></span></p>
-<p>where <span class="math inline">\(\mathcal{F}\)</span> is some space of possible feature maps?</p>
-<p>When we extended to the setting of multiple label classification (e.g.&nbsp;three penguin species), we modified this setup slightly. We let <span class="math inline">\(\mathbf{Y} \in \mathbb{R}^{n\times \ell}\)</span> be a matrix of targets, where each of the <span class="math inline">\(\ell\)</span> columns represents a possible category, <span class="math inline">\(y_{i\ell} = 1\)</span> means that observation <span class="math inline">\(i\)</span> has label <span class="math inline">\(\ell\)</span>. We then needed to replace the prediction rule <span class="math inline">\(f(\mathbf{x}) = \langle \mathbf{w}, \mathbf{x}\rangle\)</span> with a matrix-vector multiplication <span class="math inline">\(f(\mathbf{x}) = \mathbf{x}_i\mathbf{W}\)</span>, where <span class="math inline">\(\mathbf{W} \in \mathbb{R}^{p \times \ell}\)</span>. This produced a vector <span class="math inline">\(\hat{\mathbf{y}}\)</span> which we could compare to <span class="math inline">\(\mathbf{y}\)</span> using an appropriately modified loss function.</p>
-<p><span class="math display">\[
-\hat{\mathbf{W}} = \argmin_{\mathbf{W} \in \mathbb{R}^{p \times \ell}} \sum_{i = 1}^n \ell(\mathbf{x}_i\mathbf{W} , \mathbf{y}_i)\;.
-\]</span></p>
-<p>However, we soon discovered a limitation: this method can only discover <em>linear</em> patterns in data, e.g.&nbsp;linear decision boundaries for classification or linear trends for regression. But most interesting patterns in data are <em>nonlinear</em>. We addressed this limitation using <em>feature engineering</em>: define a feature map <span class="math inline">\(\phi: \mathbb{R}^p \rightarrow \mathbb{R}^{q}\)</span> and then solve the modified problem</p>
-<p><span class="math display">\[
-\hat{\mathbf{W}} = \argmin_{\mathbf{W} \in \mathbb{R}^{q\times \ell}} \sum_{i = 1}^n \ell(\phi(\mathbf{x}_i)\mathbf{W}, \mathbf{y}_i)\;.
-\]</span></p>
-</section>
-<section id="sidebar-notation-update" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="sidebar-notation-update">Sidebar: Notation Update</h2>
-<div class="page-columns page-full"><p>Before we proceed further, let’s make a notation update. It is about to become very convenient for us to abuse mathematical notation slightly by “vectorizing functions over rows of matrices.” What this means is that, if <span class="math inline">\(f:\mathbb{R}^p \rightarrow \mathbb{R}^q\)</span> we will define things like this: </p><div class="no-row-height column-margin column-container"><span class="margin-aside">This kind of definition is sometimes called <em>vectorizing</em> the function <span class="math inline">\(f\)</span>, not to be confused with our discussion of vectorizing data in a <a href="vectorization.qmd">different lecture</a>.</span></div></div>
-<p><span class="math display">\[
+<p>where <span class="math inline">\(\mathcal{F}\)</span> is some set of possible feature maps?</p>
+<p>In general, we have no hope of doing this – there are simply too many feature maps. However, if we restrict the set <span class="math inline">\(\mathcal{F}\)</span> somewhat, then we may have some hope.</p>
+<p>In particular, let’s choose a <em>nonlinear</em> function <span class="math inline">\(\alpha: \mathbb{R} \rightarrow \mathbb{R}\)</span> and a matrix <span class="math inline">\(\mathbf{U} \in \mathbb{R}^{p \times q}\)</span>. We’ll define our feature map <span class="math inline">\(\phi\)</span> by the formula <span class="math inline">\(\phi(\mathbf{X}) = \alpha(\mathbf{X}\mathbf{U})\)</span>, where <span class="math inline">\(\alpha\)</span> is applied to each element of the matrix <span class="math inline">\(\mathbf{X}\mathbf{U}\)</span>. We’ll treat <span class="math inline">\(\alpha\)</span> as fixed but <span class="math inline">\(\mathbf{U}\)</span> as <em>learnable</em>. This turns our optimization problem into</p>
+<p><span id="eq-hidden-layer"><span class="math display">\[
 \begin{aligned}
-f(\mathbf{X}) &amp;\triangleq \left[\begin{matrix} f(\mathbf{x}_1) \\ f(\mathbf{x}_2) \\ \vdots \\ f(\mathbf{x}_n) \end{matrix}\right]
+\hat{\mathbf{w}} &amp;= \argmin_{\mathbf{w} \in \mathbb{R}^q, \color{blue}{\mathbf{U} \in \mathbb{R}^{p \times q}}} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \alpha (\mathbf{x}_i \mathbf{U}) \rangle, y_i)\;.
 \end{aligned}
-\]</span></p>
-<p>So, evaluating <span class="math inline">\(f:\mathbb{R}^p \rightarrow \mathbb{R}^q\)</span> on <span class="math inline">\(\mathbf{X}\in \mathbb{R}^{n\times p}\)</span> produces a matrix <span class="math inline">\(f(\mathbf{X}) \in \mathbb{R}^{n\times q}\)</span>.</p>
-<p>Similarly, we’ll define</p>
-<p><span class="math display">\[
-\begin{aligned}
-    \phi(\mathbf{X}) \triangleq \left[\begin{matrix}\phi(\mathbf{x}_1) \\ \phi(\mathbf{x}_2) \\ \vdots \\ \phi(\mathbf{x}_n)\end{matrix}\right] \quad \text{and}
-    \quad \ell(\hat{\mathbf{Y}}, \mathbf{Y}) &amp;\triangleq \left(\begin{matrix} \ell(\hat{\mathbf{y}}_1, \mathbf{y}_1) \\ \ell(\hat{\mathbf{y}}_2, \mathbf{y}_2) \\ \vdots \\ \ell(\hat{\mathbf{y}}_n, \mathbf{y}_n) \end{matrix}\right)\;.
-\end{aligned}
-\]</span></p>
-<p>This allows us to write our prediction rule compactly as <span class="math display">\[
-\begin{aligned}
-\hat{\mathbf{Y}} = f(\mathbf{X}) = \left[\begin{matrix} f(\mathbf{x}_1) \\ f(\mathbf{x}_2) \\ \vdots \\ f(\mathbf{x}_n) \end{matrix}\right]
-       = \left[\begin{matrix} \phi(\mathbf{x}_1)\mathbf{W} \\ \phi(\mathbf{x}_2)\mathbf{W} \\ \vdots \\ \phi(\mathbf{x}_n)\mathbf{W} \end{matrix}\right]
-       = \left[\begin{matrix} \phi(\mathbf{x}_1) \\ \phi(\mathbf{x}_2) \\ \vdots \\ \phi(\mathbf{x}_n) \end{matrix}\right] \mathbf{W}
-       = \phi(\mathbf{X})\mathbf{W}
-\end{aligned}
-\]</span></p>
-<p>Let’s also define <span class="math inline">\(\mathcal{L}(\hat{\mathbf{Y}}, \mathbf{Y}) = \sum_{i = 1}^n \ell(\hat{\mathbf{y}}_i, \mathbf{y}_i)\)</span>. Then, we can write our generalized empirical risk as</p>
-<p><span class="math display">\[
-R = \mathcal{L}(\phi(\mathbf{X})\mathbf{W}, \mathbf{Y})\;,
-\]</span></p>
-<p>and our learning problem is</p>
-<p><span class="math display">\[
-\hat{\mathbf{W}} = \argmin_{\mathbf{W}} \; \mathcal{L}(\phi(\mathbf{X})\mathbf{W}, \mathbf{Y})\;,
-\]</span></p>
-</section>
-<section id="the-network-view" class="level2">
-<h2 class="anchored" data-anchor-id="the-network-view">The Network View</h2>
-<p>We can express the process of obtaining a prediction from logistic regression using a <em>computational graph</em>. Here’s an example of a computational graph for logistic regression in which we have two input features and wish to perform 3-way classification by outputing for each input <span class="math inline">\(\mathbf{x}\)</span> a vector <span class="math inline">\(\vp\)</span> of probabilities for each label:</p>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class="figure"><p></p>
-<div>
-<pre class="mermaid mermaid-js">flowchart LR
-  subgraph input
-    direction TB  
-    x_1 
-    x_2
-  end
-
-  subgraph feature_map[features]
-    f_1
-    f_2
-  end
-
-  subgraph raw predictions[raw predictions/logits]
-    y_hat_1
-    y_hat_2 
-    y_hat_3
-  end
-
-  subgraph label_preds[label probabilities]
-    p_1
-    p_2
-    p_3
-  end
-
-  x_1 &amp; x_2 --&gt; x
-
-  x --phi--&gt; f_1 &amp; f_2
-
-  f_1 --w_1--&gt; y_hat_1
-  f_2 --w_1--&gt; y_hat_1
-  f_1 --w_2--&gt; y_hat_2
-  f_2 --w_2--&gt; y_hat_2
-  f_1 --w_3--&gt; y_hat_3
-  f_2 --w_3--&gt; y_hat_3
-
-  y_hat_1 &amp; y_hat_2 &amp; y_hat_3 --&gt; softmax
-
-  softmax --&gt; p_1 &amp; p_2 &amp; p_3
-</pre>
-</div>
-<p></p></figure><p></p>
-</div>
-</div>
-</div>
-</section>
-<section id="back-to-recap" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="back-to-recap">Back to Recap</h2>
-<div class="page-columns page-full"><p>We have a problem that we never addressed in a fully satisfactory way. On the one hand, in order to describe complex, nonlinear patterns in our data, we want a <em>lot</em> of features.  However, the more features we engineer, the more likely we are to encounter overfitting.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">Kernel methods like <a href="../assignments/blog-posts/blog-post-kernel-logistic.qmd">kernel logistic</a> regression or support vector machine can actually use infinitely many features!</span></div></div>
-<p>One of the most common approaches to this problem around 15 years ago was to engineer many features but <em>regularize</em>, which forced entries of <span class="math inline">\(\mathbf{w}\)</span> to remain small. This is a useful approach that is still used today, especially in statistics and econometrics. However, when our data points are very complex (audio files, images, text), it might still be very difficult for us to manually engineer the right sets of features to use even in this approach.</p>
-<p>The fundamental idea of <em>deep learning</em> is to take a different tack: instead of only learning <span class="math inline">\(\mathbf{w}\)</span> in the empirical risk minimization problem, we are <em>also</em> going to learn the feature map <span class="math inline">\(\phi\)</span>. That is, we want to find</p>
-<p><span class="math display">\[
-\hat{\mathbf{W}}, \hat{\phi} = \argmin_{\mathbf{W}, \phi} \; \mathcal{L}(\phi(\mathbf{X})\mathbf{W}, \mathbf{Y})\;,
-\]</span></p>
-<p>and our learned predictor is <span class="math inline">\(f(\mathbf{X}) = \hat{\phi}(\mathbf{X})\hat{\mathbf{W}}\)</span>.</p>
-<p>The need to learn the feature map <span class="math inline">\(\phi\)</span> as well as weights <span class="math inline">\(\mathbf{w}\)</span> makes this problem <em>much</em> harder, both mathematically and computationally. A major enabler of the deep learning revolution has been the development of hardware that is up to the task (especially GPUs), as well as algorithms that make good use of this hardware.</p>
-</section>
-</section>
-<section id="hidden-layers" class="level1 page-columns page-full">
-<h1>Hidden Layers</h1>
-<p>Ok, so we know that we want to figure out a feature map <span class="math inline">\(\phi:\mathbb{R}^p\rightarrow \mathbb{R}^q\)</span> to make the empirical risk small. There’s no hope of optimizing over all possible feature maps, so instead we need to parameterize our feature map in some way. Here’s what we do:</p>
-<div class="page-columns page-full"><p>Let <span class="math inline">\(\alpha_1:\R \rightarrow \R\)</span> be any <em>nonlinear</em> function, and let <span class="math inline">\(\mU_1 \in \mathbb{R}^{p} \rightarrow \mathbb{R}^q\)</span>. We’ll define: </p><div class="no-row-height column-margin column-container"><span class="margin-aside"><span class="math inline">\(\alpha_1\)</span> is often called an <em>activation function.</em></span></div></div>
-<p><span class="math display">\[
-\phi(\mathbf{X}) = \alpha_1(\mathbf{X}\mU_1)\;.
-\]</span></p>
-<p>Our new prediction rule is</p>
-<p><span class="math display">\[
-\hat{\mathbf{Y}} = f(\mathbf{X}) = \phi(\mathbf{X})\mathbf{W} = \alpha_1(\mathbf{X}\mU_1)\mathbf{W}\;,
-\]</span></p>
-<p>and our empirical risk minimization problem is</p>
-<p><span id="eq-single-layer"><span class="math display">\[
-\hat{\mathbf{W}}, \hat{\mU}_1 = \argmin_{\mathbf{W} \in \mathbb{R}^{q\times \ell}, \mU_1 \in \mathbb{R}^{p\times q}} \; \mathcal{L}(\alpha_1(\mathbf{X}\mU_1)\mathbf{W}, \mathbf{Y})\;.
 \tag{3}\]</span></span></p>
-<p><a href="#eq-single-layer" class="quarto-xref">Equation&nbsp;3</a> is an example of a machine learning problem for a neural network with a single <strong><em>hidden layer</em></strong>. The hidden layer refers to the “layer” of computation <span class="math inline">\(\alpha_1(\mathbf{X}\mU_1)\)</span>. This layer is “hidden” because it’s not the input of the model (that would be <span class="math inline">\(\mathbf{X}\)</span>) nor is it the output (that would be <span class="math inline">\(\alpha_1(\mathbf{X}\mU_1)\mathbf{W}\)</span>). The computational graph is now more complicated: we need to substitute in the explicit computations for <span class="math inline">\(\phi\)</span>:</p>
+<p>We now have an optimization problem with two sets of weights: the standard weights <span class="math inline">\(\mathbf{w}\)</span> and the <em>hidden weights</em> <span class="math inline">\(\mathbf{U}\)</span>. <a href="#eq-hidden-layer" class="quarto-xref">Equation&nbsp;3</a> defines the structure of a <em>shallow</em> neural network with a single hidden layer.</p>
+</section>
+<section id="the-computational-graph" class="level2">
+<h2 class="anchored" data-anchor-id="the-computational-graph">The Computational Graph</h2>
+<p>It will soon be very useful for us to start thinking about the operations underlying the computation of the loss in terms of a <em>computational graph</em>. In the computational graph, we break down each operation as an edge in the graph, storing the result of that operation in the nodes. For example, here’s a high-level computational graph associated with the computation in <a href="#eq-hidden-layer" class="quarto-xref">Equation&nbsp;3</a>.</p>
 <div class="cell" data-layout-align="default">
 <div class="cell-output-display">
 <div>
 <p></p><figure class="figure"><p></p>
 <div>
-<pre class="mermaid mermaid-js">flowchart LR
-  subgraph input
-    direction TB  
-    x_1 
-    x_2
-  end
+<pre class="mermaid mermaid-js">flowchart TB
+  input[Data matrix X] --Matrix Multiplication--&gt; l1[XU]
+  l1       --Nonlinearity--&gt; l2["ɑ(XU)"]
+  l2       --Matrix-vector multiplication--&gt; l3["ɑ(XU)w"]
 
-  subgraph hidden_activations
-    a_1
-    a_2
-  end
-
-  subgraph feature_map[features]
-    f_1
-    f_2
-  end
-
-  subgraph raw predictions[raw predictions/logits]
-    y_hat_1
-    y_hat_2 
-    y_hat_3
-  end
-
-  subgraph label_preds[label probabilities]
-    p_1
-    p_2
-    p_3
-  end
-
-  x_1 --u_1--&gt;a_1
-  x_1 --u_2--&gt;a_2
-  x_2 --u_1--&gt;a_1
-  x_2 --u_2--&gt;a_2
-
-  a_1--alpha_1--&gt;f_1
-  a_2--alpha_1--&gt;f_2
-
-  f_1 --w_1--&gt; y_hat_1
-  f_2 --w_1--&gt; y_hat_1
-  f_1 --w_2--&gt; y_hat_2
-  f_2 --w_2--&gt; y_hat_2
-  f_1 --w_3--&gt; y_hat_3
-  f_2 --w_3--&gt; y_hat_3
-
-  y_hat_1 &amp; y_hat_2 &amp; y_hat_3 --&gt; softmax
-
-  softmax --&gt; p_1 &amp; p_2 &amp; p_3
+  y[Targets y]        --Apply loss--&gt; loss["ℓ(ɑ(XU)w, y)"]
+  l3       --Apply loss--&gt; loss 
+  loss     --Compute average loss--&gt;L
 </pre>
 </div>
 <p></p></figure><p></p>
 </div>
 </div>
 </div>
-<p>As you can see, we have to deal with a lot of matrix multiplications and vectorized function operations. We will also, soon, need to think about how to perform the empirical risk minimization problem, which in turn poses questions about things like how to do gradient descent for this kind of problem. While it’s important for us to understand some of the theory, it’s not a great use of anyone’s time to do large amounts of bookkeeping. This is why specialized deep learning libraries exist to help us along.</p>
+<p>Representing computations as graphs underlies the practical application of <em>automatic differentiation</em> for neural networks, which will soon find very helpful.</p>
+</section>
+<section id="network-layers" class="level2">
+<h2 class="anchored" data-anchor-id="network-layers">Network Layers</h2>
+<p>In this model, the matrix <span class="math inline">\(\mathbf{U}\)</span> is an example of a so-called <em>hidden layer</em>. It’s <em>hidden</em> because it’s not involved in the final computation of scores (like <span class="math inline">\(\mathbf{w}\)</span>) and it’s also not part of the data input. If we were only looking at the inputs and final computational operations of the model, we wouldn’t see <span class="math inline">\(\mathbf{U}\)</span> at all. We only see it when we look at the complete sequence of network operations.</p>
+<div id="ba71770a" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span><span class="op">+</span><span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>4</code></pre>
+</div>
+</div>
 </section>
 
 </main>
