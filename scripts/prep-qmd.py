@@ -38,7 +38,7 @@ for f in os.listdir("source"):
                 ix += 1    
                 
                 
-                cleaned_lines.insert(ix, link_line)
+                cleaned_lines.insert(ix, link_line)            
                 cleaned = "\n".join(cleaned_lines)
             
             with open(f"chapters/{f}", "w") as new: 
