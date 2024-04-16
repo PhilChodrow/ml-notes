@@ -30,3 +30,4 @@ book:
     - part: "Deep Learning"
       chapters: 
         - chapters/60-intro-deep.ipynb
+        - chapters/61-modern-optimization.ipynb

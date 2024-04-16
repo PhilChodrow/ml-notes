@@ -313,6 +313,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">The Problem of Features and Deep Learning</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/61-modern-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Contemporary Optimization</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -683,7 +689,7 @@ window.Quarto = {
 <section id="gradient-methods" class="level3">
 <h3 class="anchored" data-anchor-id="gradient-methods">Gradient Methods</h3>
 <p>More fundamentally, suppose that we have a <em>very</em> large number <span class="math inline">\(p\)</span> of features. The matrix <span class="math inline">\(\Phi(\mathbf{X})^T\Phi(\mathbf{X}) + \lambda \mathbf{I}\)</span> is a <span class="math inline">\(p\times p\)</span> matrix. The computational cost of <em>inverting</em> this matrix is <span class="math inline">\(\Theta(n^\gamma)\)</span> for some <span class="math inline">\(\gamma\)</span> between <span class="math inline">\(2\)</span> and <span class="math inline">\(3\)</span>. For sufficiently large <span class="math inline">\(p\)</span>, this may simply be infeasible. There are several approaches.</p>
-<p>To perform <strong>gradient descent</strong> with least-squares linear regression, all we need is a formula for the gradient. <a href="#eq-gradient" class="quarto-xref">Equation&nbsp;<span>11.5</span></a> gives this formula – we just plug in the gradient of the regularizing term and iterate to convergence.</p>
+<p>To perform <strong>gradient descent</strong> with least-squares linear regression, all we need is a formula for the gradient. <a href="61-modern-optimization.html#eq-gradient" class="quarto-xref">Equation&nbsp;<span>15.1</span></a> gives this formula – we just plug in the gradient of the regularizing term and iterate to convergence.</p>
 <p>Sometimes <em>even this</em> is too hard: for sufficiently large <span class="math inline">\(p\)</span>, even computing the matrix multiplication <span class="math inline">\(\Phi(\mathbf{X})^T\Phi(\mathbf{X})\)</span> required for gradient descent is too computationally intensive. In this case, <em>stochastic</em> gradient methods can be used; we’ll study these in a coming lecture.</p>
 
 
