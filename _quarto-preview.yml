@@ -26,3 +26,4 @@ book:
       chapters: 
         - source/60-intro-deep.ipynb
         - source/61-modern-optimization.ipynb
+        - source/70-image-classification.ipynb
