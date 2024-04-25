@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.551">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Phil Chodrow">
+
+<title>Machine Learning - 17&nbsp; Text Classification and Word Embedding</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/80-unsupervised-autoencoders.ipynb" rel="next">
+<link href="../chapters/70-image-classification.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/60-intro-deep.html">Deep Learning</a></li><li class="breadcrumb-item"><a href="../chapters/72-text-classification.html"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Text Classification and Word Embedding</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Introducing Machine Learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-data-and-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Data, Patterns, and Models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-black-box-classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Classification as a Black Box</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Fundamentals of Prediction</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-score-based-classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Score-Based Classification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-decision-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Decision Theory in Classification</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Discrimination, Disparity, Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/10-compas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Introduction to Algorithmic Disparity: COMPAS</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/12-statistical-fairness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Statistical Definitions of Fairness in Decision-Making</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Machine Learning Models</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/20-perceptron.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Introduction to Classification: The Perceptron</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/22-convex-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Convex Empirical Risk Minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/23-gradient-descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Optimization with Gradient Descent</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/30-features-regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Feature Maps, Regularization, and Generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/40-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Linear Regression</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/50-kernel-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Kernel Methods</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/51-vectorization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Vectorization and Feature Engineering</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text">Deep Learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/60-intro-deep.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">The Problem of Features and Deep Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/61-modern-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Contemporary Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/70-image-classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Deep Image Classification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/72-text-classification.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Text Classification and Word Embedding</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+ <span class="menu-text">Unsupervised Learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#deep-text-classification-and-word-embedding" id="toc-deep-text-classification-and-word-embedding" class="nav-link active" data-scroll-target="#deep-text-classification-and-word-embedding">Deep Text Classification and Word Embedding</a></li>
+  <li><a href="#text-vectorization" id="toc-text-vectorization" class="nav-link" data-scroll-target="#text-vectorization">Text Vectorization</a></li>
+  <li><a href="#batch-collation" id="toc-batch-collation" class="nav-link" data-scroll-target="#batch-collation">Batch Collation</a>
+  <ul class="collapse">
+  <li><a href="#modeling" id="toc-modeling" class="nav-link" data-scroll-target="#modeling">Modeling</a>
+  <ul class="collapse">
+  <li><a href="#word-embedding" id="toc-word-embedding" class="nav-link" data-scroll-target="#word-embedding">Word Embedding</a></li>
+  </ul></li>
+  <li><a href="#inspecting-word-embeddings" id="toc-inspecting-word-embeddings" class="nav-link" data-scroll-target="#inspecting-word-embeddings">Inspecting Word Embeddings</a></li>
+  <li><a href="#bias-in-text-embeddings" id="toc-bias-in-text-embeddings" class="nav-link" data-scroll-target="#bias-in-text-embeddings">Bias in Text Embeddings</a></li>
+  <li><a href="#representational-harm-and-representational-bias" id="toc-representational-harm-and-representational-bias" class="nav-link" data-scroll-target="#representational-harm-and-representational-bias">Representational Harm and Representational Bias</a>
+  <ul class="collapse">
+  <li><a href="#bias-in-google-translate" id="toc-bias-in-google-translate" class="nav-link" data-scroll-target="#bias-in-google-translate">Bias in Google Translate</a></li>
+  </ul></li>
+  <li><a href="#intersections-of-representational-and-allocative-harms" id="toc-intersections-of-representational-and-allocative-harms" class="nav-link" data-scroll-target="#intersections-of-representational-and-allocative-harms">Intersections of Representational and Allocative Harms</a></li>
+  <li><a href="#more-on-bias-in-language-models" id="toc-more-on-bias-in-language-models" class="nav-link" data-scroll-target="#more-on-bias-in-language-models">More on Bias in Language Models</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/60-intro-deep.html">Deep Learning</a></li><li class="breadcrumb-item"><a href="../chapters/72-text-classification.html"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Text Classification and Word Embedding</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Text Classification and Word Embedding</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Phil Chodrow </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><em>Major components of this set of lecture notes are based on the <a href="https://pytorch.org/tutorials/beginner/text_sentiment_ngrams_tutorial.html">Text Classification</a> tutorial from the PyTorch documentation</em>.</p>
+<section id="deep-text-classification-and-word-embedding" class="level2">
+<h2 class="anchored" data-anchor-id="deep-text-classification-and-word-embedding">Deep Text Classification and Word Embedding</h2>
+<p>In this set of notes, we’ll discuss the problem of <em>text classification</em>. Text classification is a common problem in which we aim to classify pieces of text into different categories. These categories might be about:</p>
+<ul>
+<li><strong>Subject matter</strong>: is this news article about news, fashion, finance?</li>
+<li><strong>Emotional valence</strong>: is this tweet happy or sad? Excited or calm? This particular class of questions is so important that it has its own name: sentiment analysis.</li>
+<li><strong>Automated content moderation</strong>: is this Facebook comment a possible instance of abuse or harassment? Is this Reddit thread promoting violence? Is this email spam?</li>
+</ul>
+<p>We saw text classification previously when we first considered the problem of vectorizing pieces of text. We are now going to look at a somewhat more contemporary approach to text using <em>word embeddings</em>.</p>
+<div id="cell-2" class="cell" data-execution_count="39">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchinfo <span class="im">import</span> summary</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># for embedding visualization later</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.express <span class="im">as</span> px </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.io <span class="im">as</span> pio</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># for VSCode plotly rendering</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># pio.renderers.default = "plotly_mimetype+notebook"</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># for appearance</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>pio.templates.default <span class="op">=</span> <span class="st">"plotly_white"</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># for train-test split</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co"># for suppressing bugged warnings from torchinfo</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>, category <span class="op">=</span> <span class="pp">UserWarning</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For this example, we are going to use a data set containing headlines from a large number of different news articles on the website <a href="https://www.huffpost.com/">HuffPost</a>. I retrieved this data <a href="https://www.kaggle.com/rmisra/news-category-dataset">from Kaggle</a>.</p>
+<div id="cell-4" class="cell" data-execution_count="40">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># access the data</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/PIC16B/master/datasets/news/News_Category_Dataset_v2.json"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>df  <span class="op">=</span> pd.read_json(url, lines<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>df  <span class="op">=</span> df[[<span class="st">"category"</span>, <span class="st">"headline"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>There are over 200,000 headlines listed here, along with the category in which they appeared on the website.</p>
+<div id="cell-6" class="cell" data-outputid="c8fa6b07-8747-4891-b540-2fc6b05282ab" data-execution_count="41">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="41">
+<div>
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">category</th>
+<th data-quarto-table-cell-role="th">headline</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>CRIME</td>
+<td>There Were 2 Mass Shootings In Texas Last Week...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>ENTERTAINMENT</td>
+<td>Will Smith Joins Diplo And Nicky Jam For The 2...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>ENTERTAINMENT</td>
+<td>Hugh Grant Marries For The First Time At Age 57</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>ENTERTAINMENT</td>
+<td>Jim Carrey Blasts 'Castrato' Adam Schiff And D...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>ENTERTAINMENT</td>
+<td>Julianna Margulies Uses Donald Trump Poop Bags...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</div>
+<p>Our task will be to teach an algorithm to classify headlines by predicting the category based on the text of the headline.</p>
+<p>Training a model on this much text data can require a lot of time, so we are going to simplify the problem a little bit, by reducing the number of categories. Let’s take a look at which categories we have:</p>
+<div id="cell-8" class="cell" data-outputid="d7ec91ee-32e5-4e2c-f792-89c29f9a1689" data-execution_count="42">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">"category"</span>).size()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="42">
+<pre><code>category
+ARTS               1509
+ARTS &amp; CULTURE     1339
+BLACK VOICES       4528
+BUSINESS           5937
+COLLEGE            1144
+COMEDY             5175
+CRIME              3405
+CULTURE &amp; ARTS     1030
+DIVORCE            3426
+EDUCATION          1004
+ENTERTAINMENT     16058
+ENVIRONMENT        1323
+FIFTY              1401
+FOOD &amp; DRINK       6226
+GOOD NEWS          1398
+GREEN              2622
+HEALTHY LIVING     6694
+HOME &amp; LIVING      4195
+IMPACT             3459
+LATINO VOICES      1129
+MEDIA              2815
+MONEY              1707
+PARENTING          8677
+PARENTS            3955
+POLITICS          32739
+QUEER VOICES       6314
+RELIGION           2556
+SCIENCE            2178
+SPORTS             4884
+STYLE              2254
+STYLE &amp; BEAUTY     9649
+TASTE              2096
+TECH               2082
+THE WORLDPOST      3664
+TRAVEL             9887
+WEDDINGS           3651
+WEIRD NEWS         2670
+WELLNESS          17827
+WOMEN              3490
+WORLD NEWS         2177
+WORLDPOST          2579
+dtype: int64</code></pre>
+</div>
+</div>
+<p>Some of these categories are a little odd:</p>
+<ul>
+<li>“Women”?</li>
+<li>“Weird News”?</li>
+<li>What’s the difference between “Style,” “Style &amp; Beauty,” and “Taste”? ).</li>
+<li>“Parenting” vs.&nbsp;“Parents”?</li>
+<li>Etc?…</li>
+</ul>
+<p>Well, there are definitely some questions here! Let’s just choose a few categories, and discard the rest. We’re going to give each of the categories an integer that we’ll use to encode the category in the target variable.</p>
+<div id="cell-10" class="cell" data-outputid="e8ce4efc-1c46-4c9f-a282-1293f662bc99" data-execution_count="43">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>categories <span class="op">=</span> {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"STYLE"</span>   : <span class="dv">0</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SCIENCE"</span> : <span class="dv">1</span>, </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"TECH"</span> : <span class="dv">2</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df[df[<span class="st">"category"</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: x <span class="kw">in</span> categories.keys())]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="43">
+<div>
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">category</th>
+<th data-quarto-table-cell-role="th">headline</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">137</td>
+<td>TECH</td>
+<td>Facebook Accused Of Reading Texts And Accessin...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">138</td>
+<td>TECH</td>
+<td>Self-Driving Uber In Fatal Accident Had 6 Seco...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">155</td>
+<td>SCIENCE</td>
+<td>Scientists Turn To DNA Technology To Search Fo...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">272</td>
+<td>TECH</td>
+<td>Instagram Is Adding A 'Mute' Button For The Sa...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">285</td>
+<td>SCIENCE</td>
+<td>Unusual Asteroid Could Be An Interstellar Gues...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</div>
+<div id="cell-11" class="cell" data-outputid="cfd748f8-aeb6-4cfc-ec8f-864ee5c0643d" data-execution_count="44">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"category"</span>] <span class="op">=</span> df[<span class="st">"category"</span>].<span class="bu">apply</span>(categories.get)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="44">
+<div>
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">category</th>
+<th data-quarto-table-cell-role="th">headline</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">137</td>
+<td>2</td>
+<td>Facebook Accused Of Reading Texts And Accessin...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">138</td>
+<td>2</td>
+<td>Self-Driving Uber In Fatal Accident Had 6 Seco...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">155</td>
+<td>1</td>
+<td>Scientists Turn To DNA Technology To Search Fo...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">272</td>
+<td>2</td>
+<td>Instagram Is Adding A 'Mute' Button For The Sa...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">285</td>
+<td>1</td>
+<td>Unusual Asteroid Could Be An Interstellar Gues...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">200844</td>
+<td>2</td>
+<td>Google+ Now Open for Teens With Some Safeguards</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">200845</td>
+<td>2</td>
+<td>Web Wars</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">200846</td>
+<td>2</td>
+<td>First White House Chief Technology Officer, An...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">200847</td>
+<td>2</td>
+<td>Watch The Top 9 YouTube Videos Of The Week</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">200848</td>
+<td>2</td>
+<td>RIM CEO Thorsten Heins' 'Significant' Plans Fo...</td>
+</tr>
+</tbody>
+</table>
+
+<p>6514 rows × 2 columns</p>
+</div>
+</div>
+</div>
+</div>
+<p>The base rate on this problem is the proportion of the data set occupied by the largest label class:</p>
+<div id="cell-13" class="cell" data-execution_count="71">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df_train.groupby(<span class="st">"category"</span>).size() <span class="op">/</span> <span class="bu">len</span>(df_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="71">
+<pre><code>category
+0    0.347150
+1    0.336404
+2    0.316446
+dtype: float64</code></pre>
+</div>
+</div>
+<p>If we always guessed category 1, then we would expect an accuracy of roughly 35%. So, our task is to see whether we can train a model to beat this.</p>
+<p>Next we need to wrap this Pandas dataframe as a Torch data set. While we’ve been using pre-implemented Torch classes for things like directories of images, in this case it’s not so hard to just implement our own Dataset. We just need to implement <code>__getitem__()</code> to return the appropriate row of the dataframe.</p>
+<div id="cell-16" class="cell" data-execution_count="45">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> Dataset, DataLoader</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TextDataFromDF(Dataset):</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, df):</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.df <span class="op">=</span> df</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, index):</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.df.iloc[index, <span class="dv">1</span>], <span class="va">self</span>.df.iloc[index, <span class="dv">0</span>]</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>):</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.df)                </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now let’s perform a train-validation split and make Datasets from each one.</p>
+<div id="cell-18" class="cell" data-execution_count="46">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df_train, df_val <span class="op">=</span> train_test_split(df,shuffle <span class="op">=</span> <span class="va">True</span>, test_size <span class="op">=</span> <span class="fl">0.2</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>train_data <span class="op">=</span> TextDataFromDF(df_train)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>val_data   <span class="op">=</span> TextDataFromDF(df_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Each element of our data sets is a tuple of text and label:</p>
+<div id="cell-20" class="cell" data-outputid="3a6af575-8fa6-4fa5-f63f-0ed3b1755559" data-execution_count="47">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>train_data[<span class="dv">194</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="47">
+<pre><code>("North Star's Distance To Earth: Polaris Is Not So Close After All, New Study Suggests",
+ 1)</code></pre>
+</div>
+</div>
+</section>
+<section id="text-vectorization" class="level2">
+<h2 class="anchored" data-anchor-id="text-vectorization">Text Vectorization</h2>
+<p>Now we need to vectorize our text. The most classical way to do this is via one-hot encodings. We’re not going to do this; instead we are going to treat each sentence as a sequence of words, and identify each word via an integer index. First we’ll use a <em>tokenizer</em> to split each sentence into individual words:</p>
+<div id="cell-22" class="cell" data-outputid="f6e3274d-7d15-45f9-f9e4-728aa9c5327d" data-execution_count="48">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchtext.data.utils <span class="im">import</span> get_tokenizer</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchtext.vocab <span class="im">import</span> build_vocab_from_iterator</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> get_tokenizer(<span class="st">'basic_english'</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>tokenized <span class="op">=</span> tokenizer(train_data[<span class="dv">194</span>][<span class="dv">0</span>])</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>tokenized</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="48">
+<pre><code>['north',
+ 'star',
+ "'",
+ 's',
+ 'distance',
+ 'to',
+ 'earth',
+ 'polaris',
+ 'is',
+ 'not',
+ 'so',
+ 'close',
+ 'after',
+ 'all',
+ ',',
+ 'new',
+ 'study',
+ 'suggests']</code></pre>
+</div>
+</div>
+<p>You might reasonably disagree about whether this is a good tokenization: should punctuation marks be included? Should “you’re” really have become “you”, “’”, and “re”? These are excellent questions that we won’t discuss too much further right now.</p>
+<p>We’re now ready to build a <em>vocabulary</em>. A vocabulary is a mapping from words to integers. The code below loops through the training data and uses it to build such a mapping.</p>
+<div id="cell-24" class="cell" data-execution_count="49">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> yield_tokens(data_iter):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> text, _ <span class="kw">in</span> data_iter:</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">yield</span> tokenizer(text)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>vocab <span class="op">=</span> build_vocab_from_iterator(yield_tokens(train_data), specials<span class="op">=</span>[<span class="st">"&lt;unk&gt;"</span>])</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>vocab.set_default_index(vocab[<span class="st">"&lt;unk&gt;"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here are the first couple elements of the vocabulary:</p>
+<div id="cell-26" class="cell" data-outputid="447390e1-83f2-4f13-96b7-bc99b3a6b610" data-execution_count="50">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>vocab.get_itos()[<span class="dv">0</span>:<span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="50">
+<pre><code>['&lt;unk&gt;', "'", 'the', 'to', ',', 's', 'of', 'a', 'in', 'is']</code></pre>
+</div>
+</div>
+<p>This vocabulary can be applied on a list of tokens like this:</p>
+<div id="cell-28" class="cell" data-outputid="7b2ace4d-34a3-457c-a3d5-d0ff4a6aa75c" data-execution_count="51">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>vocab(tokenized)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="51">
+<pre><code>[650, 148, 1, 5, 2296, 3, 85, 7877, 9, 90, 134, 684, 99, 41, 4, 16, 54, 132]</code></pre>
+</div>
+</div>
+</section>
+<section id="batch-collation" class="level1">
+<h1>Batch Collation</h1>
+<p>Now we’re ready to construct the function that is going to actually pass a batch of data to our training loop. Here are the main steps:</p>
+<ol type="1">
+<li>We pull some feature data (i.e.&nbsp;a batch of headlines).</li>
+<li>We represent each headline as a sequence of integers using the <code>vocab</code>.</li>
+<li>We pad the headlines with an unused integer index if necessary so that all headlines have the same length. This index corresponds to “blank” or “no words in this slot.”</li>
+<li>We return the batch of headlines as a consolidated tensor.</li>
+</ol>
+<div id="cell-30" class="cell" data-execution_count="52">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>max_len <span class="op">=</span> <span class="dv">30</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>num_tokens <span class="op">=</span> <span class="bu">len</span>(vocab.get_itos())</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> text_pipeline(x):</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    tokens <span class="op">=</span> vocab(tokenizer(x))</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> torch.zeros(max_len, dtype<span class="op">=</span>torch.int64) <span class="op">+</span> num_tokens</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(tokens) <span class="op">&gt;</span> max_len:</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">=</span> tokens[<span class="dv">0</span>:max_len]</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    y[<span class="dv">0</span>:<span class="bu">len</span>(tokens)] <span class="op">=</span> torch.tensor(tokens,dtype<span class="op">=</span>torch.int64)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> y</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>label_pipeline <span class="op">=</span> <span class="kw">lambda</span> x: <span class="bu">int</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-31" class="cell" data-execution_count="53">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>text_pipeline(<span class="st">"we can't believe"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="53">
+<pre><code>tensor([  32,   33,    1,   31,  818, 9588, 9588, 9588, 9588, 9588, 9588, 9588,
+        9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588,
+        9588, 9588, 9588, 9588, 9588, 9588])</code></pre>
+</div>
+</div>
+<div id="cell-32" class="cell" data-execution_count="54">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> collate_batch(batch):</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    label_list, text_list <span class="op">=</span> [], []</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (_text, _label) <span class="kw">in</span> batch:</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># add label to list</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>         label_list.append(label_pipeline(_label))</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>         <span class="co"># add text (as sequence of integers) to list</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>         processed_text <span class="op">=</span> text_pipeline(_text)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>         text_list.append(processed_text)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    label_list <span class="op">=</span> torch.tensor(label_list, dtype<span class="op">=</span>torch.int64)</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    text_list <span class="op">=</span> torch.stack(text_list)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> text_list.to(device), label_list.to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-33" class="cell" data-execution_count="55">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(train_data, batch_size<span class="op">=</span><span class="dv">8</span>, shuffle<span class="op">=</span><span class="va">True</span>, collate_fn<span class="op">=</span>collate_batch)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>val_loader <span class="op">=</span> DataLoader(val_data, batch_size<span class="op">=</span><span class="dv">8</span>, shuffle<span class="op">=</span><span class="va">True</span>, collate_fn<span class="op">=</span>collate_batch)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s take a look at a batch of data now:</p>
+<div id="cell-35" class="cell" data-outputid="98e6a698-98d2-45f9-aeba-7b91c12f9619" data-execution_count="56">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="bu">next</span>(<span class="bu">iter</span>(train_loader))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="56">
+<pre><code>(tensor([[   1, 3217, 1582,    1, 1089,   19,  578,  150, 1091,    9,  134,  228,
+            30, 3532, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588],
+         [8537,   44,  787,  351,    1,    5, 1379,    3,  144,   14,    5,   14,
+          2827,  761,   18, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588],
+         [ 393,  284,   63,  556,    6,  203, 9588, 9588, 9588, 9588, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588],
+         [ 202,    6,    2,   45,  350, 1559,   38,  587,    8,  204, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588],
+         [4878,  235, 5087, 1947,    4, 5629,  339, 9588, 9588, 9588, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588],
+         [  65,   27,   90,   17, 6411,    1,    5, 2363, 2809, 9588, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588],
+         [   1, 1065, 2349, 9351,    1,    9,  862,  352,    3,   55, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588],
+         [ 202, 4216, 1514,  664,  538, 1603,  112, 9588, 9588, 9588, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588, 9588,
+          9588, 9588, 9588, 9588, 9588, 9588]]),
+ tensor([2, 1, 1, 0, 2, 0, 2, 2]))</code></pre>
+</div>
+</div>
+<p>The first element is the list of labels. The second is the concatenated sequence of integers representing 8 headlines worth of text. The final one is the list of offsets that tells us where each of the 8 headlines begins.</p>
+<section id="modeling" class="level2">
+<h2 class="anchored" data-anchor-id="modeling">Modeling</h2>
+<section id="word-embedding" class="level3">
+<h3 class="anchored" data-anchor-id="word-embedding">Word Embedding</h3>
+<p>A <em>word embedding</em> refers to a representation of a word in a vector space. Each word is assigned an individual vector. The general aim of a word embedding is to create a representation such that words with related meanings are close to each other in a vector space, while words with different meanings are farther apart. One usually hopes for the <em>directions</em> connecting words to be meaningful as well. Here’s a nice diagram illustrating some of the general concepts:</p>
+<p><img src="https://miro.medium.com/max/1838/1*OEmWDt4eztOcm5pr2QbxfA.png" class="img-fluid"></p>
+<p><em>Image credit: <a href="https://towardsdatascience.com/creating-word-embeddings-coding-the-word2vec-algorithm-in-python-using-deep-learning-b337d0ba17a8">Towards Data Science</a></em></p>
+<p>Word embeddings are often produced as intermediate stages in many machine learning algorithms. In our case, we’re going to add an embedding layer at the very base of our model. We’ll allow the user to flexibly specify the number of dimensions.</p>
+<p>We’ll typically expect pretty low-dimensional embeddings for this lecture, but state-of-the-art embeddings will typically have a much higher number of dimensions. For example, the <a href="http://projector.tensorflow.org/">Embedding Projector demo</a> supplied by TensorFlow uses a default dimension of 200.</p>
+<div id="cell-37" class="cell" data-execution_count="73">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch <span class="im">import</span> nn</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TextClassificationModel(nn.Module):</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,vocab_size, embedding_dim, max_len, num_class):</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.embedding <span class="op">=</span> nn.Embedding(vocab_size<span class="op">+</span><span class="dv">1</span>, embedding_dim)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fc   <span class="op">=</span> nn.Linear(max_len<span class="op">*</span>embedding_dim, num_class)</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.embedding(x)</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.flatten(x, <span class="dv">1</span>)</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.fc(x)</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s learn and train a model!</p>
+<div id="cell-39" class="cell" data-execution_count="74">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>vocab_size <span class="op">=</span> <span class="bu">len</span>(vocab)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>embedding_dim <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> TextClassificationModel(vocab_size, embedding_dim, max_len, <span class="dv">3</span>).to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-40" class="cell" data-execution_count="75">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>INPUT_SHAPE <span class="op">=</span> (<span class="dv">1</span>,max_len)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>summary(model, INPUT_SHAPE, dtypes<span class="op">=</span>[torch.<span class="bu">long</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="75">
+<pre><code>==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+TextClassificationModel                  [1, 3]                    --
+├─Embedding: 1-1                         [1, 30, 3]                28,767
+├─Linear: 1-2                            [1, 3]                    273
+==========================================================================================
+Total params: 29,040
+Trainable params: 29,040
+Non-trainable params: 0
+Total mult-adds (M): 0.03
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.00
+Params size (MB): 0.12
+Estimated Total Size (MB): 0.12
+==========================================================================================</code></pre>
+</div>
+</div>
+<div id="cell-41" class="cell" data-execution_count="76">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">.1</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="op">=</span> torch.nn.CrossEntropyLoss()</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(dataloader):</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    epoch_start_time <span class="op">=</span> time.time()</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># keep track of some counts for measuring accuracy</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    total_acc, total_count <span class="op">=</span> <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    log_interval <span class="op">=</span> <span class="dv">300</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    start_time <span class="op">=</span> time.time()</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx, (text, label) <span class="kw">in</span> <span class="bu">enumerate</span>(dataloader):</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># zero gradients</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># form prediction on batch</span></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>        predicted_label <span class="op">=</span> model(text)</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># evaluate loss on prediction</span></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> loss_fn(predicted_label, label)</span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>        <span class="co"># compute gradient</span></span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># take an optimization step</span></span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>        <span class="co"># for printing accuracy</span></span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>        total_acc   <span class="op">+=</span> (predicted_label.argmax(<span class="dv">1</span>) <span class="op">==</span> label).<span class="bu">sum</span>().item()</span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>        total_count <span class="op">+=</span> label.size(<span class="dv">0</span>)</span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'| epoch </span><span class="sc">{</span>epoch<span class="sc">:3d}</span><span class="ss"> | train accuracy </span><span class="sc">{</span>total_acc<span class="op">/</span>total_count<span class="sc">:8.3f}</span><span class="ss"> | time: </span><span class="sc">{</span>time<span class="sc">.</span>time() <span class="op">-</span> epoch_start_time<span class="sc">:5.2f}</span><span class="ss">s'</span>)</span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print('| end of epoch {:3d} | time: {:5.2f}s | '.format(epoch,</span></span>
+<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">#                                        time.time() - epoch_start_time))</span></span>
+<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluate(dataloader):</span>
+<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a>    total_acc, total_count <span class="op">=</span> <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb32-38"><a href="#cb32-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> idx, (text, label) <span class="kw">in</span> <span class="bu">enumerate</span>(dataloader):</span>
+<span id="cb32-39"><a href="#cb32-39" aria-hidden="true" tabindex="-1"></a>            predicted_label <span class="op">=</span> model(text)</span>
+<span id="cb32-40"><a href="#cb32-40" aria-hidden="true" tabindex="-1"></a>            total_acc <span class="op">+=</span> (predicted_label.argmax(<span class="dv">1</span>) <span class="op">==</span> label).<span class="bu">sum</span>().item()</span>
+<span id="cb32-41"><a href="#cb32-41" aria-hidden="true" tabindex="-1"></a>            total_count <span class="op">+=</span> label.size(<span class="dv">0</span>)</span>
+<span id="cb32-42"><a href="#cb32-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total_acc<span class="op">/</span>total_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-42" class="cell" data-outputid="c7efbe25-d0a2-4225-d814-e1af7bd4ffaf" data-execution_count="77">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>EPOCHS <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    train(train_loader)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>| epoch   1 | train accuracy    0.585 | time:  0.87s
+| epoch   2 | train accuracy    0.863 | time:  0.95s
+| epoch   3 | train accuracy    0.931 | time:  0.80s
+| epoch   4 | train accuracy    0.949 | time:  1.12s
+| epoch   5 | train accuracy    0.966 | time:  1.03s
+| epoch   6 | train accuracy    0.969 | time:  0.76s
+| epoch   7 | train accuracy    0.974 | time:  0.95s
+| epoch   8 | train accuracy    0.978 | time:  0.79s
+| epoch   9 | train accuracy    0.982 | time:  0.79s
+| epoch  10 | train accuracy    0.987 | time:  0.81s</code></pre>
+</div>
+</div>
+<div id="cell-43" class="cell" data-outputid="9be492a0-41ab-4d49-ceff-34ebb268b3ba" data-execution_count="78">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>evaluate(val_loader)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="78">
+<pre><code>0.827321565617805</code></pre>
+</div>
+</div>
+<p>Our accuracy on validation data is much lower than what we achieved on the training data. This is a possible sign of overfitting. Regardless, this predictive performance is much better than the roughly 34% that we would have achieved by guesswork:</p>
+</section>
+</section>
+<section id="inspecting-word-embeddings" class="level2">
+<h2 class="anchored" data-anchor-id="inspecting-word-embeddings">Inspecting Word Embeddings</h2>
+<p>Recall from our discussion of image classification that the intermediate layers learned by the model can help us understand the representations that the model uses to construct its final outputs. In the case of word embeddings, we can simply extract this matrix from the corresponding layer of the model:</p>
+<div id="cell-46" class="cell" data-execution_count="79">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>embedding_matrix <span class="op">=</span> model.embedding.cpu().weight.data.numpy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s also extract the words from our vocabular:</p>
+<div id="cell-48" class="cell" data-execution_count="82">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>tokens <span class="op">=</span> vocab.get_itos()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The embedding matrix itself has 3 columns, which is too many for us to conveniently visualize. So, instead we are going to use our friend PCA to extract a 2-dimensional representation that we can plot.</p>
+<div id="cell-50" class="cell" data-execution_count="83">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> pca.fit_transform(embedding_matrix)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We’ll use the Plotly package to do the plotting. Plotly works best with dataframes:</p>
+<div id="cell-52" class="cell" data-outputid="eaed0eb6-cbaa-4877-ff06-fc1b60721359" data-execution_count="84">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>tokens <span class="op">=</span> vocab.get_itos()</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>tokens.append(<span class="st">" "</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>embedding_df <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'word'</span> : tokens, </span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'x0'</span>   : weights[:,<span class="dv">0</span>],</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'x1'</span>   : weights[:,<span class="dv">1</span>]</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>embedding_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="84">
+<div>
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">word</th>
+<th data-quarto-table-cell-role="th">x0</th>
+<th data-quarto-table-cell-role="th">x1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>&lt;unk&gt;</td>
+<td>-0.132511</td>
+<td>-1.768109</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>'</td>
+<td>0.938984</td>
+<td>0.265752</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>the</td>
+<td>-0.269031</td>
+<td>1.063714</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>to</td>
+<td>1.117192</td>
+<td>-1.469461</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>,</td>
+<td>-2.883097</td>
+<td>2.297512</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9584</td>
+<td>‘what</td>
+<td>-0.128428</td>
+<td>-4.969171</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9585</td>
+<td>’</td>
+<td>-0.933694</td>
+<td>0.041928</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9586</td>
+<td>’90s</td>
+<td>6.380589</td>
+<td>2.653529</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9587</td>
+<td>💯</td>
+<td>1.735272</td>
+<td>3.793828</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9588</td>
+<td></td>
+<td>-0.374999</td>
+<td>-0.086186</td>
+</tr>
+</tbody>
+</table>
+
+<p>9589 rows × 3 columns</p>
+</div>
+</div>
+</div>
+</div>
+<p>And, let’s plot! We’ve used Plotly for the interactivity: hover over a dot to see the word it corresponds to.</p>
+<div id="cell-54" class="cell" data-outputid="4ea01cb9-bd75-4065-f79f-89d095fa4537" data-execution_count="85">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> px.scatter(embedding_df, </span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>                 x <span class="op">=</span> <span class="st">"x0"</span>, </span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>                 y <span class="op">=</span> <span class="st">"x1"</span>, </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>                 size <span class="op">=</span> <span class="bu">list</span>(np.ones(<span class="bu">len</span>(embedding_df))),</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>                 size_max <span class="op">=</span> <span class="dv">10</span>,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>                 hover_name <span class="op">=</span> <span class="st">"word"</span>)</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Unable to display output for mime type(s): application/vnd.plotly.v1+json</code></pre>
+</div>
+</div>
+<p>We’ve made an embedding! We might notice that this embedding appears to be a little bit “stretched out” in three main directions. Each one corresponds to one of the three classes in our training data.</p>
+</section>
+<section id="bias-in-text-embeddings" class="level2">
+<h2 class="anchored" data-anchor-id="bias-in-text-embeddings">Bias in Text Embeddings</h2>
+<p>Whenever we create a machine learning model that might conceivably have impact on the thoughts or actions of human beings, we have a responsibility to understand the limitations and biases of that model. Biases can enter into machine learning models through several routes, including the data used as well as choices made by the modeler along the way. For example, in our case:</p>
+<ol type="1">
+<li><strong>Data</strong>: we used data from a popular news source.</li>
+<li><strong>Modeler choice</strong>: we only used data corresponding to a certain subset of labels.</li>
+</ol>
+<p>With these considerations in mind, let’s see what kinds of words our model associates with female and male genders.</p>
+<div id="cell-56" class="cell" data-execution_count="86">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>feminine <span class="op">=</span> [<span class="st">"she"</span>, <span class="st">"her"</span>, <span class="st">"woman"</span>]</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>masculine <span class="op">=</span> [<span class="st">"he"</span>, <span class="st">"him"</span>, <span class="st">"man"</span>]</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>highlight_1 <span class="op">=</span> [<span class="st">"strong"</span>, <span class="st">"powerful"</span>, <span class="st">"smart"</span>,     <span class="st">"thinking"</span>, <span class="st">"brave"</span>, <span class="st">"muscle"</span>]</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>highlight_2 <span class="op">=</span> [<span class="st">"hot"</span>,    <span class="st">"sexy"</span>,     <span class="st">"beautiful"</span>, <span class="st">"shopping"</span>, <span class="st">"children"</span>, <span class="st">"thin"</span>]</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gender_mapper(x):</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> x <span class="kw">in</span> feminine:</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> x <span class="kw">in</span> masculine:</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">4</span></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> x <span class="kw">in</span> highlight_1:</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">3</span></span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> x <span class="kw">in</span> highlight_2:</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">2</span></span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>embedding_df[<span class="st">"highlight"</span>] <span class="op">=</span> embedding_df[<span class="st">"word"</span>].<span class="bu">apply</span>(gender_mapper)</span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>embedding_df[<span class="st">"size"</span>]      <span class="op">=</span> np.array(<span class="fl">1.0</span> <span class="op">+</span> <span class="dv">50</span><span class="op">*</span>(embedding_df[<span class="st">"highlight"</span>] <span class="op">&gt;</span> <span class="dv">0</span>))</span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>sub_df <span class="op">=</span> embedding_df[embedding_df[<span class="st">"highlight"</span>] <span class="op">&gt;</span> <span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-57" class="cell" data-outputid="f92609a5-b848-4067-bc4b-2d815b5d037e" data-execution_count="87">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.express <span class="im">as</span> px </span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> px.scatter(sub_df, </span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>                 x <span class="op">=</span> <span class="st">"x0"</span>, </span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>                 y <span class="op">=</span> <span class="st">"x1"</span>, </span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>                 color <span class="op">=</span> <span class="st">"highlight"</span>,</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>                 size <span class="op">=</span> <span class="bu">list</span>(sub_df[<span class="st">"size"</span>]),</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>                 size_max <span class="op">=</span> <span class="dv">10</span>,</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>                 hover_name <span class="op">=</span> <span class="st">"word"</span>, </span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>                 text <span class="op">=</span> <span class="st">"word"</span>)</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>fig.update_traces(textposition<span class="op">=</span><span class="st">'top center'</span>)</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Unable to display output for mime type(s): application/vnd.plotly.v1+json</code></pre>
+</div>
+</div>
+<p>What do you notice about some of the similarities represented in these embeddings? What do you wonder?</p>
+</section>
+<section id="representational-harm-and-representational-bias" class="level2">
+<h2 class="anchored" data-anchor-id="representational-harm-and-representational-bias">Representational Harm and Representational Bias</h2>
+<p>Earlier in this course, we discussed <em>allocative bias</em>. Allocative bias occurs when different groups have inequitable opportunities to access important resources or opportunities on the basis of their identity. We discussed examples that raised questions about equitable access to personal liberty, employment, and insurance.</p>
+<p><em>Representational bias</em> refers to the systematic cultural representation of marginalized groups in harmful ways, or of denying them cultural representation at all. The perpetuation of <em>harmful stereotypes</em> is perhaps the most well-known form of representational harm. <em>Erasure</em> is another form of representational harm in which representations or topics of interest to marginalized groups are suppressed.</p>
+<p>Here’s a very recent example (from Margaret Mitchell) illustrating how representational gender bias shows up in ChatGPT:</p>
+<blockquote class="twitter-tweet blockquote">
+<p lang="en" dir="ltr">
+I replicated this (my screenshot below).<br>Really great example of gender bias, for those of you who need a canonical example to make the point. <a href="https://t.co/O1A8Tk7oI1">https://t.co/O1A8Tk7oI1</a> <a href="https://t.co/hKt4HSBzh3">pic.twitter.com/hKt4HSBzh3</a>
+</p>
+— MMitchell (<span class="citation" data-cites="mmitchell_ai">(<a href="#ref-mmitchell_ai" role="doc-biblioref"><strong>mmitchell_ai?</strong></a>)</span>) <a href="https://twitter.com/mmitchell_ai/status/1650110045781393410?ref_src=twsrc%5Etfw">April 23, 2023</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>Another form of representational harm in ML systems is the famous historical tendency of Google Search to surface demeaning and offensive search results related to people of color. This tendency was studied by Dr.&nbsp;Safiya Noble in her book <em>Algorithms of Oppression</em>. In one of Dr.&nbsp;Nobel’s most famous examples, top results for the phrase “black girls” in 2011 consisted of links to porn sites, which did not hold true of searches for “white girls” or “black men.” As late as 2016, an image search for “gorillas” would surface pictures of Black individuals. You can find a brief synopsis of some of Dr.&nbsp;Noble’s findings <a href="https://time.com/5209144/google-search-engine-algorithm-bias-racism/">here</a> (content warning: highly sexually explicit language). Google has since taken steps to improve these specific examples.</p>
+<section id="bias-in-google-translate" class="level3">
+<h3 class="anchored" data-anchor-id="bias-in-google-translate">Bias in Google Translate</h3>
+<p>It is well-documented that machine learning algorithms trained on natural text can inherit biases present in those texts. One of the most direct ways in which we can observe such bias is in Google Translate. Some languages, such as Hungarian, do not possess gendered pronouns. When Google Translate attempts to render these pronouns into a gendered language like English, assumptions are made, as pointed out in <a href="https://twitter.com/DoraVargha/status/1373211762108076034?ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1373211762108076034%7Ctwgr%5E%7Ctwcon%5Es1_&amp;ref_url=https%3A%2F%2Fd-7356743851859968838.ampproject.net%2F2103240330002%2Fframe.html">this Tweet by Dora Vargha</a>. Let’s demonstrate with the following English sentences.</p>
+<blockquote class="blockquote">
+<p><strong>he</strong> cooks. <strong>she</strong> is a political leader. <strong>she</strong> is an engineer. <strong>he</strong> is a cleaner. <strong>he</strong> is beautiful. <strong>she</strong> is strong.</p>
+</blockquote>
+<p>Translate these into Hungarian and back via Google Translate, and here’s what you’ll get:</p>
+<blockquote class="blockquote">
+<p><strong>she</strong> cooks. <strong>he</strong> is a political leader. <strong>he</strong> is an engineer. <strong>she</strong> is cleaning. <strong>she</strong> is beautiful. <strong>he</strong> is strong.</p>
+</blockquote>
+<p>Considering that English <em>has</em> a gender neutral pronoun (<em>they</em>), this would be an easy item to fix, which Google has thus far declined to do.</p>
+</section>
+</section>
+<section id="intersections-of-representational-and-allocative-harms" class="level2">
+<h2 class="anchored" data-anchor-id="intersections-of-representational-and-allocative-harms">Intersections of Representational and Allocative Harms</h2>
+<p>In some cases, representational and allocative harms can intersect and reinforce each other. For example, modern translation systems perform impressively in certain languages but much less well in others. Some of these languages, such as Pashto and Dari, are spoken by many refugees and asylum-seekers to the US. The use of automated translation software when processing these asylum cases has drawn considerable scrutiny and <a href="https://restofworld.org/2023/ai-translation-errors-afghan-refugees-asylum/">appears to have resulted in the denial of at least one case</a> due to a machine translation error.</p>
+</section>
+<section id="more-on-bias-in-language-models" class="level2">
+<h2 class="anchored" data-anchor-id="more-on-bias-in-language-models">More on Bias in Language Models</h2>
+<p>For more on the topic of bias in language models, you may wish to read the now-infamous paper by Emily Bender, Angelina McMillan-Major, Timnit Gebru, and “Shmargret Shmitchell” (Margaret Mitchell), “<a href="https://faculty.washington.edu/ebender/papers/Stochastic_Parrots.pdf">On the Dangers of Stochastic Parrots</a>.” This is the paper that ultimately led to the firing of the final two authors by Google in late 2020 and early 2021.</p>
+
+
+</section>
+</section>
+
+<p><br> <br> <span style="color:grey;">© Phil Chodrow, 2024</span></p></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/70-image-classification.html" class="pagination-link" aria-label="Deep Image Classification">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Deep Image Classification</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/80-unsupervised-autoencoders.ipynb" class="pagination-link" aria-label="">
+        <span class="nav-page-text"></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

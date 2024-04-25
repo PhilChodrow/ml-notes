@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.551">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Machine Learning - 8&nbsp; Convex Empirical Risk Minimization</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/23-gradient-descent.html" rel="next">
+<link href="../chapters/20-perceptron.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar floating slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/20-perceptron.html">Machine Learning Models</a></li><li class="breadcrumb-item"><a href="../chapters/22-convex-erm.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Convex Empirical Risk Minimization</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Introducing Machine Learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-data-and-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Data, Patterns, and Models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-black-box-classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Classification as a Black Box</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Fundamentals of Prediction</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-score-based-classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Score-Based Classification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-decision-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Decision Theory in Classification</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Discrimination, Disparity, Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/10-compas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Introduction to Algorithmic Disparity: COMPAS</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/12-statistical-fairness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Statistical Definitions of Fairness in Decision-Making</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Machine Learning Models</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/20-perceptron.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Introduction to Classification: The Perceptron</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/22-convex-erm.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Convex Empirical Risk Minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/23-gradient-descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Optimization with Gradient Descent</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/30-features-regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Feature Maps, Regularization, and Generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/40-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Linear Regression</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/50-kernel-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Kernel Methods</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/51-vectorization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Vectorization and Feature Engineering</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text">Deep Learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/60-intro-deep.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">The Problem of Features and Deep Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/61-modern-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Contemporary Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/70-image-classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Deep Image Classification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/72-text-classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Text Classification and Word Embedding</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+ <span class="menu-text">Unsupervised Learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#modeling-choices" id="toc-modeling-choices" class="nav-link active" data-scroll-target="#modeling-choices">Modeling Choices</a></li>
+  <li><a href="#convex-functions" id="toc-convex-functions" class="nav-link" data-scroll-target="#convex-functions">Convex Functions</a></li>
+  <li><a href="#convex-loss-functions" id="toc-convex-loss-functions" class="nav-link" data-scroll-target="#convex-loss-functions">Convex Loss Functions</a></li>
+  <li><a href="#convex-empirical-risk-minimization" id="toc-convex-empirical-risk-minimization" class="nav-link" data-scroll-target="#convex-empirical-risk-minimization">Convex Empirical Risk Minimization</a></li>
+  <li><a href="#convex-functions-have-global-minimizers" id="toc-convex-functions-have-global-minimizers" class="nav-link" data-scroll-target="#convex-functions-have-global-minimizers">Convex Functions Have Global Minimizers</a></li>
+  <li><a href="#demo-logistic-regression" id="toc-demo-logistic-regression" class="nav-link" data-scroll-target="#demo-logistic-regression">Demo: Logistic Regression</a></li>
+  <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap">Recap</a>
+  <ul class="collapse">
+  <li><a href="#optional-a-logistic-regression-training-loop" id="toc-optional-a-logistic-regression-training-loop" class="nav-link" data-scroll-target="#optional-a-logistic-regression-training-loop">(Optional): A Logistic Regression Training Loop</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/20-perceptron.html">Machine Learning Models</a></li><li class="breadcrumb-item"><a href="../chapters/22-convex-erm.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Convex Empirical Risk Minimization</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Convex Empirical Risk Minimization</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><a href="../chapters/20-perceptron.html">Last time</a>, we studied the binary classification problem. In this problem, we assume that we have a <em>feature matrix</em> <span class="math inline">\(\mathbf{X} \in \mathbb{R}^{n\times p}\)</span>. Each row of this feature matrix gives the predictor data (features) for each of <span class="math inline">\(n\)</span> total observations:</p>
+<p><span class="math display">\[
+\mathbf{X} = \left[\begin{matrix} &amp; - &amp; \mathbf{x}_1 &amp; - \\
+&amp; - &amp; \mathbf{x}_2 &amp; - \\
+&amp; \vdots &amp; \vdots &amp; \vdots \\
+&amp; - &amp; \mathbf{x}_{n} &amp; - \end{matrix}\right]
+\]</span></p>
+<div class="page-columns page-full"><p>We also have a <em>target vector</em> <span class="math inline">\(\mathbf{y} \in \{0,1\}^n\)</span>.  Here’s an example of how our training data might look:</p><div class="no-row-height column-margin column-container"><span class="margin-aside">For convenience, we will continue to assume that the final column of <span class="math inline">\(\mathbf{X}\)</span> is a column of 1s; i.e.&nbsp;<span class="math inline">\(x_{ip} = 1\)</span> for all <span class="math inline">\(i = 1,\ldots,n\)</span>.</span></div></div>
+<div id="cell-fig-scatter" class="cell page-columns page-full" data-execution_count="10">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> classification_data(n_points <span class="op">=</span> <span class="dv">300</span>, noise <span class="op">=</span> <span class="fl">0.2</span>, p_dims <span class="op">=</span> <span class="dv">2</span>):</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> torch.arange(n_points) <span class="op">&gt;=</span> <span class="bu">int</span>(n_points<span class="op">/</span><span class="dv">2</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="fl">1.0</span><span class="op">*</span>y</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> y[:, <span class="va">None</span>] <span class="op">+</span> torch.normal(<span class="fl">0.0</span>, noise, size <span class="op">=</span> (n_points,p_dims))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> torch.cat((X, torch.ones((X.shape[<span class="dv">0</span>], <span class="dv">1</span>))), <span class="dv">1</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X, y</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> classification_data(n_points <span class="op">=</span> <span class="dv">300</span>, noise <span class="op">=</span> <span class="fl">0.2</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_classification_data(X, y, ax):</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> X.shape[<span class="dv">1</span>] <span class="op">==</span> <span class="dv">3</span>, <span class="st">"This function only works for data created with p_dims == 2"</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    targets <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    markers <span class="op">=</span> [<span class="st">"o"</span> , <span class="st">","</span>]</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        ix <span class="op">=</span> y <span class="op">==</span> targets[i]</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X[ix,<span class="dv">0</span>], X[ix,<span class="dv">1</span>], s <span class="op">=</span> <span class="dv">20</span>,  c <span class="op">=</span> y[ix], facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"darkgrey"</span>, cmap <span class="op">=</span> <span class="st">"BrBG"</span>, vmin <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>, vmax <span class="op">=</span> <span class="dv">2</span>, alpha <span class="op">=</span> <span class="fl">0.8</span>, marker <span class="op">=</span> markers[i])</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"$x_1$"</span>, ylabel <span class="op">=</span> <span class="vs">r"$x_2$"</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> classification_data()</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>plot_classification_data(X, y, ax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-scatter" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full" data-cap-location="margin">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="22-convex-erm_files/figure-html/fig-scatter-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.1: 300 data points in the 2d plane, each of which has one of two labels.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We continue to study the <em>linear</em> classification problem. We will find a vector of <em>weights</em> <span class="math inline">\(\mathbf{w}\)</span> with the property that the hyperplane defined by the equation</p>
+<p><span class="math display">\[
+\langle \mathbf{w}, \mathbf{x} \rangle = 0
+\]</span></p>
+<p>approximately separates the two classes.</p>
+<section id="modeling-choices" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="modeling-choices">Modeling Choices</h2>
+<p>Once we have chosen linear models as our tool, we can specify a model for the binary classification task by making two additional choices:</p>
+<ol type="1">
+<li><strong>Loss</strong>: How will we measure the success of the model in distinguishing the two classes?</li>
+<li><strong>Optimizer</strong>: What algorithm will we use in order to minimize the loss?</li>
+</ol>
+<p>What choices did we make in the context of the perceptron?</p>
+<div class="page-columns page-full"><p>The <strong>loss</strong> function was the misclassification rate. If we let <span class="math inline">\(s_i = \langle \mathbf{w}, \mathbf{x}_i\rangle\)</span>, then we can write the loss like this: </p><div class="no-row-height column-margin column-container"><span class="margin-aside">Here, the term <span class="math inline">\(2y_i - 1\)</span> transforms a <span class="math inline">\(y_i\)</span> with values in <span class="math inline">\(\{0,1\}\)</span> into one with values in <span class="math inline">\(\{-1,1\}\)</span>.</span></div></div>
+<p><span class="math display">\[
+L(\mathbf{w}) = \frac{1}{n}\sum_{i = 1}^n \mathbb{1}[s_i (2y_i-1) &lt; 0]
+\]</span></p>
+<p>The <strong>optimizer</strong> we used to minimize the loss was the perceptron update, in which we picked a random point <span class="math inline">\(i\)</span> and then performed the update</p>
+<div class="page-columns page-full"><p> <span class="math display">\[
+\mathbf{w}^{(t+1)} = \mathbf{w}^{(t)} + \mathbb{1}[s_i (2y_i-1) &lt; 0]y_i \mathbf{x}_i
+\]</span></p><div class="no-row-height column-margin column-container"><span class="margin-aside">If <span class="math inline">\(i\)</span> is correctly classified (i.e.&nbsp;if <span class="math inline">\(s_i(2 y_i - 1) &gt; 0\)</span>), then the second term zeros out and nothing happens.</span></div></div>
+<p>However, as we saw, this doesn’t actually work that well. There are two problems:</p>
+<ol type="1">
+<li>Our problem with the <strong>optimizer</strong> was that this update won’t actually converge if the data is not linearly separable. Maybe we could choose a better optimizer that would converge?</li>
+<li>Unfortunately not – as we saw last time, the very problem of minimizing <span class="math inline">\(L(\mathbf{w})\)</span> is NP-hard. This is a problem with the <strong>loss function itself</strong>.</li>
+</ol>
+<p>So, how could we choose a <em>better loss function</em> that would allow us to create efficient algorithms?</p>
+</section>
+<section id="convex-functions" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="convex-functions">Convex Functions</h2>
+<p>Let’s start by visualizing a single term of the perceptron loss function. We’ll view this as a function of the score <span class="math inline">\(s\)</span> and the true target value <span class="math inline">\(y\)</span>:</p>
+<p><span class="math display">\[
+\ell(s, y) = \mathbb{1}[s (2y-1) &lt; 0]\;.
+\]</span></p>
+<p>We’ll call this the <em>0-1 loss function</em>. Here’s a plot of this function for each of the two possible values of <span class="math inline">\(y\)</span>:</p>
+<div id="203a2fc0" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> zero_one_loss(s, y): </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span><span class="op">*</span>(s<span class="op">*</span>(<span class="dv">2</span><span class="op">*</span>y<span class="op">-</span><span class="dv">1</span>)<span class="op">&lt;</span> <span class="dv">0</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># or </span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># hinge_loss = lambda s, y: 1*(s*(2*y-1) &lt; 0)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-fig-0-1-loss" class="cell page-columns page-full" data-execution_count="13">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.rcParams["figure.figsize"] = (10, 4)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_loss(loss_fun, show_line <span class="op">=</span> <span class="va">False</span>):</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> warnings.catch_warnings():</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        warnings.simplefilter(<span class="st">"ignore"</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">3</span>)) </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        s <span class="op">=</span> torch.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">10001</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            y <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>][j]</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            axarr[j].set_title(<span class="ss">f"y = </span><span class="sc">{</span>y<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            axarr[j].<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"$s$"</span>, </span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>                        ylabel <span class="op">=</span> <span class="vs">r"$\ell(s, y)$"</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            ix1 <span class="op">=</span> s <span class="op">&lt;</span> <span class="dv">0</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>            axarr[j].plot(s[ix1], loss_fun(s[ix1], y), color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>            ix2 <span class="op">=</span> s <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>            axarr[j].plot(s[ix2], loss_fun(s[ix2], y), color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> show_line: </span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>                s1 <span class="op">=</span> torch.tensor([<span class="op">-</span><span class="fl">0.7</span>])</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>                s2 <span class="op">=</span> torch.tensor([<span class="fl">0.9</span>])</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>                axarr[j].plot([s1, s2], [loss_fun(s1, y), loss_fun(s2, y)], color <span class="op">=</span> <span class="st">"darkgrey"</span>, linestyle <span class="op">=</span> <span class="st">"--"</span>)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>        plt.tight_layout()</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fig, axarr</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plot_loss(loss_fun <span class="op">=</span> zero_one_loss, show_line <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-0-1-loss" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full" data-cap-location="margin">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-0-1-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="22-convex-erm_files/figure-html/fig-0-1-loss-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-0-1-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.2: The 0-1 loss function.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Surprsingly, the problem with this loss function <span class="math inline">\(\ell\)</span> is that we can “draw lines under the function.” What this means is that we can pick two points on the graph of the function, connect them with a line, and find that the line lies <em>under</em> the graph of the function in some regions:</p>
+<div id="cell-fig-0-1-loss-nonconvex" class="cell page-columns page-full" data-execution_count="14">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plot_loss(loss_fun <span class="op">=</span> zero_one_loss, show_line <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-0-1-loss-nonconvex" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full" data-cap-location="margin">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-0-1-loss-nonconvex-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="22-convex-erm_files/figure-html/fig-0-1-loss-nonconvex-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-0-1-loss-nonconvex-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.3: The 0-1 loss function with a line demonstrating that this function is nonconvex.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Surprisingly, this specific geometric property is what’s blocking us from achieving performant searchability for the problem of finding <span class="math inline">\(\mathbf{w}\)</span>.</p>
+</section>
+<section id="convex-loss-functions" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="convex-loss-functions">Convex Loss Functions</h2>
+<p>In order to develop <em>good</em> properties of loss functions, we need to define two concepts: convex sets, which we mostly won’t need to worry about, and convex functions.</p>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<div id="def-convex-set" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 8.1</strong></span> A set <span class="math inline">\(S \subseteq \mathbb{R}^n\)</span> is <em>convex</em> if, for any two points <span class="math inline">\(\mathbf{z}_1, \mathbf{z}_2 \in S\)</span> and for any <span class="math inline">\(\lambda \in [0,1]\)</span>, the point <span class="math inline">\(\mathbf{z} = \lambda \mathbf{z}_1 + (1-\lambda) \mathbf{z}_2\)</span> is also an element of <span class="math inline">\(S\)</span>.</p>
+</div>
+</div>
+</div>
+</div>
+<p>We also need to define convex <em>functions</em>:</p>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<div id="def-convex-function" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 8.2 (Convex Functions)</strong></span> Let <span class="math inline">\(S \subseteq \mathbb{R}^n\)</span> be convex. A function <span class="math inline">\(f:S \rightarrow \mathbb{R}\)</span> is <em>convex</em> if, for any <span class="math inline">\(\lambda \in \mathbb{R}\)</span> and any two points <span class="math inline">\(\mathbf{z}_1, \mathbf{z}_2 \in S\)</span>, we have</p>
+<p><span class="math display">\[
+f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) \leq \lambda f( \mathbf{z}_1 ) + (1-\lambda)f(\mathbf{z}_2)\;.
+\]</span></p>
+<p>The function <span class="math inline">\(f\)</span> is <em>strictly convex</em> if the inequality is strict: for all <span class="math inline">\(\lambda\)</span>, <span class="math inline">\(\mathbf{z}_1\)</span>, and <span class="math inline">\(\mathbf{z}_2\)</span>,</p>
+<p><span class="math display">\[
+f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) &lt; \lambda f( \mathbf{z}_1 ) + (1-\lambda)f(\mathbf{z}_2)\;.
+\]</span></p>
+</div>
+</div>
+</div>
+</div>
+<p>Roughly, a convex function is “bowl-shaped,” in the sense that any line connecting two points on its graph must lie above the graph. The most familiar example of a convex function is our good friend the convex parabola:</p>
+<div id="cell-fig-parabola" class="cell page-columns page-full" data-execution_count="15">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">10001</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> x<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>plt.plot(x, y, color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"$x$"</span>, ylabel <span class="op">=</span> <span class="vs">r"$f(x)$"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-parabola" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full" data-cap-location="margin">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-parabola-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="22-convex-erm_files/figure-html/fig-parabola-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-parabola-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.4: The convex parabola <span class="math inline">\(f(x) = x^2\)</span>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Note that any straight line connecting two points on this graph always stays above the graph of the parabola. As we saw above, the 0-1 loss function <span class="math inline">\(\ell(s, y) = \mathbb{1}[s(2y-1)&lt;0]\)</span> does not have this property.</p>
+<p>We can also define convex functions to replace the nonconvex 0-1 loss function from earlier. Here’s an example, which is usually called the <em>hinge loss</em>, which is defined by the formula</p>
+<p><span class="math display">\[
+\ell(s, y) = y\max\{0, -s\}  + (1 - y) \max \{0, s\}\;.
+\]</span></p>
+<div id="fd6716f0" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hinge_loss(s, y):</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    first_term  <span class="op">=</span>  y    <span class="op">*</span> (torch.<span class="bu">max</span>(torch.zeros_like(s),  <span class="op">-</span>s))  </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    second_term <span class="op">=</span> (<span class="dv">1</span><span class="op">-</span>y) <span class="op">*</span> (torch.<span class="bu">max</span>(torch.zeros_like(s), s))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> first_term <span class="op">+</span> second_term</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># hinge_loss = lambda s, y: y * (torch.max(torch.zeros_like(s), s))  + (1-y) * (torch.max(torch.zeros_like(s), -s))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-fig-hinge-loss" class="cell page-columns page-full" data-execution_count="17">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plot_loss(loss_fun <span class="op">=</span> hinge_loss, show_line <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-hinge-loss" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full" data-cap-location="margin">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-hinge-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="22-convex-erm_files/figure-html/fig-hinge-loss-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-hinge-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.5: The hinge loss function.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The hinge loss is not strictly convex and is not even everywhere differentiable! Despite this, the fact that it is convex has made it a modern workhorse of machine learning. The support vector machine (SVM) operates by minimizing the hinge loss. The “Rectified Linear Unit” (ReLU) is a mainstay of modern deep learning–and is just another name for the hinge loss.</p>
+<div class="page-columns page-full"><p>An even handier loss function for our purposes is the sigmoid binary cross entropy, which is defined by the formula  <span class="math display">\[
+\begin{aligned}
+\ell(s, y) &amp;=  -y \log \sigma(s) - (1-y)\log (1-\sigma(s))\;,
+\end{aligned}
+\]</span></p><div class="no-row-height column-margin column-container"><span class="margin-aside">In this formula, <span class="math inline">\(\sigma(s) = \frac{1}{1 + e^{-s}}\)</span> is the logistic sigmoid function.</span></div></div>
+<div id="1326f8d2" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sig(s):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> torch.exp(<span class="op">-</span>s))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> binary_cross_entropy(s, y):</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">-</span>(y <span class="op">*</span> sig(s).log() <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> y)<span class="op">*</span>(<span class="dv">1</span><span class="op">-</span>sig(s)).log())</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># or </span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># sig = lambda s: 1 / (1 + torch.exp(-s))</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># binary_cross_entropy = lambda s, y: -(y * sig(s).log() + (1 - y)*(1-sig(s)).log())</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-fig-cross-entropy-loss" class="cell page-columns page-full" data-execution_count="19">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sig <span class="op">=</span> <span class="kw">lambda</span> s: <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> torch.exp(<span class="op">-</span>s))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>binary_cross_entropy <span class="op">=</span> <span class="kw">lambda</span> s, y: <span class="op">-</span>(y <span class="op">*</span> sig(s).log() <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> y)<span class="op">*</span>(<span class="dv">1</span><span class="op">-</span>sig(s)).log())</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plot_loss(loss_fun <span class="op">=</span> binary_cross_entropy, show_line <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-cross-entropy-loss" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full" data-cap-location="margin">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-cross-entropy-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="22-convex-erm_files/figure-html/fig-cross-entropy-loss-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-cross-entropy-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.6: The binary cross-entropy loss function.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>This function is also convex, and has the considerable benefit of being everywhere differentiable.</p>
+<p>We intentionally formulated our definition of convexity for functions of many variables. Here is a convex function <span class="math inline">\(f:\mathbb{R}^2 \rightarrow \mathbb{R}\)</span>.</p>
+<div id="cell-fig-quadratic-3d" class="cell page-columns page-full" data-execution_count="20">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(subplot_kw<span class="op">=</span>{<span class="st">"projection"</span>: <span class="st">"3d"</span>})</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1001</span>)[:, <span class="va">None</span>]</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1001</span>)[<span class="va">None</span>, :]</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> x<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> y<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>ax.plot_surface(x, y, z, cmap<span class="op">=</span><span class="st">"inferno_r"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>                       linewidth<span class="op">=</span><span class="dv">0</span>, antialiased<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"$x_1$"</span>, ylabel <span class="op">=</span> <span class="vs">r"$x_2$"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-quadratic-3d" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full" data-cap-location="margin">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-quadratic-3d-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="22-convex-erm_files/figure-html/fig-quadratic-3d-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-quadratic-3d-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.7: A convex quadratic function of two variables.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>You could imagine trying to draw a straight line between two points on the graph of this function – the line would always be above the graph. When thinking about convexity in many variables, it is often sufficient to imagine a bowl-shaped function like this one.</p>
+</section>
+<section id="convex-empirical-risk-minimization" class="level2">
+<h2 class="anchored" data-anchor-id="convex-empirical-risk-minimization">Convex Empirical Risk Minimization</h2>
+<p>We are now ready to define the primary framework in which we will conduct supervised machine learning: convex empirical risk minimization.</p>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<div id="def-empirical-risk" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 8.3 (Empirical Risk Minimization)</strong></span> Given a loss function <span class="math inline">\(\ell:\mathbb{R}\times \{0,1\} \rightarrow \mathbb{R}\)</span>, a feature matrix <span class="math inline">\(\mathbb{X} \in \mathbb{R}^{n\times p}\)</span>, a target vector <span class="math inline">\(\mathbf{y}\)</span>, and a parameter vector <span class="math inline">\(\mathbf{w} \in \mathbb{R}^p\)</span>, the <em>empirical risk of <span class="math inline">\(\mathbf{w}\)</span></em> is</p>
+<p><span class="math display">\[
+\begin{aligned}
+L(\mathbf{w}) = \frac{1}{n}\sum_{i = 1}^n \ell(s_i, y_i), \quad&amp;\text{where }s_i = \langle \mathbf{w}, \mathbf{x}_i\rangle\;.
+\end{aligned}
+\]</span></p>
+<p>The <em>empirical risk minimization problem</em> is to find the value of <span class="math inline">\(\mathbf{w}\)</span> that makes <span class="math inline">\(L(\mathbf{w})\)</span> smallest:</p>
+<p><span id="eq-ERM"><span class="math display">\[
+\DeclareMathOperator*{\argmin}{argmin}
+\begin{aligned}
+\hat{\mathbf{w}} &amp;= \argmin_{\mathbf{w}} L(\mathbf{w})  \\
+                 &amp;= \argmin_{\mathbf{w}} \frac{1}{n}\sum_{i = 1}^n \ell(s_i, y_i) \\
+                 &amp;= \argmin_{\mathbf{w}} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \mathbf{x}_i\rangle, y_i)\;.
+\end{aligned}
+\tag{8.1}\]</span></span></p>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<div id="prp-sum-of-convex" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 8.1 (Convex <span class="math inline">\(\ell\)</span> means convex <span class="math inline">\(L\)</span>)</strong></span> If the per-observation loss function <span class="math inline">\(\ell:\mathbb{R}\times \{0,1\} \rightarrow \mathbb{R}\)</span> is convex in its first argument, then the empirical risk <span class="math inline">\(L(\mathbf{w})\)</span> is convex as a function of <span class="math inline">\(\mathbf{w}\)</span>.</p>
+</div>
+</div>
+</div>
+</div>
+<p>The proof of <a href="#prp-sum-of-convex" class="quarto-xref">Proposition&nbsp;<span>8.1</span></a> involves some elementary properties of convex functions:</p>
+<ol type="1">
+<li>If <span class="math inline">\(f(\mathbf{z})\)</span> is convex as a function of <span class="math inline">\(\mathbf{z}\)</span>, then <span class="math inline">\(g(\mathbf{z}) = f(\mathbf{A}\mathbf{z'})\)</span> is also convex as a function of <span class="math inline">\(\mathbf{z}'\)</span>, provided that all the dimensions work out.</li>
+<li>Any finite sum of convex functions is convex.</li>
+</ol>
+<p>So, we know that if we choose <span class="math inline">\(\ell\)</span> to be convex in the score function, then the entire empirical risk <span class="math inline">\(L\)</span> will be convex as a function of the weight vector <span class="math inline">\(\mathbf{w}\)</span>.</p>
+<p>Why do we care?</p>
+</section>
+<section id="convex-functions-have-global-minimizers" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="convex-functions-have-global-minimizers">Convex Functions Have Global Minimizers</h2>
+<p>We want to solve the empirical risk minimization problem:</p>
+<p><span class="math display">\[
+\DeclareMathOperator*{\argmin}{argmin}
+\begin{aligned}
+\hat{\mathbf{w}} &amp;= \argmin_{\mathbf{w}} L(\mathbf{w}).
+\end{aligned}
+\]</span></p>
+<p>We might ask ourselves a few questions about this problem:</p>
+<ol type="1">
+<li><strong>Existence</strong>: Does there exist <em>any</em> choice of <span class="math inline">\(\mathbf{w}\)</span> that achieves a minimizing value for this function?</li>
+<li><strong>Uniqueness</strong>: Is this choice of <span class="math inline">\(\mathbf{w}\)</span> unique, or are there multiple candidates?</li>
+<li><strong>Searchability</strong>: are there algorithms which are guaranteed to (a) terminate and (b) not get “trapped” at a bad solution?</li>
+</ol>
+<p>Answering these questions precisely requires a bit more math:</p>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<div id="def-minimizers" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 8.4 (Local and Global Minimizers)</strong></span> A point <span class="math inline">\(\mathbf{z}\in S\)</span> is a <em>global minimizer</em> of the function <span class="math inline">\(f:S \rightarrow \mathbb{R}\)</span> if <span class="math inline">\(f(\mathbf{z}) \leq f(\mathbf{z}')\)</span> for all <span class="math inline">\(\mathbf{z}' \in S\)</span>.</p>
+<p>A point <span class="math inline">\(\mathbf{z} \in S\)</span> is a <em>local minimizer</em> of <span class="math inline">\(f:S \rightarrow \mathbb{R}\)</span> if there exists a neighborhood <span class="math inline">\(T \subseteq S\)</span> containing <span class="math inline">\(\mathbf{z}\)</span> such that <span class="math inline">\(\mathbf{z}\)</span> is a global minimizer of <span class="math inline">\(f\)</span> on <span class="math inline">\(T\)</span>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">It’s ok if you don’t know what it means for a set to be closed – all the convex functions we will care about in this class will either be defined on sets where this theorem holds or will be otherwise defined so that the conclusions apply.</span></div></div>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<div id="thm-convex-functions-are-nice" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 8.1 (Properties of Convex Functions)</strong></span> Let <span class="math inline">\(f:S \rightarrow \mathbb{R}\)</span> be a convex function. Then:</p>
+<ol type="1">
+<li>If <span class="math inline">\(S\)</span> is closed and bounded, <span class="math inline">\(f\)</span> has a minimizer <span class="math inline">\(\mathbf{z}^*\)</span> in <span class="math inline">\(S\)</span>.</li>
+<li>Furthermore, if <span class="math inline">\(\mathbf{z}^*\)</span> is a <em>local</em> minimizer of <span class="math inline">\(f\)</span>, then it is also a global minimizer.</li>
+<li>If in addition <span class="math inline">\(f\)</span> is <em>strictly</em> convex, then this minimizer is unique.</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>The proof of item 1 needs some tools from real analysis. The short version is:</p>
+<ul>
+<li>Every convex function is <em>continuous</em>.</li>
+<li>If <span class="math inline">\(S\subseteq \mathbb{R}^n\)</span> is closed and bounded, then it is <em>compact</em>.</li>
+<li>Continuous functions achieve minimizers and maximizers on compact sets.</li>
+</ul>
+<p>It’s ok if you didn’t follow this! Fortunately the second part of the proof is one we can do together. Suppose to contradiction that <span class="math inline">\(\mathbf{z}^*\)</span> is a local minimizer of <span class="math inline">\(f\)</span>, but that there is also a point <span class="math inline">\(\mathbf{z}'\)</span> such that <span class="math inline">\(f(\mathbf{z}') &lt; f(\mathbf{z}^*)\)</span>. Since <span class="math inline">\(\mathbf{z}^*\)</span> is a local minimizer, we can find some neighborhood <span class="math inline">\(T\)</span> containing <span class="math inline">\(\mathbf{z}^*\)</span> such that <span class="math inline">\(\mathbf{z}^*\)</span> is a minimizer of <span class="math inline">\(f\)</span> on <span class="math inline">\(T\)</span>. Let <span class="math inline">\(\lambda\)</span> be some very small number and consider the point <span class="math inline">\(\mathbf{z} = \lambda \mathbf{z}' + (1-\lambda)\mathbf{z}^*\)</span>. Specifically, choose <span class="math inline">\(\lambda\)</span> small enough so that <span class="math inline">\(\mathbf{z} \in T\)</span> (since this makes <span class="math inline">\(\mathbf{z}\)</span> close to <span class="math inline">\(\mathbf{z}^*\)</span>). We can evaluate</p>
+<p><span class="math display">\[
+\begin{align}
+f(\mathbf{z}) &amp;= f(\lambda \mathbf{z}' + (1-\lambda)\mathbf{z}^*) &amp;\quad \text{(definition of $\mathbf{z}$)}\\
+       &amp;\leq \lambda f(\mathbf{z}') + (1-\lambda)f(\mathbf{z}^*)  &amp;\quad \text{($f$ is convex)} \\
+       &amp;= f(\mathbf{z}^*) + \lambda (f(\mathbf{z}') - f(\mathbf{z}^*)) &amp;\quad \text{(algebra)}\\
+       &amp;&lt; f(\mathbf{z}^*)\;. &amp;\quad \text{(assumption that $f(\mathbf{z}') &lt; f(\mathbf{z}^*)$)}
+\end{align}
+\]</span></p>
+<p>But this is a contradiction, since we constructed <span class="math inline">\(\mathbf{z}\)</span> to be in the neighborhood <span class="math inline">\(T\)</span> where <span class="math inline">\(\mathbf{z}^*\)</span> is a local minimizer. We conclude that there is no <span class="math inline">\(\mathbf{z}'\)</span> such that <span class="math inline">\(f(\mathbf{z}') &lt; f(\mathbf{z}^*)\)</span>, and therefore that <span class="math inline">\(\mathbf{z}^*\)</span> is a global minimizer.</p>
+<p>The proof of the third part follows a very similar argument to the proof of the second part.</p>
+</div>
+<p>These properties of convex functions have very important implications for our fundamental questions on empirical risk minimization. If we choose a strictly convex per-observation loss function <span class="math inline">\(\ell\)</span>, then our empirical risk <span class="math inline">\(L\)</span> will also be strictly convex, and:</p>
+<p><strong>Existence</strong>. The minimizer <span class="math inline">\(\hat{\mathbf{w}} = \argmin_{\mathbf{w}}L(\mathbf{w})\)</span> will exist.</p>
+<p><strong>Uniqueness</strong>: The minimizer <span class="math inline">\(\hat{\mathbf{w}} = \argmin_{\mathbf{w}}L(\mathbf{w})\)</span> will be unique: if we run a minimization algorithm repeatedly, we’ll get the same answer every time.</p>
+<div class="page-columns page-full"><p><strong>Searchability</strong>: When <span class="math inline">\(L\)</span> is convex, there are also no local minimizers other than the global minimizer. Algorithmically, <strong><em>this is the most important property of convexity</em></strong>. It means that if I manage to find any local minimizer at all, that point <em>must</em> be the global minimizer.  <strong>Performance</strong>: Convexity significantly reduces the difficulty of our task: instead of trying to find “the best” solution, it’s sufficient for us to find any local optimum. This means that we can design our algorithms to be “greedy local minimizer hunters.” There are lots of fast algorithms to do this. An especially important class of algorithms are <em>gradient descent methods</em>, which we’ll discuss soon.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">If you’ve taken an algorithms class, one way of thinking of convexity is that it guarantees that <em>greedy methods work</em> for solving minimization problems.</span></div></div>
+</section>
+<section id="demo-logistic-regression" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="demo-logistic-regression">Demo: Logistic Regression</h2>
+<p>You may have heard of <em>logistic regression</em> in a course on statistics or data science. Logistic regression is simply binary classification using a linear model and the binary cross-entropy loss function which we saw above:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\ell(s, y) &amp;=  -y \log \sigma(s) - (1-y)\log (1-\sigma(s))\;,
+\end{aligned}
+\]</span></p>
+<p>As can be proven with calculus, this function is convex as a function of <span class="math inline">\(s\)</span>. The logistic regression problem then becomes the problem of solving:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\hat{\mathbf{w}} &amp;= \argmin_\mathbf{w} \frac{1}{n} \sum_{i = 1}^n \ell(s_i, y_i)  \\
+&amp;= \argmin_\mathbf{w} \frac{1}{n} \sum_{i = 1}^n \left[-y_i \log \sigma(s_i) - (1-y_i)\log (1-\sigma(s_i))\right] \\
+&amp;= \argmin_\mathbf{w} \frac{1}{n} \sum_{i = 1}^n \left[-y_i \log \sigma(\langle \mathbf{w}, \mathbf{x}_i \rangle) - (1-y_i)\log (1-\sigma(\langle \mathbf{w}, \mathbf{x}_i \rangle)\right]
+\end{aligned}
+\]</span></p>
+<p>So, let’s do convex empirical risk minimization! We’ll use the following data set. Note that this data is not linearly separable and therefore the perceptron algorithm would not converge.</p>
+<div id="cell-fig-LR-data" class="cell page-columns page-full" data-execution_count="21">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> classification_data(noise <span class="op">=</span> <span class="fl">0.5</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>plot_classification_data(X, y, ax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-lr-data" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full" data-cap-location="margin">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-lr-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="22-convex-erm_files/figure-html/fig-lr-data-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-lr-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.8: Data for logistic regression.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s go ahead and train a logistic regression model. For the purposes of today, we can do this in a very simple way that doesn’t even involve an explicit training loop. Next time, we’ll learn how to write an explicit training loop.</p>
+<p>First, we’ll define a complete function for calculating the empirical risk for a given value of <span class="math inline">\(\mathbf{w}\)</span>. Since we already implemented <code>binary_cross_entropy</code>, this implementation is very quick:</p>
+<div id="3b2b9dec" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> empirical_risk(w, X, y):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> X<span class="op">@</span>w</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> binary_cross_entropy(s, y).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we’ll use the <code>minimize</code> function from <code>scipy.optimize</code> to find the value of <span class="math inline">\(\mathbf{w}\)</span> that makes this function smallest:</p>
+<div id="3de84042" class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> minimize</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>w0 <span class="op">=</span> torch.tensor([<span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.0</span>])</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> minimize(<span class="kw">lambda</span> w: empirical_risk(w, X, y), x0 <span class="op">=</span> w0)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> result.x</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"""Learned parameter vector w = </span><span class="sc">{</span>w<span class="sc">}</span><span class="ss">.</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="ss">The empirical risk is </span><span class="sc">{</span>result<span class="sc">.</span>fun<span class="sc">:.4f}</span><span class="ss">."""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Learned parameter vector w = [ 4.30124525  5.0754567  -4.55870966].
+The empirical risk is 0.1670.</code></pre>
+</div>
+</div>
+<p>How does it look?</p>
+<div id="cell-fig-LR-line" class="cell page-columns page-full" data-execution_count="24">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> draw_line(w, X, y, x_min, x_max, ax, <span class="op">**</span>kwargs):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    plot_classification_data(X, y, ax)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> torch.linspace(x_min, x_max, <span class="dv">101</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="op">-</span>(w[<span class="dv">0</span>]<span class="op">*</span>x <span class="op">+</span> w[<span class="dv">2</span>])<span class="op">/</span>w[<span class="dv">1</span>]</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    l <span class="op">=</span> ax.plot(x, y, <span class="op">**</span>kwargs)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>draw_line(w, X, y, x_min <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, x_max <span class="op">=</span> <span class="fl">1.5</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>, linestyle <span class="op">=</span> <span class="st">"dashed"</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># fig</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-lr-line" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full" data-cap-location="margin">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-lr-line-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="22-convex-erm_files/figure-html/fig-lr-line-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-lr-line-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.9: The separating line learned by logistic regression.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Pretty good! Yes, it’s as easy as that – provided that you don’t ask too many questions about how the <code>minimize</code> function works. Questions like that will be the topic of our next several sets of notes.</p>
+</section>
+<section id="recap" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="recap">Recap</h2>
+<p>In this set of notes, we introduced a fundamental idea: <em>convex empirical risk minimization</em>. To do convex empirical risk minimization, all we need is a convex per-observation loss function. This gives us a <em>convex empirical risk function</em>, which is simply the mean of all the per-observation losses. Once we have that, the problem of classification reduces to the problem of finding a value of the parameter vector <span class="math inline">\(\mathbf{w}\)</span> that makes the empirical risk small. Convexity guarantees that this problem has exactly one solution. Today, we found this solution using a packaged optimizer. Starting next time, we’ll learn how to write our own optimization algorithms and explore how optimization techniques enable scalable machine learning.</p>
+<section id="optional-a-logistic-regression-training-loop" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="optional-a-logistic-regression-training-loop">(Optional): A Logistic Regression Training Loop</h3>
+<p>How would we do this if we didn’t have access to the <code>minimize</code> function? We’ll soon discuss this question much more. For now, we can take a look at the code block below, which implements such a loop using a framework very similar to the one we learned for perceptron. This model <em>also</em> inherits from the <code>LinearModel</code> class that you previously started implementing. The training loop is also <em>very</em> similar to our training loop for the perceptron. The main difference is that the loss is calculated using the <code>binary_cross_entropy</code> function above, and the <code>step</code> function of the <code>GradientDescentOptimizer</code> works differently in a way that we will discuss in the following section.</p>
+<p><em>Starting with the code block below, you won’t be able to follow along in coding these notes unless you have sneakily implemented logistic regression in a <code>hidden</code> module.</em></p>
+<div id="cell-fig-LR-loss-iterations" class="cell page-columns page-full" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb16" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hidden.logistic <span class="im">import</span> LogisticRegression, GradientDescentOptimizer</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># instantiate a model and an optimizer</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression() </span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer(LR)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># for keeping track of loss values</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>loss_vec <span class="op">=</span> []</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># not part of the update: just for tracking our progress    </span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> LR.loss(X, y) </span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    loss_vec.append(loss)</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># only this line actually changes the parameter value</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    opt.step(X, y, lr <span class="op">=</span> <span class="fl">0.02</span>)</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>plt.plot(torch.arange(<span class="dv">1</span>, <span class="bu">len</span>(loss_vec)<span class="op">+</span><span class="dv">1</span>), loss_vec, color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>plt.semilogx()</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Number of gradient descent iterations"</span>, ylabel <span class="op">=</span> <span class="st">"Loss (binary cross entropy)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-lr-loss-iterations" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full" data-cap-location="margin">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-lr-loss-iterations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="22-convex-erm_files/figure-html/fig-lr-loss-iterations-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-lr-loss-iterations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.10: Evolution of the binary cross entropy loss function in the logistic regression training loop.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The loss quickly levels out to a constant value (which is the same as we learned with <code>scipy.optimize.minimize</code>). Because our theory tells us that the loss function is convex, we know that the value of <span class="math inline">\(\mathbf{w}\)</span> we have found is the best possible, in the sense of minimizing the loss.</p>
+<p>Let’s take a look at the separating line we found:</p>
+<div id="a69b15d0" class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>draw_line(LR.w, X, y, </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>          x_min <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>          x_max <span class="op">=</span> <span class="fl">1.5</span>, </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>          ax <span class="op">=</span> ax, </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>          color <span class="op">=</span> <span class="st">"black"</span>, </span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>          linestyle <span class="op">=</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="22-convex-erm_files/figure-html/cell-18-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Yep, that’s the same line as we found earlier!</p>
+<p>Although our data is not linearly separable, the separating line we have learned appears to do a reasonable job of separating the points from each other. Let’s check our accuracy:</p>
+<div id="71a03bb7" class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(<span class="fl">1.0</span><span class="op">*</span>(LR.predict(X) <span class="op">==</span> y)).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="27">
+<pre><code>tensor(0.9267)</code></pre>
+</div>
+</div>
+<p>Not too bad! In the next section, we’ll learn much, much more about what’s behind that <code>opt.step()</code> call.</p>
+
+
+</section>
+</section>
+
+<p><br> <br> <span style="color:grey;">© Phil Chodrow, 2024</span></p></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/20-perceptron.html" class="pagination-link" aria-label="Introduction to Classification: The Perceptron">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Introduction to Classification: The Perceptron</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/23-gradient-descent.html" class="pagination-link" aria-label="Optimization with Gradient Descent">
+        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Optimization with Gradient Descent</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
