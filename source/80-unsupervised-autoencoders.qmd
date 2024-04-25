@@ -1,0 +1,168 @@
+---
+mermaid: 
+    theme: neutral
+---
+
+# Unsupervised Learning and Encoders
+
+So far in these notes, we have focused almost exclusively on *supervised* learning. In this setting, we had a predictor matrix $\mathbf{X} \in \mathbb{R}^{n \times p}$ and a target vector $\mathbf{y} \in \mathbb{R}^n$. Our general goal was to learn patterns that would allow us to make predictions: given a new set of predictors $\mathbf{x}$, we could compute a prediction $\hat{y}$ that is hopefully "close" in some sense to the true label $y$. As we saw, this supervised framework encompasses both classification and regression problems. 
+
+But what happens when there are no targets $\mathbf{y}$? Is it still possible to learn some interesting patterns in our data? Yes! *Unsupervised learning* is the name for the broad class of machine learning problems that ask us to "find some patterns in the data" without necessarily using a target variable to evaluate whether these patterns are "right" or "accurate."
+
+## Encoders
+
+There are *many* kinds of unsupervised learning, and there is no single unifying framework that can capture all of them. For the purposes of these notes, we are going to focus on a particular paradigm for unsupervised learning that captures several important and useful examples. This is the framework of *encoders* and *decoders*.  
+
+Let $\mathbf{X} \in \mathbb{R}^{n\times p}$ be our matrix of data. An *encoder* is a function $\phi_e: \mathbf{x} \mapsto c_\mathbf{x}$, which associates to each data point $\mathbf{x}$ a *code* $c_{\mathbf{x}}$. This code is intended to contain some compressed information that could, in principle, be used to approximately reconstruct the data point. A *decoder* is a function which does the reconstruction: the decoder function $\psi_d c_\mathbf{x} \mapsto \hat{\mathbf{x}} \in \mathbb{R}^n$ sends the code $c_\mathbf{x}$ to a "reconstructed" vector $\hat{\mathbf{x}}$. [I have added a subscript $e$ to the encoder $\phi_e$ just to remind us that it is the encoder, and similarly a subscript $d$ to $\psi_d$. These subscripts are mnemonic devices that don't have any further mathematical significance.]{.aside} We aim for an encoder-decoder pair that "successfully" approximates the original data points, where "successful" depends on the purpose of our unsupervised learning application as well as various modeling choices. 
+
+In order to define the idea of the reconstructed data point $\hat{\mathbf{x}}$ being close to the *true* data point $\mathbf{x}$, we need to again define a *loss function* to measure closeness. Following our notation from supervised learning, we'll denote the per-observation loss $\ell: \mathbb{R}^n \times \mathbb{R}^n \rightarrow \mathbb{R}$. Note that, unlike in the supervized learning case, $\ell$ is a function of pairs of vectors rather than pairs of scalars representing elements of the target vector. 
+
+So, given a data set, an encoder, a decoder, and a loss function, we can define the *reconstruction loss* of the encoder-decoder pair as 
+
+$$
+\DeclareMathOperator*{\argmin}{argmin}
+\begin{aligned}
+    \mathcal{L}(\phi_e, \psi_d) = \frac{1}{n} \sum_{i=1}^n \ell(\mathbf{x}_i, \psi_d(\phi_e(\mathbf{x}_i)))\;. 
+\end{aligned}
+$$
+
+Our goal in the encoder-decoder framework is to find good choices of the encoder $\phi_e$ and the decoder $\psi_d$. 
+
+We've intentionally been pretty vague about the nature of the code $c$. There are many ways in which we can define this code, all of which depend on what kind of patterns we are aiming to learn from our data. Here are a few examples: 
+
+### Approximate the data with fewer data points: K-means
+
+Suppose we are looking at data like this: 
+
+```{python}
+#| code-fold: true
+import numpy as np
+from matplotlib import pyplot as plt 
+from sklearn.datasets import make_moons, make_circles, make_blobs
+plt.style.use('seaborn-v0_8-whitegrid')
+```
+
+```{python}
+#| code-fold: true
+X, y = make_blobs(n_samples=100, n_features=2, 
+                                centers=2, random_state=1, cluster_std=2.0)
+
+def plot_classification_data(X, y, ax):
+    ax.scatter(X[:,0], X[:,1], s = 20, edgecolor = "steelblue", facecolor = "white", linewidth = 1.5)    
+    ax.set(xlabel = r"$x_1$", ylabel = r"$x_2$")
+
+fig, ax = plt.subplots(1, 1, figsize=(5,5))
+plot_classification_data(X, y, ax)
+```
+
+If asked to summarise this data in some way, you might reasonably suggest that the data is divided into two groups. If we wanted to know about an individual point, we could get a lot of information just by knowing which group it was in and where that group was located. 
+
+To represent this logic, et's consider the following simple encoder-decoder pair. We'll pick a *number of centroids* $k < n$. Then, the encoder simply assigns an integer $h = 1,\ldots,k$ to each data point: 
+$$
+\begin{aligned}
+    \phi_e(\mathbf{x}_i) = h_i\;.
+\end{aligned}
+$$
+
+The *decoder* assigns to each integer $h = 1,\ldots,k$ a vector $\boldsymbol{\mu}_h \in \mathbb{R}^n$: $\psi_d(h) = \boldsymbol{\mu}_h$.  We can think of each $\boldsymbol{\mu}_h$, $h = 1,\ldots,k$, as a "representative" data point. We treat $\boldsymbol{\mu}_h$ as "representing" all of the data points $\mathbf{x}$ for which $\phi_e(\mathbf{x}) = h$. To measure the loss, we'll set $\ell$ to be the squared Euclidean distance: 
+
+$$
+\begin{aligned}
+    \ell(\mathbf{x}_i, \boldsymbol{\mu}_h) = \|\mathbf{x}_i - \boldsymbol{\mu}_h\|^2\;.
+\end{aligned}
+$$
+
+The objective function for our encoder-decoder problem is then 
+$$
+\begin{aligned}
+    \mathcal{L}(\phi_e, \psi_d) &= \frac{1}{n} \sum_{i=1}^n \|\mathbf{x}_i - \psi_d(\phi_e(\mathbf{x}_i))\|^2 \\ 
+    &= \frac{1}{n} \sum_{i=1}^n \|\mathbf{x}_i - \boldsymbol{\mu}_{\phi_e(\mathbf{x}_i)}\|^2 \\ 
+    &= \frac{1}{n} \sum_{i=1}^n \|\mathbf{x}_i - \boldsymbol{\mu}_{h_i}\|^2\;.
+\end{aligned}
+$$
+
+This last expression is the objective function for the well-known *k-means clustering problem*. We have arrived at this algorithm through the somewhat unusual route of encoder-decoder pairs. 
+
+In the k-means algorithm, we aim to optimize both the centroids $\boldsymbol{\mu}_h$, $h = 1,\ldots,k$, and the assignments $h_i$, $i = 1,\ldots,n$. Unfortunately, although optimizing the *centroids* is a convex problem, optimizing the *assignments* is not. Worse yet, since the assignments are discrete, we can't do gradient descent either! The k-means clustering problem is typically solved using a heuristic algorithm with very fast performance: 
+
+Until converged: 
+1. For each data index $i$, let $h_i \gets \argmin_{h} \|\mathbf{x}_i - \boldsymbol{\mu}_h  \|^2$ be the index of the closest centroid $\boldsymbol{\mu_{h}}$ to $\mathbf{x}_i$.
+2. Then, for each centroid index $h$, let $\boldsymbol{\mu}_h$ be the mean of all the data points $\mathbf{x}_i$ for which $h_i = h$:
+$$
+\begin{aligned}
+    \boldsymbol{\mu}_h \gets \frac{\sum_{i=1}^n \mathbf{x}_i \mathbb{1}[h_i = h]}{\sum_{i=1}^n \mathbb{1}[h_i = h]}\;.
+\end{aligned}
+$$
+
+
+::: {.callout-note}
+::: {#thm-kmeans-works}
+
+Provided that every cluster centroid is always associated to at least one point: 
+
+1. Each of the two phases of the k-means algorithm is guaranteed not to increase the objective function $\mathcal{L}(\phi_e, \psi_d)$.
+2. The k-means algorithm is guaranteed to terminate in a finite number of steps. 
+3. At termination, k-means will return an encoder and decoder which are local optima of $\mathcal{L}(\phi_e, \psi_d)$. 
+
+:::
+:::
+
+Here is a simple implementation of the k-means clustering algorithm: 
+
+```{python}
+from sklearn.metrics import pairwise_distances
+
+# number of clusters k
+def k_means(X, k = 2):
+
+    # initialization
+    n, p = X.shape
+    M = np.random.rand(k, p) # initialize matrix of clusters
+    z_prev = np.random.randint(0, k, n) # assignments of points to clusters
+    done = False
+
+    # main loop: take a step until labels stop updating
+    while not done: 
+        M, z = k_means_step(X, M, z_prev)
+        done = np.all(z_prev == z)
+        z_prev = z
+    
+    # return centroid matrix and cluster labels
+    return M, z
+
+
+# implement the step itself
+def k_means_step(X, M, z):
+
+    # Step 1 of k-means: assign each point to the closest centroid
+    
+    D = pairwise_distances(X, M) # distances between points and centroids
+    z = np.argmin(D, axis = 1)   # each point's new centroid is the closest one
+
+    # Step 2 of k-means: update the centroids
+    # each centroid's new value is the mean of all the points in its group
+    for j in range(M.shape[0]):
+        M[j,:] = X[z == j].mean(axis = 0)
+    return M, z
+```
+
+Let's go ahead and run this algorithm: 
+
+```{python}
+M, z = k_means(X, 2)
+```
+
+```{python}
+fig, ax = plt.subplots(1, figsize = (4, 4))
+a = ax.scatter(X[:, 0], X[:, 1], c = z, alpha = 0.4, cmap = plt.cm.BrBG, vmin = -0.5, vmax = 1.5)
+a = ax.set(xlabel = r"$x_1$", ylabel = r"$x_2$")
+
+ax.scatter(M[:,0], M[:,1], s = 50, color = "black")
+```
+
+The two centroids are shown as black dots. The colors of the points indicate the centroid to which those points are assigned by the k-means clustering algorithm. 
+
+A few practical notes: 
+
+1. Since k-means is a nonconvex optimization problem, the final results will in general depend on the initial random choice of centroids. For this reason, it is often best to run k-means multiple times and choose the result with the lowest value of the objective function. Many very fast implementations of k-means exist, which means that running it multiple times is usually fairly practical. 
+2. How many clusters should we use? This question is usually addressed by running k-means with many different values of $k$ and inspecting a plot of the loss function. You can learn more details about this method [here](https://en.wikipedia.org/wiki/Elbow_method_(clustering)). 
