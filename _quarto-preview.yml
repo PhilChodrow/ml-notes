@@ -31,4 +31,5 @@ book:
     - part: "Unsupervised Learning"
       chapters: 
         - source/80-unsupervised-autoencoders.ipynb
+        - source/81-neural-autoencoders.ipynb
     
