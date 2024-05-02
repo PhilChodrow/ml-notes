@@ -491,11 +491,15 @@ window.Quarto = {
 \]</span></p>
 <p>This last expression is the objective function for the well-known <em>k-means clustering problem</em>. We have arrived at this algorithm through the somewhat unusual route of encoder-decoder pairs.</p>
 <p>In the k-means algorithm, we aim to optimize both the centroids <span class="math inline">\(\boldsymbol{\mu}_h\)</span>, <span class="math inline">\(h = 1,\ldots,k\)</span>, and the assignments <span class="math inline">\(h_i\)</span>, <span class="math inline">\(i = 1,\ldots,n\)</span>. Unfortunately, although optimizing the <em>centroids</em> is a convex problem, optimizing the <em>assignments</em> is not. Worse yet, since the assignments are discrete, we can’t do gradient descent either! The k-means clustering problem is typically solved using a heuristic algorithm with very fast performance:</p>
-<p>Until converged: 1. For each data index <span class="math inline">\(i\)</span>, let <span class="math inline">\(h_i \gets \argmin_{h} \|\mathbf{x}_i - \boldsymbol{\mu}_h  \|^2\)</span> be the index of the closest centroid <span class="math inline">\(\boldsymbol{\mu_{h}}\)</span> to <span class="math inline">\(\mathbf{x}_i\)</span>. 2. Then, for each centroid index <span class="math inline">\(h\)</span>, let <span class="math inline">\(\boldsymbol{\mu}_h\)</span> be the mean of all the data points <span class="math inline">\(\mathbf{x}_i\)</span> for which <span class="math inline">\(h_i = h\)</span>: <span class="math display">\[
+<p>Until converged:</p>
+<ol type="1">
+<li>For each data index <span class="math inline">\(i\)</span>, let <span class="math inline">\(h_i \gets \argmin_{h} \|\mathbf{x}_i - \boldsymbol{\mu}_h  \|^2\)</span> be the index of the closest centroid <span class="math inline">\(\boldsymbol{\mu_{h}}\)</span> to <span class="math inline">\(\mathbf{x}_i\)</span>.</li>
+<li>Then, for each centroid index <span class="math inline">\(h\)</span>, let <span class="math inline">\(\boldsymbol{\mu}_h\)</span> be the mean of all the data points <span class="math inline">\(\mathbf{x}_i\)</span> for which <span class="math inline">\(h_i = h\)</span>: <span class="math display">\[
 \begin{aligned}
-    \boldsymbol{\mu}_h \gets \frac{\sum_{i=1}^n \mathbf{x}_i \mathbb{1}[h_i = h]}{\sum_{i=1}^n \mathbb{1}[h_i = h]}\;.
+\boldsymbol{\mu}_h \gets \frac{\sum_{i=1}^n \mathbf{x}_i \mathbb{1}[h_i = h]}{\sum_{i=1}^n \mathbb{1}[h_i = h]}\;.
 \end{aligned}
-\]</span></p>
+\]</span></li>
+</ol>
 <div class="callout callout-style-simple callout-note no-icon">
 <div class="callout-body d-flex">
 <div class="callout-icon-container">
