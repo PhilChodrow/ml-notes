@@ -513,7 +513,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Here is a simple implementation of the k-means clustering algorithm. Note that this implementation is pretty simple and</p>
+<p>Here is an implementation of the k-means clustering algorithm. In the case of k-means, it is not too beneficial from an implementation perspective to explicitly represent the encoder and decoder as part of the code. This is because we can’t directly perform optimization on the encoder and decoder (due to the nondifferentiability of the encoder). Instead, we’ll use a direct implementation.</p>
 <div id="cell-5" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># implement the k-means step</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># M is a matrix of centroids</span></span>
@@ -550,8 +550,8 @@ window.Quarto = {
 <span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># main loop: take a step until labels stop updating</span></span>
 <span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="kw">not</span> done: </span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>        M, z <span class="op">=</span> k_means_step(X, M, z_prev)</span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>        done <span class="op">=</span> torch.<span class="bu">all</span>(z_prev <span class="op">==</span> z)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>        M, z   <span class="op">=</span> k_means_step(X, M, z_prev)</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>        done   <span class="op">=</span> torch.<span class="bu">all</span>(z_prev <span class="op">==</span> z)</span>
 <span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>        z_prev <span class="op">=</span> z</span>
 <span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># return centroid matrix and cluster labels</span></span>
@@ -637,6 +637,8 @@ window.Quarto = {
 </div>
 <p>To illustrate, we’ll work on the following data set:</p>
 <div id="cell-12" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n_points <span class="op">=</span> <span class="dv">100</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(n_points, dtype <span class="op">=</span> torch.float64)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> torch.zeros(n_points, <span class="dv">2</span>)</span>
@@ -645,9 +647,8 @@ window.Quarto = {
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> X.double()</span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>plot_2d_data(X, torch.zeros(n_points), ax)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.scatter(X[:, 0], X[:, 1])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>plot_2d_data(X, torch.zeros(n_points), ax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -656,7 +657,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Now we’ll instantiate and train our model. In this example, we’ll assume that <span class="math inline">\(k = 1\)</span>. This means that both the encoder and decoder are rank-1 matrices.</p>
+<p>Now we’ll instantiate and train our model. In this example, we’ll assume that <span class="math inline">\(k = 1\)</span>.</p>
 <div id="cell-14" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>le <span class="op">=</span> LinearAutoEncoder(input_dim <span class="op">=</span> <span class="dv">2</span>, k <span class="op">=</span> <span class="dv">1</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -674,7 +675,8 @@ window.Quarto = {
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>losses <span class="op">=</span> train(X, le, lr <span class="op">=</span> <span class="fl">0.1</span>, n_iter <span class="op">=</span> <span class="dv">10000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-15" class="cell" data-execution_count="9">
+<p>Now let’s inspect the loss:</p>
+<div id="cell-16" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plt.plot(losses, color <span class="op">=</span> <span class="st">"steelblue"</span>)</span>
@@ -690,11 +692,11 @@ window.Quarto = {
 </div>
 </div>
 <p>The loss quickly converged. We can take a look at the trained reconstruction of the data just using the <code>forward</code> method:</p>
-<div id="cell-17" class="cell" data-execution_count="10">
+<div id="cell-18" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>X_hat <span class="op">=</span> le.forward(X) <span class="co"># reconstructed data points</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we can compare the original and reconstructed data:</p>
-<div id="cell-19" class="cell" data-execution_count="11">
+<div id="cell-20" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>plot_2d_data(X, torch.zeros(n_points), ax)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>plot_2d_data(X_hat, torch.zeros(n_points), ax, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -708,7 +710,7 @@ window.Quarto = {
 </div>
 <p>Because we required that the learned linear encoding have rank 1, the reconstruction is a 1-d subspace: a line.</p>
 <p>What would happen if we allowed the encoder to have rank 2?</p>
-<div id="cell-21" class="cell" data-execution_count="12">
+<div id="cell-22" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>le <span class="op">=</span> LinearAutoEncoder(input_dim <span class="op">=</span> <span class="dv">2</span>, k <span class="op">=</span> <span class="dv">2</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>losses <span class="op">=</span> train(X, le, lr <span class="op">=</span> <span class="fl">0.1</span>, n_iter <span class="op">=</span> <span class="dv">10000</span>)</span>
@@ -733,7 +735,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="quick-example-image-compression-two-ways">Quick Example: Image Compression, Two Ways</h2>
 <p>One application of the encoder-decoder framework is <em>image compression</em>. In the image compression problem, we aim to represent an image using less information than the original. There are many ways to do image compression, and modern methods rely on very sophisticated algorithms. Here we’ll focus only on illustrating our two simple methods.</p>
 <p>Let’s use the following image of <a href="https://en.wikipedia.org/wiki/Maru_(cat)">Maru the cat</a>.</p>
-<div id="cell-24" class="cell" data-execution_count="13">
+<div id="cell-25" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> urllib.request</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PIL <span class="im">import</span> Image</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
@@ -770,7 +772,7 @@ window.Quarto = {
 </div>
 <p>This image has size <span class="math inline">\(413 \times 640\)</span>, which means that representing it exactly requires <span class="math inline">\(413 \times 640 = 263,520\)</span> floating point numbers to represent the greyscale values.</p>
 <p>To apply <span class="math inline">\(k\)</span>-means, we’ll treat each individual pixel as a data point. This requires us to reshape the image.</p>
-<div id="cell-26" class="cell" data-execution_count="14">
+<div id="cell-27" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> img.reshape(img.size(<span class="dv">0</span>)<span class="op">*</span>img.size(<span class="dv">1</span>), <span class="dv">1</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>X.size()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
@@ -778,11 +780,11 @@ window.Quarto = {
 </div>
 </div>
 <p>Now we’ll run k-means:</p>
-<div id="cell-28" class="cell" data-execution_count="15">
+<div id="cell-29" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>M, z <span class="op">=</span> k_means(X, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And visualize the result! The code below reconstructs the image, replacing the value at each pixel with the corresponding centroid learned in k-means.</p>
-<div id="cell-30" class="cell" data-execution_count="16">
+<div id="cell-31" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>X_hat <span class="op">=</span> M[z].reshape(img.size(<span class="dv">0</span>), img.size(<span class="dv">1</span>), <span class="dv">1</span>)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>show(X_hat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -797,11 +799,11 @@ window.Quarto = {
 <section id="linear-autoencoder" class="level3">
 <h3 class="anchored" data-anchor-id="linear-autoencoder">Linear Autoencoder</h3>
 <p>What if instead we want to reduce the <em>dimension</em> of the image? In this case, we treat each row of the image as a piece of data, and we don’t need to do any reshaping:</p>
-<div id="cell-33" class="cell" data-execution_count="17">
+<div id="cell-34" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>le <span class="op">=</span> LinearAutoEncoder(input_dim <span class="op">=</span> img.size(<span class="dv">1</span>), k <span class="op">=</span> <span class="dv">20</span>)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>losses <span class="op">=</span> train(img, le, lr <span class="op">=</span> <span class="fl">0.001</span>, n_iter <span class="op">=</span> <span class="dv">10000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-34" class="cell" data-execution_count="18">
+<div id="cell-35" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>plt.plot(losses)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>plt.semilogy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -813,7 +815,7 @@ window.Quarto = {
 </div>
 </div>
 <p>How does the reconstructed image look?</p>
-<div id="cell-36" class="cell" data-execution_count="19">
+<div id="cell-37" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>img_hat <span class="op">=</span> le.forward(img)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>show(img_hat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -825,7 +827,7 @@ window.Quarto = {
 </div>
 </div>
 <p>This is a very different kind of reconstruction. The coarse features are very visible, but most of the detail is missing and the image is quite blurry. On the other hand, the cost of storing this representation of the image is very low. The original image required <span class="math inline">\(263520\)</span> floating point numbers to store. To store the compressed image, however, it is sufficient to store the encoded representation and the decoder weights.</p>
-<div id="cell-38" class="cell" data-execution_count="20">
+<div id="cell-39" class="cell" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>le.encoder(img).numel() <span class="op">+</span> le.decoder.weight.numel()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="20">
 <pre><code>21060</code></pre>
