@@ -16,6 +16,7 @@ publish:
 	python scripts/prep-qmd.py
 	quarto render --profile publish
 	python scripts/create-ipynb.py
+	python scripts/insert-colab-link.py
 	git add .
 	git commit -m "Update"
 	git push

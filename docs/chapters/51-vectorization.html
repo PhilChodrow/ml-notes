@@ -394,6 +394,8 @@ window.Quarto = {
 
 </header>
 
+<p><a href="http://colab.research.google.com/github/philchodrow/ml-notes/blob/main/docs/live-notebooks/51-vectorization.ipynb">Open the live notebook in Google Colab</a>.</p>
+
 
 <p>So far in this course, we’ve considered the general <em>supervised learning</em> scenario, in which we are given a feature matrix <span class="math inline">\(\mathbf{X} \in \mathbb{R}^{n\times p}\)</span> and a target vector <span class="math inline">\(\mathbf{y} \in \mathbb{R}^n\)</span>. We then solve the empirical risk minimization problem in order to choose model parameters that minimize a loss function on the training data. The exact structure of this loss function depends on things like whether we are doing classification or regression, what our computational resources are, and other considerations.</p>
 <p>But feature matrices <span class="math inline">\(\mathbf{X}\)</span> and target vectors <span class="math inline">\(\mathbf{y}\)</span> don’t just exist in the world: they are <em>collected</em> and <em>measured</em>. We can think of data collection and measurement as posing three fundamental questions:</p>

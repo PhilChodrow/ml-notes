@@ -399,6 +399,8 @@ window.Quarto = {
 
 </header>
 
+<p><a href="http://colab.research.google.com/github/philchodrow/ml-notes/blob/main/docs/live-notebooks/30-features-regularization.ipynb">Open the live notebook in Google Colab</a>.</p>
+
 
 <div class="hidden">
 $$ \newcommand{}{} \newcommand{}{} \newcommand{}{} \newcommand{}{}
@@ -425,7 +427,7 @@ L(\mathbf{w}) = \frac{1}{n} \sum_{i = 1}^n \ell(\langle \mathbf{w}, \mathbf{x}_i
 <section id="nonlinear-decision-boundaries" class="level2">
 <h2 class="anchored" data-anchor-id="nonlinear-decision-boundaries">Nonlinear Decision Boundaries</h2>
 <p>However, we are still working with an important limitation: for a long time now, we’ve focused only on <em>linear</em> decision boundaries. However, most of the data we care about in practice has <em>nonlinear</em> decision boundaries. Here’s a dramatic example. <span class="alert">For this example and throughout today, I’m using the implementation of logistic regression from <code>scikit-learn</code>. The purpose is to let you follow along while still giving you the chance to implement your own logistic regression for homework. Toward the end of the notes, I’ll highlight where regularization shows up if you want to implement it in e.g.&nbsp;a <code>torch</code> model. I’m also using the <code>plot_decision_regions</code> function from the <code>mlxtend</code> package, which is a handy plotting utility for visualizing the behavior of our models.</span></p>
-<div id="fd472f47" class="cell" data-execution_count="2">
+<div id="e7893d50" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_moons, make_circles</span>
@@ -456,12 +458,12 @@ L(\mathbf{w}) = \frac{1}{n} \sum_{i = 1}^n \ell(\langle \mathbf{w}, \mathbf{x}_i
 </details>
 </div>
 <p>First, let’s create some training and testing data:</p>
-<div id="57fffdf8" class="cell" data-execution_count="4">
+<div id="a6c3e5cf" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>X_train, y_train <span class="op">=</span> make_circles(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.1</span>, factor <span class="op">=</span> <span class="fl">0.5</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>X_test, y_test   <span class="op">=</span> make_circles(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.1</span>, factor <span class="op">=</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now let’s fit and visualize the the decision regions learned on both the training and test sets.</p>
-<div id="81cf05fb" class="cell" data-execution_count="5">
+<div id="51f96069" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression()</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>LR.fit(X_train, y_train)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(LR, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -531,11 +533,11 @@ r^2 = x_1^2 + x_2^2\;.
 r^2 = \langle (1, 1), (x_1^2, x_2^2) \rangle\;.
 \]</span></p>
 <p>Let’s see how this looks. We’ll again show the failed linear separator, and we’ll also show a successful separator in a transformed feature space:</p>
-<div id="b1d1dc5d" class="cell" data-execution_count="6">
+<div id="84e456fe" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> phi(X): </span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X<span class="op">**</span><span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="195c6273" class="cell" data-execution_count="7">
+<div id="ec748c7e" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
@@ -574,7 +576,7 @@ r^2 = x_1^2 + x_2^2\;.
 \]</span></p>
 <p>The important point to keep track of is that the new feature matrix <span class="math inline">\(\mathbf{X}' = \Phi(\mathbf{X})\)</span> generally has a different number of columns from <span class="math inline">\(\mathbf{X}\)</span>. In this case, for example, <span class="math inline">\(\mathbf{X}\)</span> had just 2 columns but <span class="math inline">\(\Phi(\mathbf{X})\)</span> has 6. This means that <span class="math inline">\(\hat{\mathbf{w}}\)</span> has 6 components, instead of 2!</p>
 <p>Let’s now run logistic regression with degree-2 polynomial features on this data set. The most convenient way to make this happen in the <code>scikit-learn</code> framework is with at <code>Pipeline</code>. The <code>Pipeline</code> first applies the feature map and then calls the model during both fitting and evaluation. We’ll wrap the pipeline in a simple function for easy reuse.</p>
-<div id="41148778" class="cell" data-execution_count="8">
+<div id="47858cc8" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PolynomialFeatures</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -584,7 +586,7 @@ r^2 = x_1^2 + x_2^2\;.
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> plr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now our decision boundary is much more successful:</p>
-<div id="34f86b73" class="cell" data-execution_count="9">
+<div id="2b87dddf" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">2</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -597,7 +599,7 @@ r^2 = x_1^2 + x_2^2\;.
 </div>
 </div>
 <p>Let’s check the entries of the weight vector:</p>
-<div id="96f803e6" class="cell" data-execution_count="10">
+<div id="8e3fb175" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>plot_weights(plr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -609,7 +611,7 @@ r^2 = x_1^2 + x_2^2\;.
 </div>
 <p>Notice that two coefficients are much larger in magnitude than the others, and approximately equal. These are the coefficients for the features <span class="math inline">\(x_1^2\)</span> and <span class="math inline">\(x_2^2\)</span>. The fact that these are approximately equal means that our model is very close to using the square radius <span class="math inline">\(r^2 = x_1^2 + x_2^2\)</span> as a learned feature for this data, just like we’d expect. The benefit is that we didn’t have to hard-code that in; the model just detected the right pattern to find.</p>
 <p>Part of the reason this might be beneficial is that for some data sets, we might not really know what specific features we should try. For example, here’s another one where a linear classifier doesn’t do so great (degree 1 corresponds to no transformation of the features). We’ll keep using this example as we go, and so we’ll generate both a training and a test set.</p>
-<div id="6ffc5de7" class="cell" data-execution_count="11">
+<div id="9115271b" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">123</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>X_train, y_train <span class="op">=</span> make_moons(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.3</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>X_test, y_test   <span class="op">=</span> make_moons(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.3</span>)</span>
@@ -627,7 +629,7 @@ r^2 = x_1^2 + x_2^2\;.
 </div>
 </div>
 <p>It’s not as obvious that we should use the radius or any other specific feature for our feature map. Fortunately we don’t need to think too much about it – we can just increase the degree and let the model figure things out:</p>
-<div id="21e05556" class="cell" data-execution_count="12">
+<div id="29d4b02d" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">5</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -645,7 +647,7 @@ r^2 = x_1^2 + x_2^2\;.
 <section id="generalization-feature-selection-regularization" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="generalization-feature-selection-regularization">Generalization, Feature Selection, Regularization</h2>
 <p>So, why don’t we just use as many features as it takes to get perfect accuracy on the training data? As usual, this would lead to overfitting, as we can observe in the following example:</p>
-<div id="522c02d5" class="cell" data-execution_count="13">
+<div id="128919a3" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">15</span>, penalty <span class="op">=</span> <span class="st">"none"</span>, max_iter <span class="op">=</span> <span class="dv">1000000</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -662,7 +664,7 @@ r^2 = x_1^2 + x_2^2\;.
 <p>The problem here is that, although this classifier might achieve perfect <em>training</em> accuracy, it doesn’t really look like it’s captured “the right” pattern. This is why this classifier makes many more mistakes on the test data, even though it had much higher training accuracy. We have <em>overfit</em>: our model was so flexible that it was able to learn both some <em>real</em> patterns that we wanted it to learn and some <em>noise</em> that we didn’t. As a result, when it made a prediction on new data, the model’s predictions were imperfect, reflecting the noise it learned in the training process.</p>
 <p>In machine learning practice, we don’t actually <em>want</em> our models to get perfect scores on the training data – we want them to <strong><em>generalize</em></strong> to new instances of unseen data. Overfitting is one way in which a model can fail to generalize.</p>
 <p>Let’s do an experiment in which we see what happens to the model’s generalization ability when we increase the number of polynomial features:</p>
-<div id="6bd0fcb7" class="cell" data-execution_count="14">
+<div id="e0aafc94" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -697,7 +699,7 @@ r^2 = x_1^2 + x_2^2\;.
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="30-features-regularization_files/figure-html/cell-15-output-1.png" class="figure-img" width="581" height="423"></p>
+<p><img src="30-features-regularization_files/figure-html/cell-15-output-1.png" class="figure-img" width="581" height="426"></p>
 </figure>
 </div>
 </div>
@@ -705,7 +707,7 @@ r^2 = x_1^2 + x_2^2\;.
 <p>We observe that there is an optimal number of features for which the model is most able to generalize: around 3 or so. More features than that is actually <em>harmful</em> to the model’s predictive performance on unseen data.</p>
 <p>So, one way to promote generalization is to try to find “the right” or “the right number” of features and use them for prediction. This problem is often called <strong>feature selection</strong> and can be done with cross-validation.</p>
 <p>Another common approach to avoid overfitting is called <em>regularization</em>. Regularization proceeds from the insight that wiggly decision boundaries often come from <em>large entries in the weight vector <span class="math inline">\(\mathbf{w}\)</span></em>. Let’s check this for the degree-15 polynomial features model that we trained previously:</p>
-<div id="652009ef" class="cell" data-execution_count="15">
+<div id="8eb1d788" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>plot_weights(plr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -722,7 +724,7 @@ L'(\mathbf{w}) = L(\mathbf{w}) + \lambda R(\mathbf{w})\;,
 <div class="page-columns page-full"><p>where <span class="math inline">\(\lambda\)</span> is a <em>regularization strength</em> and <span class="math inline">\(R(\mathbf{w})\)</span> is a <em>regularization function</em> that aims to shrink the entries of <span class="math inline">\(\mathbf{w}\)</span> in some way. Common choices of regularization function include the <span class="math inline">\(\ell_2\)</span> regularizer, which is simply the square Euclidean norm <span class="math inline">\(R(\mathbf{w}) = \lVert \mathbf{w} \rVert_2^2 = \sum_{j = 1}^p w_i^2\)</span>, and the <span class="math inline">\(\ell_1\)</span> norm given by <span class="math inline">\(R(\mathbf{w}) = \sum_{j = 1}^p \lvert w_j \rvert\)</span>. To see regularization in action, let’s go back to our logistic regression model with a large number of polynomial features. We can see the presence of overfitting in the excessive “wiggliness” of the decision boundary. </p><div class="no-row-height column-margin column-container"><span class="margin-aside">If <span class="math inline">\(\mathbf{x}\)</span> is defined in such a way that it has a constant column (e.g.&nbsp;<span class="math inline">\(x_{in} = 1\)</span> for all <span class="math inline">\(n\)</span>), then it is important <em>not to regularize the entries of <span class="math inline">\(\mathbf{w}\)</span> that correspond to the constant column</em>. This issue can be avoided by assuming that all the entries of the feature matrix <span class="math inline">\(\Phi(\mathbf{X})\)</span> are column-centered, so that each column mean is zero. This can be achieved simply by defining <span class="math inline">\(\Phi\)</span> that way!</span></div></div>
 <p>Fortunately for us, we can actually use regularization directly from inside the <code>scikit-learn</code> implementation of <code>LogisticRegression</code>. Below we specify the penalty (the <span class="math inline">\(\ell_2\)</span> regularization), the strength of the penalty (in the <code>scikit-learn</code> implementation, you specify <span class="math inline">\(C = \frac{1}{\lambda}\)</span> so that larger <span class="math inline">\(C\)</span> means less regularization) and the optimization solver (not all solvers work with all penalties).</p>
 <p>This model did much better on the test data than the overfit model.</p>
-<div id="89fce981" class="cell" data-execution_count="16">
+<div id="13f0f141" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">15</span>, penalty <span class="op">=</span> <span class="st">"l2"</span>, solver <span class="op">=</span> <span class="st">"lbfgs"</span>, C <span class="op">=</span> <span class="dv">10</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -735,7 +737,7 @@ L'(\mathbf{w}) = L(\mathbf{w}) + \lambda R(\mathbf{w})\;,
 </div>
 </div>
 <p>One reason for this success is that the entries of the weight vector are now much smaller:</p>
-<div id="f232a7d0" class="cell" data-execution_count="17">
+<div id="bfe8838f" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plot_weights(plr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -746,7 +748,7 @@ L'(\mathbf{w}) = L(\mathbf{w}) + \lambda R(\mathbf{w})\;,
 </div>
 </div>
 <p>In fact, we can even force some of the coefficients of the weight vector to be exactly 0. This is achieved through the use of the <span class="math inline">\(\ell_1\)</span> regularization term <span class="math inline">\(R(\mathbf{w}) = \sum_{j = 1}^p \lvert w_j \rvert\)</span>.</p>
-<div id="a32de3eb" class="cell" data-execution_count="18">
+<div id="2a3a512f" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plr <span class="op">=</span> poly_LR(degree <span class="op">=</span> <span class="dv">15</span>, penalty <span class="op">=</span> <span class="st">"l1"</span>, solver <span class="op">=</span> <span class="st">"liblinear"</span>, C <span class="op">=</span> <span class="dv">1</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>plr.fit(X_train, y_train)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>viz_decision_regions(plr, X_train, y_train, X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -759,7 +761,7 @@ L'(\mathbf{w}) = L(\mathbf{w}) + \lambda R(\mathbf{w})\;,
 </div>
 </div>
 <p>How do the weights look now?</p>
-<div id="3cdbd484" class="cell" data-execution_count="19">
+<div id="6e317edb" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plot_weights(plr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>

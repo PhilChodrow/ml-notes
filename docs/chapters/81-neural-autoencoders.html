@@ -383,6 +383,8 @@ window.Quarto = {
 
 </header>
 
+<p><a href="http://colab.research.google.com/github/philchodrow/ml-notes/blob/main/docs/live-notebooks/81-neural-autoencoders.ipynb">Open the live notebook in Google Colab</a>.</p>
+
 
 <p>Last time, we studied unsupervised learning through the framework of <em>autoencoders</em>. When using autoencoders, the learning problem is to find an <em>encoder</em> <span class="math inline">\(\phi_e\)</span> and a <em>decoder</em> <span class="math inline">\(\psi_d\)</span> such that a reconstructed data point <span class="math inline">\(\hat{\mathbf{x}} = \psi_d(\phi_e(\mathbf{x}))\)</span> is “close” to the original data point <span class="math inline">\(\mathbf{x}\)</span>, where “close” needs to be measured in terms of a loss function. We looked at two examples of autoencoders defined in terms of the square-error loss function: k-means and principal component analysis (PCA).</p>
 <p>PCA in particular is an example of an encoding algorithm for <em>dimensionality reduction</em>. The aim of dimensionality reduction is to learn a lower-dimensional representation of the data set in a new feature space that captures its fundamental structure. PCA is the most common form of <em>linear</em> dimensionality reduction, in which we aim to learn linear structure that summarizes the data. In these notes we’ll focus on neural network methods for <em>nonlinear</em> dimensionality reduction, which is sometimes also called <em>manifold learning</em>.</p>

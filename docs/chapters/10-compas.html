@@ -412,6 +412,8 @@ window.Quarto = {
 
 </header>
 
+<p><a href="http://colab.research.google.com/github/philchodrow/ml-notes/blob/main/docs/live-notebooks/10-compas.ipynb">Open the live notebook in Google Colab</a>.</p>
+
 
 <p>Today we are going to study an extremely famous investigation into algorithmic decision-making in the sphere of criminal justice by <span class="citation" data-cites="angwin2022machine">Angwin et al. (<a href="#ref-angwin2022machine" role="doc-biblioref">2022</a>)</span>, originally written for ProPublica in 2016. This investigation significantly accelerated the pace of research into bias and fairness in machine learning, due in combination to its simple message and publicly-available data.</p>
 <div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">It’s helpful to look at a <a href="https://www.documentcloud.org/documents/2702103-Sample-Risk-Assessment-COMPAS-CORE">sample form</a> used for feature collection in the COMPAS risk assessment.</span></div></div>
@@ -420,7 +422,7 @@ window.Quarto = {
 <section id="data-preparation" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="data-preparation">Data Preparation</h2>
 <div class="page-columns page-full"><p> Let’s first obtain the data. I’ve hosted a copy on the course website, so we can download it using a URL.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">This data set was obtained by <span class="citation" data-cites="angwin2022machine">Angwin et al. (<a href="#ref-angwin2022machine" role="doc-biblioref">2022</a>)</span> through a public records request. The data comprises two years worth of COMPAS scoring in Broward County, Florida.</span></div></div>
-<div id="63f7697f" class="cell" data-execution_count="1">
+<div id="4a1a6f05" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -432,12 +434,12 @@ window.Quarto = {
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> pd.read_csv(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>For today we are only going to consider a subset of columns.</p>
-<div id="37ed32fa" class="cell" data-execution_count="2">
+<div id="454f87e3" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> [<span class="st">"sex"</span>, <span class="st">"race"</span>, <span class="st">"decile_score"</span>, <span class="st">"two_year_recid"</span>]</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> compas[cols]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We are also only going to consider white (Caucasian) and Black (African-American) defendants:</p>
-<div id="0bb65a96" class="cell" data-execution_count="3">
+<div id="f7e27116" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>is_white <span class="op">=</span> compas[<span class="st">"race"</span>] <span class="op">==</span> <span class="st">"Caucasian"</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>is_black <span class="op">=</span> compas[<span class="st">"race"</span>] <span class="op">==</span> <span class="st">"African-American"</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -445,7 +447,7 @@ window.Quarto = {
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> compas.copy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Our data now looks like this:</p>
-<div id="0bd82837" class="cell" data-execution_count="4">
+<div id="14a2f162" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>compas.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <div>
@@ -507,7 +509,7 @@ window.Quarto = {
 <section id="preliminary-explorations" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="preliminary-explorations">Preliminary Explorations</h2>
 <p>Let’s do some quick exploration of our data. How many defendants are present in this data of each sex?</p>
-<div id="c53b1873" class="cell" data-execution_count="5">
+<div id="d65c2b83" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>compas.groupby(<span class="st">"sex"</span>).size()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>sex
@@ -517,7 +519,7 @@ dtype: int64</code></pre>
 </div>
 </div>
 <p>What about race?</p>
-<div id="c3ebfd82" class="cell" data-execution_count="6">
+<div id="e531d132" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>compas.groupby(<span class="st">"race"</span>).size()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>race
@@ -528,7 +530,7 @@ dtype: int64</code></pre>
 </div>
 <p>The decile score is the algorithm’s prediction. Higher decile scores indicate that, according to the COMPAS model, the defendant has higher likelihood to be charged with a crime within the next two years. In the framework we’ve developed in this class, you can think of the decile score as being produced by computing a score like <span class="math inline">\(s_i = \langle \mathbf{w}, \mathbf{x}_i \rangle\)</span> for each defendant <span class="math inline">\(i\)</span>, and then dividing these into the lowest 10% (decile score 1), the next 10% (decile score 2), the next 10% (decile score 3) and so on.</p>
 <p>The easiest way to see how this looks is with a bar chart, which we can make efficiently using the <code>seaborn</code> (<code>sns</code>) package.</p>
-<div id="2b2aa7a4" class="cell" data-execution_count="7">
+<div id="59e6a984" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> compas.groupby([<span class="st">"race"</span>, <span class="st">"decile_score"</span>]).size().reset_index(name <span class="op">=</span> <span class="st">"n"</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> sns.barplot(data <span class="op">=</span> counts, </span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                x <span class="op">=</span> <span class="st">"decile_score"</span>, </span>
@@ -546,7 +548,7 @@ dtype: int64</code></pre>
 </div>
 <p>You may notice that the number of white defendants who receive a given decile score tends to decrease as the score increases, whereas the number of Black defendants remains relatively constant.</p>
 <p>Let’s also take a look at the recidivism rate in the data:</p>
-<div id="9f97405f" class="cell" data-execution_count="8">
+<div id="08fd79c3" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>compas[<span class="st">"two_year_recid"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>0.4661788617886179</code></pre>
@@ -555,7 +557,7 @@ dtype: int64</code></pre>
 <p>So, in these data, approximately 47% of all defendants went on to be charged of another crime within the next two years. This is sometimes called the <em>prevalence</em> of the outcome. Although this is not a “good” outcome, it is labeled <code>1</code> in the target data and so we refer to this as the “positive” outcome. <em>Prevalence</em> without further specification usually refers to prevalence of the positive outcome.</p>
 <p>The base rate of prediction accuracy in this problem is 53%: if we always guessed that the defendant was not arrested within two years, we would be right 53% of the time.</p>
 <p>We can also compute the prevalence broken down by race of the defendant:</p>
-<div id="ea05c184" class="cell" data-execution_count="9">
+<div id="23833f1c" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>compas.groupby(<span class="st">"race"</span>)[<span class="st">"two_year_recid"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>race
@@ -575,14 +577,14 @@ Name: two_year_recid, dtype: float64</code></pre>
 </ul>
 </div></div><p>The prevalences between the two groups are substantially different. This difference will have major consequences later on for the possibility of different kinds of fairness in classifiers.</p>
 <p>We’re going to treat the COMPAS algorithm as a binary classifier, but you might notice a problem: the algorithm’s prediction is the <code>decile_score</code> column, which is not actually a <code>0</code>-<code>1</code> label. Following the analysis of <span class="citation" data-cites="angwin2022machine">Angwin et al. (<a href="#ref-angwin2022machine" role="doc-biblioref">2022</a>)</span>, we are going to construct a new binary column in which we say that a defendant is <code>predicted_high_risk</code> if their <code>decile_score</code> is larger than 4.</p>
-<div id="d66af6c0" class="cell" data-execution_count="10">
+<div id="34abe85c" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>compas[<span class="st">"predicted_high_risk"</span>] <span class="op">=</span> (compas[<span class="st">"decile_score"</span>] <span class="op">&gt;</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now that we’ve done that, we can ask: how likely are Black and white defendants to receive positive predictions in this data?</p>
-<div id="28b34dd6" class="cell" data-execution_count="11">
+<div id="3405285f" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>compas.groupby(<span class="st">"race"</span>)[<span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/var/folders/xn/wvbwvw0d6dx46h9_2bkrknnw0000gn/T/ipykernel_51817/3539224628.py:1: FutureWarning:
+<pre><code>/var/folders/xn/wvbwvw0d6dx46h9_2bkrknnw0000gn/T/ipykernel_53838/3539224628.py:1: FutureWarning:
 
 Indexing with multiple keys (implicitly converted to a tuple of keys) will be deprecated, use a list instead.
 </code></pre>
@@ -639,7 +641,7 @@ Fairness (Part 1)
 <section id="the-propublica-findings" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="the-propublica-findings">The ProPublica Findings</h2>
 <p>Let’s now ask a few questions about the the predictive accuracy of this algorithm. First, how accurate it is it overall?</p>
-<div id="e51a9695" class="cell" data-execution_count="12">
+<div id="b990d81b" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>compas[<span class="st">"correct_prediction"</span>] <span class="op">=</span> (compas[<span class="st">"predicted_high_risk"</span>] <span class="op">==</span> compas[<span class="st">"two_year_recid"</span>])</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>compas[<span class="st">"correct_prediction"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
@@ -648,7 +650,7 @@ Fairness (Part 1)
 </div>
 <p>Recall that the base rate in this problem is 53%, so our accuracy is somewhat better than random guessing.</p>
 <p>What about the accuracy on Black and white defendants separately?</p>
-<div id="8f4cbf6a" class="cell" data-execution_count="13">
+<div id="9a31e6a3" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>compas.groupby([<span class="st">"race"</span>])[<span class="st">"correct_prediction"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
 <pre><code>race
@@ -659,7 +661,7 @@ Name: correct_prediction, dtype: float64</code></pre>
 </div>
 <p>The overall accuracies for Black and white defendants are comparable, and both are somewhat higher than the base rate of 53%.</p>
 <p>What about the error rates? Here is a simple calculation which computes the false positive rate (FPR) in the first row and the true positive rate (TPR) on the bottom row:</p>
-<div id="037da073" class="cell" data-execution_count="14">
+<div id="ff5f173b" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>compas.groupby([<span class="st">"two_year_recid"</span>])[<span class="st">"predicted_high_risk"</span>].mean().reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <div>
@@ -691,7 +693,7 @@ Name: correct_prediction, dtype: float64</code></pre>
 </div>
 </div>
 <p>However, and this was the main finding of the ProPublica study, the FPR and FNR are very different when we break down the data by race:</p>
-<div id="5babc812" class="cell" data-execution_count="15">
+<div id="17d673af" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>compas.groupby([<span class="st">"two_year_recid"</span>, <span class="st">"race"</span>])[<span class="st">"predicted_high_risk"</span>].mean().reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="15">
 <div>
@@ -797,7 +799,7 @@ Fairness (Part 2)
 </blockquote>
 <p>To operationalize this idea, we are looking for the rate of re-arrest to be the same between (a) Black defendants who received a positive prediction and (b) white defendants who received a positive prediction.</p>
 <p>Let’s check this:</p>
-<div id="88bbec75" class="cell" data-execution_count="16">
+<div id="fd8eb70d" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>compas.groupby([<span class="st">"predicted_high_risk"</span>, <span class="st">"race"</span>])[<span class="st">"two_year_recid"</span>].mean().reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="16">
 <div>
