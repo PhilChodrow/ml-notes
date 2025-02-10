@@ -1,31 +1,29 @@
 ---
 code-fold: false
 code-summary: "Show code"
+fig-cap-location: margin
 ---
 
 
 
 # Score-Based Classification
 
-A particular focus of this course is the use of machine learning models for automated decision-making. Now that we've been introduced to the fundamental idea of finding patterns in data, let's jump straight into a problem of *predictive modeling*. Predictive modeling is based on a simple idea: let's use past observations to make decisions about the future, in an automated way. 
-  
+A particular focus of these lecture notes is the use of machine learning models for automated decision-making. Now that we've been introduced to the fundamental idea of finding patterns in data, let's jump straight into a problem of *predictive modeling*. Predictive modeling is based on a simple idea: let's use past observations to make decisions about the future, in an automated way. We'll consider a case study in finance: should a bank extend credit (i.e. lend money) to a prospective borrower, or not? 
+   
 ### To Lend Or Not To Lend?
 
 Banks are in the business of lending money, and they must often decide when to loan whom how much money and under what terms. When deciding whether to loan a sum of money, there are two major competing questions: 
 
 1. How much profit does the bank stand to make if the loan is paid off in full? 
-2. What is the risk that an individual might *default* on their loan and fail to pay it back? In this case, the bank may lose a significant fraction of the loan amount. 
+2. What is the risk that an individual might *default* on their loan and fail to pay it all back? In this case, the bank may lose a significant fraction of the loan amount. 
 
 Banks can try to balance these risks by controlling interest rates. Higher interest rates increase prospective profit if the loan is repaid in full, but also increase the risk that an individual may be unable to keep up with payments. 
 
-The judgment of whether to extend an individual a loan is handled by human experts. Recently, human experts have been seeking assistance from machine learning algorithms. As in most predictive modeling, the idea is to use the past to predict the future. Here, we'll consider simple modeling problem in which we aim to learn patterns in when individuals are able to pay off loans, and use these patterns to make predictions. 
+Historically, the judgment of whether to extend an individual a loan was handled by human experts. Recently, human experts have been seeking assistance from machine learning algorithms. As in most predictive modeling, the idea is to use the past to predict the future. Here, we'll consider simple modeling problem in which we aim to learn patterns in when individuals are able to pay off loans, and use these patterns to make predictions. 
 
 We'll first load in the `pandas` package and use the `read_csv` command to acquire our data for this problem as a `pd.DataFrame`. [This data set was produced by Kaggle](https://www.kaggle.com/datasets/laotse/credit-risk-dataset); it is a *simulated* data set based on patterns in real world data, which, of course, is sensitive and confidential. For today, we are only going to focus on the first 1,000 rows of data. 
 
-
-
 ```{python}
-
 import pandas as pd
 from matplotlib import pyplot as plt
 import numpy as np 
@@ -38,11 +36,9 @@ pd.options.mode.chained_assignment = None
 ```
 
 
+Here's the URL where I've hosted the data set. We can read in the data using the `pd.read_csv()` command, and then subset to the first 1,000 rows. 
 ```{python}
 url = "https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/credit-risk/credit_risk_dataset.csv"
-```
-
-```{python}
 
 #---
 df = pd.read_csv(url)
@@ -74,12 +70,18 @@ df["loan_status"].mean()
 #---
 ```
 
-In this data, roughly 55% of borrowers default on their loan. An important aspect of this learning is the *base rate for prediction.* If we predicted that every borrower would default on a loan, we would be right 55% of the time. So, if we want to find patterns in our data set and use those patterns to make predictions, we should aim for accuracy greater than 55%. 
+In this data, roughly 55% of borrowers default on their loan. An important aspect of this learning is the *base rate for prediction.* If we predicted that every borrower would default on a loan, we would be right 55% of the time. So, if we want to find patterns in our data set and use those patterns to make predictions, we will usually aim for accuracy greater than 55%. [In some contexts, we might want to use metrics other than accuracy as a measure of performance. In such contexts, it's helpful to measure the base rate for that metric instead. In the bank case for example, rather than measuring accuracy we might instead want to measure expected profit per-loan or some other metric that is more directly relevant to the bank's predictive goals.]{.aside} 
 
 
 So, can we find some patterns? Here is a labeled scatterplot of our simplified data set. 
 
 ```{python}
+#| code-fold: true
+#| label: fig-scatter
+#| fig-cap: Scatter plot of loan interest rate and loan / income ratio, colored by loan status.
+#| fig-width: 6
+#| fig-height: 4
+
 def scatter_data(ax, df):
 
     markers = ["o" , ","]
@@ -94,9 +96,19 @@ fig, ax = plt.subplots(1, 1)
 scatter_data(ax, df)
 ```
 
-Although it looks difficult to completely separate the defaulted loans from the loans which were repaid in full, it does look like there is some pattern to find. Loans which were repaid in full concentrate in the lower right corner of the visualization. This makes sense -- these are loans which have low interest rates and which are relatively small sums relative to the annual resources of the borrower. 
+Although it looks difficult to completely separate the defaulted loans from the loans which were repaid in full using just the interest rate and the loan/income ratio, it does look like there is some pattern to find. Loans which were repaid in full concentrate in the lower right corner of the visualization. This makes sense -- these are loans which have low interest rates and which are relatively small sums relative to the annual resources of the borrower. 
 
-A very common approach in problems like this one is to assign, to each loan applicant $i$, a *score* $s_i$ which predicts their likelihood to default on a loan. Higher scores indicate greater reliability. Let's formulate a linear score function: 
+A very common approach in problems like this one is to assign, to each loan applicant $i$, a *score* $s_i$ which predicts their likelihood to default on a loan. Higher scores indicate greater reliability. The score $s_i$ is expected to be a function of the *features* of the loan application $i$, which in this case might include things like the interest rate and the loan/income ratio. We typically encode the features in a vector $\mathbf{x}_i \in \mathbb{R}$. [Soon, we'll see many examples of how to encode information in the feature vector.]{.aside} So, the statement that the score is a function of the features can be written as
+
+$$
+\begin{aligned}
+    s_i = f(\mathbf{x}_i)\;.
+\end{aligned}
+$$
+
+for some choice of function $f:\mathbb{R}^\ell \rightarrow \mathbb{R}$. 
+
+We're going to use a *linear* score function $f$, which means that our scores will have the form 
 
 $$
 \begin{aligned}
@@ -104,8 +116,7 @@ $$
 \end{aligned}
 $$
 
-
-We can write this score function much more compactly by defining a data point 
+A bit more formally, we can write this score function much more compactly by defining a data point 
 
 $$
 \begin{aligned}
@@ -125,11 +136,11 @@ Then, we can compactly write our score function as
 
 $$
 \begin{aligned}
-    s_i = \langle \mathbf{w}, \mathbf{x}_i\rangle\;. 
+    s_i = f(\mathbf{x}_i) = \langle \mathbf{w}, \mathbf{x}_i\rangle\;. 
 \end{aligned} 
 $$ {#eq-risk-score}
 
-Let's implement this score in Python.  
+Let's implement this score in Python.  [This is not the optimal implementation of the score -- we'll see a much better approach that leverages linear algebra and matrix multiplication soon.]{.aside}
 
 ```{python}
 #---
@@ -182,6 +193,8 @@ def score_viz(score_fun, w, df):
 To see the scores, we need to make an initial choice about the weight vector $\mathbf{w}$. 
 
 ```{python}
+#| fig-cap: Quantized visualization of the values of the score with an arbitrary initial choice of weight vector. (Left) values of the score shown alone. (Right) values of the score shown with the data points.
+#| label: fig-linear-score-viz-arbitrary
 
 #---
 w = np.array([0.4, -2])
@@ -192,6 +205,8 @@ score_viz(linear_score, w, df)
 Hmmm, that doesn't look so good. Ideally, we'd like the higher scores to line up with the borrowers who defaulted, and the lower scores to line up with the borrowers who fully repaid their loans. Can we find a better choice? 
 
 ```{python}
+#| fig-cap: Quantized visualization of the values of the score with an reasonable choice of weight vector chosen by guess-and-check. (Left) values of the score shown alone. (Right) values of the score shown with the data points.
+#| label: fig-linear-score-viz-guessed
 
 #---
 w = np.array([0.01, 1.1])

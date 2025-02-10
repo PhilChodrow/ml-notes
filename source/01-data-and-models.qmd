@@ -24,19 +24,20 @@ def plot_fig(pattern = False):
 
     # panel 1: regression
 
+    fig, ax = plt.subplots(1, 1, figsize = (6, 3))
     noise = 0.3
 
     x = np.arange(0, np.pi, 0.01)
     y = 2*np.sin(x) + 0.5
     y_noise = y + np.random.normal(0.0, noise, size = (len(x),))
 
-    plt.scatter(x, y_noise, s = 20,  facecolors='none', edgecolors = "darkgrey", label = "data")
+    ax.scatter(x, y_noise, s = 20,  facecolors='none', edgecolors = "darkgrey", label = "data")
     if pattern: 
-        plt.plot(x, y, label = "pattern", linestyle = "--", color = "black", zorder = 10)
-    plt.gca().set(xlabel = r"$x$", ylabel = r"$y$")
-    plt.gca().set_xlim(-0, np.pi)
-    plt.gca().set_ylim(-0, np.pi)
-    plt.gca().set_aspect('equal')
+        ax.plot(x, y, label = "pattern", linestyle = "--", color = "black", zorder = 10)
+    ax.set(xlabel = r"$x$", ylabel = r"$y$")
+    ax.set_xlim(-0, np.pi)
+    ax.set_ylim(-0, np.pi)
+    ax.set_aspect('equal')
     plt.legend()
     plt.show()
 
@@ -45,19 +46,20 @@ def plot_fig(pattern = False):
     noise = 0.2
     n_points = 300
 
+    fig, ax = plt.subplots(1, 1, figsize = (6, 3))
     for i in range(2):
         x = i + np.random.normal(0.0, noise, size = n_points)
         y = i + np.random.normal(0.0, noise, size = n_points)
     
-        plt.scatter(x, y, s = 20,  c = i*(np.zeros_like(x) + 1), facecolors = "none", edgecolors = "darkgrey", cmap = "BrBG", label = f"Category {i+1}", vmin = -1, vmax = 2)
+        ax.scatter(x, y, s = 20,  c = i*(np.zeros_like(x) + 1), facecolors = "none", edgecolors = "darkgrey", cmap = "BrBG", label = f"Category {i+1}", vmin = -1, vmax = 2)
 
     if pattern: 
-        plt.plot([-0.5, 1.5], [1.5, -0.5], label = "pattern", linestyle = "--", color = "black", zorder = 10)
+        ax.plot([-0.5, 1.5], [1.5, -0.5], label = "pattern", linestyle = "--", color = "black", zorder = 10)
     plt.legend()
-    plt.gca().set(xlabel = r"$x_1$", ylabel = r"$x_2$")
-    plt.gca().set_xlim(-1.0, 2.0)
-    plt.gca().set_ylim(-1.0, 2.0)
-    plt.gca().set_aspect('equal')
+    ax.set(xlabel = r"$x_1$", ylabel = r"$x_2$")
+    ax.set_xlim(-1.0, 2.0)
+    ax.set_ylim(-1.0, 2.0)
+    ax.set_aspect('equal')
     plt.show()
 
 plot_fig()

@@ -11,7 +11,9 @@ book:
   author: "Phil Chodrow"
   date: "01/15/2024"
   body-footer: |
-        <br> <br> <span style="color:grey;">&#169; Phil Chodrow, 2024</span>
+        <br> <br> <span style="color:grey;">&#169; Phil Chodrow, 2025</span>
+  sidebar: 
+    search: false
 
 bibliography: refs.bib
 
@@ -24,6 +26,7 @@ format:
     reference-location: margin
     callout-icon: false;
     callout-appearance: simple
+    fig-cap-location: margin
 
 jupyter: conda-env-ml-0451-py
 
