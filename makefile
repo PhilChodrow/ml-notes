@@ -5,9 +5,9 @@ CONDA_ACTIVATE = source $$(conda info --base)/etc/profile.d/conda.sh ; conda act
 
 publish: 
 	$(CONDA_ACTIVATE) ml-0451
-	python scripts/create-ipynb.py
 	python scripts/prep-qmd.py
 	quarto render --profile publish
+	python scripts/create-ipynb.py
 	git add .
 	git commit -m "Update"
 	git push
