@@ -21,26 +21,6 @@ for f in os.listdir("source"):
     if f.endswith(".qmd"):
         with open(f"source/{f}", "r") as file: 
             cleaned = file.read().replace('#---\n', '')
-            
-            live_path = f"{f.replace('.qmd', '.ipynb')}"
-            
-                
-            link_line = f"*Open the live notebook in Google Colab [here](http://colab.research.google.com/github/philchodrow/ml-notes/blob/main/docs/live-notebooks/{live_path}).* \n"
-            
-            cleaned_lines = cleaned.split("\n")
-            ix = 0
-            found = False
-            while not found: 
-                line = cleaned_lines[ix]
-                if line: 
-                    found = "#" in line 
-                ix += 1
-            ix += 1    
-            
-            
-            cleaned_lines.insert(ix, link_line)            
-            cleaned = "\n".join(cleaned_lines)
-            
             with open(f"chapters/{f}", "w") as new: 
                 new.write(cleaned)
     
@@ -50,7 +30,7 @@ for f in os.listdir("source"):
         notebook = nb.read(out_path, as_version = 4)
         for cell in notebook["cells"]:
             cell["source"] = re.sub(r"#---\n", "", cell["source"])
-            cell["source"] = re.sub(r"#---", "", cell["source"])
+            cell["source"] = re.sub(r"#---", "",   cell["source"])
 
         nb.write(notebook, out_path)
             
