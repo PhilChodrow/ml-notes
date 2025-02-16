@@ -71,10 +71,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-79bb3942e891885f9f7af119cd221462.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-2d9718c933debafcce942f9b212640bc.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-3ce699d121c8856c5a63a6d50acd43d0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-c0d67a68f570ca6fa4e67bd1fc2162d1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -392,9 +392,18 @@ window.Quarto = {
 
 </header>
 
-<p><a href="http://colab.research.google.com/github/philchodrow/ml-notes/blob/main/docs/live-notebooks/04-decision-theory.ipynb">Open the live notebook in Google Colab</a>.</p>
+<p><i><a href="http://colab.research.google.com/github/philchodrow/ml-notes/blob/main/docs/live-notebooks/04-decision-theory.ipynb">Open the live notebook</a> in Google Colab.</i></p>
 
 
+<p>Machine learning algorithms are often used to make recommendations to inform decisions:</p>
+<ul>
+<li>Should a patient receive additional confirmatory screening for a rare disease?</li>
+<li>Should an email be sent to the spam folder, or should it be sent to the primary inbox?</li>
+<li>Should a prospective borrower be granted a loan?</li>
+</ul>
+<p>An important feature of each of these examples is that there may be <em>asymmetric costs of error</em>. In many cases, it’s worse to be wrong in one way than it is to be wrong in another. A patient who in fact <em>has</em> a rare disease but <em>is not</em> screened for it is at grave risk, while a patient who <em>does not</em> have a rare disease but <em>is</em> screened for it might only risk a higher bill. A frivolous email sent to the main inbox is an irritation, while an important email sent to the spam folder is an opportunity for consequential miscommunication. A prospective borrower who <em>is</em> granted a loan but <em>should not</em> have been granted a loan may default and lose money for the lender, while a prospective borrower who <em>is not</em> granted a loan but <em>should</em> have been granted a loan cannot default and therefore cannot incur losses for the lender.</p>
+<p>In cases with asymmetric costs of error, selecting models based on <em>accuracy</em> may not be the right approach, since accuracy treats all types of error as equally weighty. In this set of notes, we’ll go beyond accuracy and learn how to tune models for decision-making in the presence of asymmetric error costs.</p>
+<p>We are going to <em>operationalize</em> this via the choice of the threshold <span class="math inline">\(t\)</span> in the score-based classification framework that we discussed <a href="../chapters/03-score-based-classification.html">last time</a>. Let’s do a quick recap:</p>
 <section id="last-time" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="last-time">Last time…</h2>
 <p>…we considered a prediction problem in which we observed <span class="math inline">\(p\)</span> attributes of prospective borrower <span class="math inline">\(i\)</span> in the form of a vector <span class="math inline">\(\mathbf{x}_i \in \mathbb{R}^p\)</span>. We then formed a <em>score</em> for prospective borrower <span class="math inline">\(i\)</span> using a weight vector <span class="math inline">\(\mathbf{w}\in \mathbb{R}^p\)</span> and an inner product:</p>
@@ -410,49 +419,50 @@ window.Quarto = {
 <li>Borrowers who do not receive a loan have the property <span class="math inline">\(s_i &gt; t\)</span>.</li>
 </ul>
 <p><a href="#eq-linear-model" class="quarto-xref">Equation&nbsp;<span>4.1</span></a> says that the score should be computed as a <em>linear function</em> of the features <span class="math inline">\(\mathbf{x}_i\)</span>. Models with this property are called <em>linear models</em> and are fundamental in both classification and regression tasks.</p>
-<div class="page-columns page-full"><p>In this set of notes, we are going to focus on one of the many questions we might ask about this framework: how do we choose the threshold <span class="math inline">\(t\)</span>?  As we’ll see, this is a surprisingly tricky question that depends heavily on context.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">We’ll study later how to find <span class="math inline">\(\mathbf{w}\)</span>.</span></div></div>
 </section>
-<section id="lending-data-set" class="level2">
+<section id="lending-data-set" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="lending-data-set">Lending Data Set</h2>
-<p>To illustrate our discussion, we are going to pull up the lending data set from the previous section.</p>
-<div id="fcd68f68" class="cell" data-execution_count="1">
+<div class="page-columns page-full"><p>To illustrate our discussion, we are going to pull up the lending data set from the previous section. </p><div class="no-row-height column-margin column-container"><span class="margin-aside">This hidden code cell imports several standard Python libraries and reads in our data, saving the result in a variable called <code>df</code>.</span></div></div>
+<div id="dcd15634" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>np.set_printoptions(precision <span class="op">=</span> <span class="dv">3</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/credit-risk/credit_risk_dataset.csv"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>pd.options.mode.chained_assignment <span class="op">=</span> <span class="va">None</span>  </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>np.set_printoptions(precision <span class="op">=</span> <span class="dv">3</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/credit-risk/credit_risk_dataset.csv"</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>df_all <span class="op">=</span> pd.read_csv(url)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df_all[[<span class="st">"loan_int_rate"</span>, <span class="st">"loan_percent_income"</span>, <span class="st">"loan_status"</span>]]</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.dropna()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="90ce4db2" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df_all <span class="op">=</span> pd.read_csv(url)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df_all[[<span class="st">"loan_int_rate"</span>, <span class="st">"loan_percent_income"</span>, <span class="st">"loan_status"</span>]]</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.dropna()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <p>Following the usual paradigm in machine learning, we’re going to incorporate two elements which we previously saw <a href="../source/02-black-box-classification.qmd">when studying the Palmer penguins</a>. First, we are going to hold off a part of our data set that we will not use for making any choices about how we design our decision algorithm. This held-off part of the data is called the <em>test set</em>. We’ll use it for a final evaluation of our model’s performance.</p>
-<div id="e0218dcc" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>df_train, df_test <span class="op">=</span> train_test_split(df, test_size <span class="op">=</span> <span class="fl">0.2</span>, random_state <span class="op">=</span> <span class="dv">123</span>) <span class="co"># 20% test set</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="655c0517" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_train, df_test <span class="op">=</span> train_test_split(df, test_size <span class="op">=</span> <span class="fl">0.2</span>, random_state <span class="op">=</span> <span class="dv">123</span>) <span class="co"># 20% test set</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Next, we’ll distinguish our predictor and target variables in each of the train and test sets.</p>
-<div id="ea606dd7" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> df_train[[<span class="st">"loan_int_rate"</span>, <span class="st">"loan_percent_income"</span>]]</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> df_train[<span class="st">"loan_status"</span>]</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> df_test[[<span class="st">"loan_int_rate"</span>, <span class="st">"loan_percent_income"</span>]]</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> df_test[<span class="st">"loan_status"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="158546ac" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> df_train[[<span class="st">"loan_int_rate"</span>, <span class="st">"loan_percent_income"</span>]]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> df_train[<span class="st">"loan_status"</span>]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> df_test[[<span class="st">"loan_int_rate"</span>, <span class="st">"loan_percent_income"</span>]]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> df_test[<span class="st">"loan_status"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Now we’re ready to proceed in making predictions and comparing our predictions to outcomes in both the training and test sets.</p>
 </section>
 <section id="vectorized-computation-of-scores" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="vectorized-computation-of-scores">Vectorized Computation of Scores</h2>
 <div class="page-columns page-full"><p>Suppose that we have a weight vector <span class="math inline">\(\mathbf{w}\)</span> and that we’d like to choose a threshold <span class="math inline">\(t\)</span>. To do this, we will compute all the scores on the training data and do some experiments. How should we compute training scores? As we know, the <span class="math inline">\(i\)</span>th score is given by <a href="#eq-linear-model" class="quarto-xref">Equation&nbsp;<span>4.1</span></a>. To compute scores for all <span class="math inline">\(n\)</span> of our training points, we could write a loop like this: </p><div class="no-row-height column-margin column-container"><span class="margin-aside">In our case, <span class="math inline">\(n =\)</span> 23572, the number of rows in the training data.</span></div></div>
-<div id="87e1f0a3" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> [] <span class="co"># vector of scores</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n):</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    s.append(compute_score(X[i], w))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="26cf7c47" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> df_train.shape[<span class="dv">0</span>]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> [] <span class="co"># vector of scores</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n):</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    s.append(compute_score(X[i], w))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>where <code>X[i]</code> is the <code>i</code>th data point <span class="math inline">\(\mathbf{x}_i\)</span> and <code>compute_score</code> is a function that computes the score according to <a href="#eq-linear-model" class="quarto-xref">Equation&nbsp;<span>4.1</span></a>. However, there’s a better way to do this if we step back from code into math for a moment. If <span class="math inline">\(\mathbf{s} \in \mathbb{R}^n\)</span> is a vector whose <span class="math inline">\(i\)</span>th entry is the score <span class="math inline">\(s_i\)</span>, then we have</p>
 <p><span class="math display">\[
@@ -472,10 +482,10 @@ window.Quarto = {
 \begin{aligned}
     \mathbf{X} = \left[
         \begin{matrix}
-            - \mathbf{x}_1 -  \\
-            -\mathbf{x}_2-  \\
+            \rule[.5ex]{2.5ex}{0.5pt} \; \mathbf{x}_1 \;\rule[.5ex]{2.5ex}{0.5pt}  \\
+            \rule[.5ex]{2.5ex}{0.5pt}\;\mathbf{x}_2 \; \rule[.5ex]{2.5ex}{0.5pt}  \\
             \vdots \\
-            -\mathbf{x}_n -
+            \rule[.5ex]{2.5ex}{0.5pt} \;  \mathbf{x}_n \;\rule[.5ex]{2.5ex}{0.5pt}
         \end{matrix}
         \right] =
         \left[
@@ -489,62 +499,94 @@ window.Quarto = {
 \end{aligned}
 \]</span></p>
 <p>This is good news because it simplifies our life both mathematically and in code: the Numpy package supplies very fast matrix multiplication:</p>
-<div id="75811c7a" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> linear_score(X, w):</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X<span class="op">@</span>w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="3b4fe697" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> linear_score(X, w):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X<span class="op">@</span>w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now, given <span class="math inline">\(\mathbf{w}\)</span>, we can compute all the scores at once.</p>
-<div id="72b4116f" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([<span class="fl">0.01</span>, <span class="fl">1.0</span>])</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> linear_score(X_train, w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="page-columns page-full"><p>Now, given <span class="math inline">\(\mathbf{w}\)</span>, we can compute all the scores at once. To do this, we’ll finally choose a value for <span class="math inline">\(\mathbf{w}\)</span>: </p><div class="no-row-height column-margin column-container"><span class="margin-aside">Again, the topic of <em>how to choose <span class="math inline">\(\mathbf{w}\)</span> is the topic of </em>model training*, which we’ll study in detail soon.</span></div></div>
+<div id="83fe73d8" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> np.array([<span class="fl">0.01</span>, <span class="fl">1.0</span>])</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> linear_score(X_train, w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Importantly, we were able to compute all of our scores on the training data without writing any loops. This is both easier for us to read/write and much faster for most computers to execute; the reason is that Numpy is able to use highly optimized C code to perform the matrix multiplication.</p>
 <p>Here is a histogram of the scores we just computed:</p>
-<div id="799b6bf9" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>hist <span class="op">=</span> plt.hist(s)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"Score $s$"</span>, ylabel <span class="op">=</span> <span class="st">"Frequency"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="79eaa656" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>hist <span class="op">=</span> ax.hist(s, bins <span class="op">=</span> <span class="dv">50</span>, color <span class="op">=</span> <span class="st">"steelblue"</span>, alpha <span class="op">=</span> <span class="fl">0.6</span>, linewidth <span class="op">=</span> <span class="dv">1</span>, edgecolor <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"Score $s$"</span>, ylabel <span class="op">=</span> <span class="st">"Frequency"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="04-decision-theory_files/figure-html/cell-11-output-1.png" class="figure-img" width="592" height="423"></p>
+<p><img src="04-decision-theory_files/figure-html/cell-8-output-1.png" class="figure-img" width="517" height="349"></p>
 </figure>
 </div>
+</div>
+</div>
+<p>We see that most of the scores are relatively small, but that a small number of scores are over <span class="math inline">\(0.5\)</span>. Numpy offers many helpful vectorized operations which make it quick to answer simple questions about the data. For example, what proportion of scores are larger than <span class="math inline">\(0.5\)</span>?</p>
+<div id="12bf1987" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(s <span class="op">&gt;</span> <span class="fl">0.5</span>).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>0.050398778211437296</code></pre>
 </div>
 </div>
 </section>
 <section id="types-of-error" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="types-of-error">Types of Error</h2>
-<p>Now that we have the scores, we can easily simulate decision-making with a given threshold. For example, the proportion predicted to default on their loan with a given threshold <span class="math inline">\(t\)</span> can be computed like this:</p>
-<div id="4bfaae4c" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> <span class="fl">0.4</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>preds <span class="op">=</span> s <span class="op">&gt;=</span> t</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>preds.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
+<div class="page-columns page-full"><p>Once we have a vector of scores <span class="math inline">\(\mathbf{s}\)</span>, we can create a vector of <em>predictions</em> simply by applying a threshold <span class="math inline">\(t\)</span>. Here’s our training predictions for the loan data using a threshold <span class="math inline">\(t = 0.4\)</span>: </p><div class="no-row-height column-margin column-container"><span class="margin-aside">Recall that a prediction of <code>True</code> means that the individual is considered likely to default on their loan and therefore should <em>not</em> be offered credit.</span></div></div>
+<div id="c680c15d" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> <span class="fl">0.4</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>preds <span class="op">=</span> s <span class="op">&gt;=</span> t</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>preds.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>17279    False
+14157     True
+25427    False
+23449     True
+14739     True
+dtype: bool</code></pre>
+</div>
+</div>
+<p>What proportion of individuals are predicted to default?</p>
+<div id="5c42c922" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>preds.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>0.15386899711522145</code></pre>
 </div>
 </div>
-<p>So, how should we choose the threshold <span class="math inline">\(t\)</span>? One possibility would be to try to choose the threshold in a way that maximizes the training accuracy, the number of times that the prediction agrees with the actual outcome (repaid or default) on the training data. Here’s an example of a quick grid search:</p>
-<div id="dbe50132" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">11</span>):</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> s <span class="op">&gt;=</span> t</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    acc <span class="op">=</span> (y_pred <span class="op">==</span> y_train).mean()</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"A threshold of </span><span class="sc">{</span>t<span class="sc">:.1f}</span><span class="ss"> gives an accuracy of </span><span class="sc">{</span>acc<span class="sc">:.2f}</span><span class="ss">."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>A threshold of 0.0 gives an accuracy of 0.22.
-A threshold of 0.1 gives an accuracy of 0.23.
-A threshold of 0.2 gives an accuracy of 0.46.
-A threshold of 0.3 gives an accuracy of 0.71.
-A threshold of 0.4 gives an accuracy of 0.82.
-A threshold of 0.5 gives an accuracy of 0.80.
-A threshold of 0.6 gives an accuracy of 0.79.
-A threshold of 0.7 gives an accuracy of 0.78.
-A threshold of 0.8 gives an accuracy of 0.78.
-A threshold of 0.9 gives an accuracy of 0.78.
-A threshold of 1.0 gives an accuracy of 0.78.</code></pre>
+<p>Of course, this result depends strongly on our choice of threshold <span class="math inline">\(t\)</span>. How should we choose it? One possibility would be to try to choose the threshold in a way that maximizes the training accuracy, the number of times that the prediction agrees with the actual outcome (repaid or default) on the training data. Here’s an example of a quick grid search:</p>
+<div id="cell-fig-accuracy-threshold" class="cell page-columns page-full" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>best_accuracy <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>best_threshold <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">101</span>): </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> s <span class="op">&gt;=</span> t</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    acc <span class="op">=</span> (y_pred <span class="op">==</span> y_train).mean()</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    ax.scatter(t, acc, color <span class="op">=</span> <span class="st">"steelblue"</span>, s <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> acc <span class="op">&gt;</span> best_accuracy: </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        best_accuracy <span class="op">=</span> acc</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        best_threshold <span class="op">=</span> t</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>ax.axvline(best_threshold, linestyle <span class="op">=</span> <span class="st">"--"</span>, color <span class="op">=</span> <span class="st">"grey"</span>, zorder <span class="op">=</span> <span class="op">-</span><span class="dv">10</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"Threshold $t$"</span>, ylabel <span class="op">=</span> <span class="st">"Accuracy"</span>, title <span class="op">=</span> <span class="ss">f"Best accuracy </span><span class="sc">{</span>best_accuracy<span class="sc">:.3f}</span><span class="ss"> at best threshold t = </span><span class="sc">{</span>best_threshold<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-accuracy-threshold" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-accuracy-threshold-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-decision-theory_files/figure-html/fig-accuracy-threshold-output-1.png" width="506" height="368" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-accuracy-threshold-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.1: Accuracy as a function of threshold in the credit default prediction problem.
+</figcaption>
+</figure>
+</div>
 </div>
 </div>
 <p>However, accuracy is not always the most relevant measure. For example, <a href="https://www.fieldandstream.com/survival/how-many-shark-attacks-per-year/#:~:text=In%20recent%20years%2C%20there's%20been,%E2%80%94a%2010%2Dyear%20low.">Field and Stream estimates</a> that there are, globally, approximately 70 unprovoked shark attacks each year. Since the population of the world is currently around <span class="math inline">\(8.1\times 10^9\)</span> people, the average probability that a specific individual will suffer an unprovoked shark attack in a year is approximately <span class="math inline">\(70 / (8.1 \times 10^9) \approx 8.6 \times 10^{-9}\)</span>. So, if we created a shark attack predictor which always predicted “no shark attack,” our model would be correct approximately 99.999999% of the time. However, this model wouldn’t be very <em>useful</em>, and wouldn’t have anything to tell us about the activities that increase or reduce the risk of experience an attack.</p>
 <p>A second reason we may wish to measure something other than accuracy has to do with <em>asymmetrical costs of error</em>. If we incorrectly predict that an individual will suffer a shark attack but no attack occurs, this is not that big a problem. Yes, we were wrong, but no one got hurt. In contrast, if we incorrectly predict that an individual will <em>not</em> suffer a shark attach, then this is a big problem which potentially involves grievous bodily injury, death, trauma, legal liability, etc. So, in designing our predictor, we might want to prioritizing avoiding the second kind of error, even if that leads us to make more of the first kind of error.</p>
-<p>What <em>are</em> the types of error? For a binary outcome with a binary predictor, there are four possibilities:</p>
+<p>What <em>are</em> the types of error? For a binary (yes/no) outcome with a binary predictor, there are four possibilities:</p>
 <div id="tbl-errors" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-errors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -591,22 +633,22 @@ Table&nbsp;4.1: Types of correct classifications and errors in a binary classifi
 </figure>
 </div>
 <p>Given a vector of true outcomes <span class="math inline">\(\mathbf{y}\)</span> and a vector of predictions <span class="math inline">\(\hat{\mathbf{y}}\)</span>, we can calculate frequencies of each outcome. For example, here are the false positives associated with a given threshold value:</p>
-<div id="e20638ae" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> <span class="fl">0.5</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> s <span class="op">&gt;=</span> t </span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># number where outcome == 0 and prediction == 1</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>((y_train <span class="op">==</span> <span class="dv">0</span>)<span class="op">*</span>(y_pred <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="12">
+<div id="35532821" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> <span class="fl">0.5</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> s <span class="op">&gt;=</span> t </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># false positives: outcome == 0 and prediction == 1</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>((y_train <span class="op">==</span> <span class="dv">0</span>)<span class="op">*</span>(y_pred <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>286</code></pre>
 </div>
 </div>
-<p>In practice, it’s more convenient to compute all the error rates at once using the confusion matrix:</p>
-<div id="54bbba65" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>confusion_matrix(y_train, y_pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
+<p>In practice, it’s typically more convenient to compute all the error rates at once using the confusion matrix:</p>
+<div id="f61ae501" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>confusion_matrix(y_train, y_pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>array([[18062,   286],
        [ 4319,   905]])</code></pre>
 </div>
@@ -658,109 +700,143 @@ false negative, true positive</code></pre>
 </tbody>
 </table>
 <p>Intuitively, the TPR measures the proportion of the time that the classifier predicts the correct (positive) label <em>when the true outcome was positive</em>. Similarly, the FPR measures the proportion of the time that the classifier predicts the incorrect (positive) label <em>when the true outcome was negative</em>. Because <span class="math inline">\(\mathrm{TPR} = 1 - \mathrm{FNR}\)</span> and <span class="math inline">\(\mathrm{FPR} = 1 - \mathrm{TNR}\)</span>, folks usually only bother remembering and using <span class="math inline">\(\mathrm{TPR}\)</span> and <span class="math inline">\(\mathrm{FNR}\)</span>.</p>
+<div class="page-columns page-full"><p>Let’s compute the False Positive Rate (FPR) manually: </p><div class="no-row-height column-margin column-container"><span class="margin-aside">Cases where <code>y_pred == 1</code> correspond to positive predictions, while cases where <code>y_train == 0</code> correspond to true negative outcomes.</span></div></div>
+<div id="986c37fe" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># number of false positives / all true negatives</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>((y_pred <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_train <span class="op">==</span> <span class="dv">0</span>)).<span class="bu">sum</span>() <span class="op">/</span> (y_train <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>0.015587529976019185</code></pre>
+</div>
+</div>
 <p>Rather than computing these by hand, Scikit-learn offers a handy argument to <code>confusion_matrix</code> for computing these automatically and simultaneously:</p>
-<div id="c84dfc4c" class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>confusion_matrix(y_train, y_pred, normalize <span class="op">=</span> <span class="st">"true"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="8f027128" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># top right corner agrees with manual computation. </span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>confusion_matrix(y_train, y_pred, normalize <span class="op">=</span> <span class="st">"true"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <pre><code>array([[0.984, 0.016],
        [0.827, 0.173]])</code></pre>
 </div>
 </div>
-<div class="page-columns page-full"><p>Let’s do a quick check against the FPR using manual vectorized code. </p><div class="no-row-height column-margin column-container"><span class="margin-aside">Cases where <code>y_pred == 1</code> correspond to positive predictions, while cases where <code>y_train == 0</code> correspond to true negative outcomes.</span></div></div>
-<div id="fd7bcae2" class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># agrees with the top right corner of the normalized confusion matrix</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>((y_pred <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_train <span class="op">==</span> <span class="dv">0</span>)).<span class="bu">sum</span>() <span class="op">/</span> (y_train <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="15">
-<pre><code>0.015587529976019185</code></pre>
-</div>
-</div>
 <section id="the-roc-curve" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="the-roc-curve">The ROC Curve</h3>
-<div class="page-columns page-full"><p>For any given value of the threshold <span class="math inline">\(t\)</span>, we can compute the TPR and FPR. We can think of this process as defining a parametrized function, a curve in TPR-FPR space. This curve is the ROC curve </p><div class="no-row-height column-margin column-container"><span class="margin-aside">ROC stands for “receiver operating characteristic,” a term that reflects the origin of the curve in detection of objects by radar.</span></div></div>
+<div class="page-columns page-full"><p>The four error rates are mathematically related to each other: <span class="math inline">\(\mathrm{TPR} + \mathrm{FNR} = 1\)</span> and <span class="math inline">\(\mathrm{TNR} + \mathrm{FPR} = 1\)</span>. This means that there are really only two distinct numbers to keep track of: if we know the TPR and FPR, for example, then we can compute the FNR and TNR from them. It is common to explore the complete space of all possible TPRs and FPRs by varying the threshold <span class="math inline">\(t\)</span>. This defines a parametrized function, a curve in TPR-FPR space. This curve is the ROC curve </p><div class="no-row-height column-margin column-container"><span class="margin-aside">ROC stands for “receiver operating characteristic,” a term that reflects the origin of the curve in detection of objects by radar.</span></div></div>
 <p>To compute an ROC curve, we simply need to compute the TPR and FPR for many different values of the threshold <span class="math inline">\(t\)</span> and plot them.</p>
-<div id="b381a7ff" class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>num_thresholds <span class="op">=</span> <span class="dv">101</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>FPR <span class="op">=</span> np.zeros(num_thresholds)</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>TPR <span class="op">=</span> np.zeros(num_thresholds)</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> np.linspace(s.<span class="bu">min</span>()<span class="op">-</span><span class="fl">0.1</span>, s.<span class="bu">max</span>()<span class="op">+</span><span class="fl">0.1</span>, num_thresholds)</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>s    <span class="op">=</span> linear_score(X_train, w)</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(num_thresholds):</span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> T[i]</span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    preds    <span class="op">=</span> s <span class="op">&gt;=</span> t</span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    FPR[i]   <span class="op">=</span> ((preds <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_train <span class="op">==</span> <span class="dv">0</span>)).<span class="bu">sum</span>() <span class="op">/</span> (y_train <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    TPR[i]   <span class="op">=</span> ((preds <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_train <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>() <span class="op">/</span> (y_train <span class="op">==</span> <span class="dv">1</span>).<span class="bu">sum</span>()</span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>ax.plot(FPR, TPR, color <span class="op">=</span> <span class="st">"black"</span>)</span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="dv">0</span>,<span class="dv">1</span>], [<span class="dv">0</span>,<span class="dv">1</span>], linestyle<span class="op">=</span><span class="st">"--"</span>, color <span class="op">=</span> <span class="st">"grey"</span>)</span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>ax.set_aspect(<span class="st">'equal'</span>)</span>
-<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"False Positive Rate"</span>, ylabel <span class="op">=</span> <span class="st">"True Positive Rate"</span>, title <span class="op">=</span> <span class="st">"ROC Curve"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="aa9428d5" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>num_thresholds <span class="op">=</span> <span class="dv">101</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>FPR <span class="op">=</span> np.zeros(num_thresholds)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>TPR <span class="op">=</span> np.zeros(num_thresholds)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> np.linspace(s.<span class="bu">min</span>()<span class="op">-</span><span class="fl">0.1</span>, s.<span class="bu">max</span>()<span class="op">+</span><span class="fl">0.1</span>, num_thresholds)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>s    <span class="op">=</span> linear_score(X_train, w)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(num_thresholds):</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> T[i]</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    preds    <span class="op">=</span> s <span class="op">&gt;=</span> t</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    FPR[i]   <span class="op">=</span> ((preds <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_train <span class="op">==</span> <span class="dv">0</span>)).<span class="bu">sum</span>() <span class="op">/</span> (y_train <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    TPR[i]   <span class="op">=</span> ((preds <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_train <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>() <span class="op">/</span> (y_train <span class="op">==</span> <span class="dv">1</span>).<span class="bu">sum</span>()</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>ax.plot(FPR, TPR, color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="dv">0</span>,<span class="dv">1</span>], [<span class="dv">0</span>,<span class="dv">1</span>], linestyle<span class="op">=</span><span class="st">"--"</span>, color <span class="op">=</span> <span class="st">"grey"</span>)</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>ax.set_aspect(<span class="st">'equal'</span>)</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"False Positive Rate"</span>, ylabel <span class="op">=</span> <span class="st">"True Positive Rate"</span>, title <span class="op">=</span> <span class="st">"ROC Curve"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="04-decision-theory_files/figure-html/cell-18-output-1.png" class="figure-img" width="355" height="368"></p>
+<p><img src="04-decision-theory_files/figure-html/cell-17-output-1.png" class="figure-img" width="355" height="368"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>We can think of the ROC curve as a description of all the possible tradeoffs between the TPR and FPR that are achievable for a given score as we vary the threshold <span class="math inline">\(t\)</span>. For example, the curve tells us that if we are willing to tolerate a false positive rate of 0.40, then the best true positive rate we can achieve is approximately 0.77.</p>
-<p>ROC curves are often used as a measure of the ability of a score function to classify data into two groups. Curves that bend farther towards the upper left corner of the plot are generally viewed as more effective classifiers. The area under the curve (AUC) is sometimes used as a single quantitative measure describing the classification quality.</p>
+<p>ROC curves are often used as a measure of the ability of a score function to classify data into two groups. Curves that bend farther towards the upper left corner of the plot are generally viewed as more effective classifiers, while curves which follow the dashed line of equality correspond to models that are no better than random chance. The area under the curve (AUC) is sometimes used as a single quantitative measure describing the classification quality.</p>
 </section>
 <section id="cost-of-errors-and-optimal-thresholding" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="cost-of-errors-and-optimal-thresholding">Cost of Errors and Optimal Thresholding</h3>
-<p>How do we choose the tradeoff that works best for us? To answer this kind of question, we need to reflect back on the <em>purpose</em> for which we are building a classifier. According to <a href="#tbl-errors" class="quarto-xref">Table&nbsp;<span>4.1</span></a>, there are two ways to be correct (true positive, true negative) and two ways to make an error (false positive, false negative). In order to choose an appropriate tradeoff, we need to think about the <em>benefit</em> of being right in relation to the <em>cost</em> of being wrong.</p>
-<div class="page-columns page-full"><p>A logical way for a bank to approach this problem would be from the perspective of profit-maximization. In the lending business, a bank can <em>make</em> money when loans are fully repaid with interest, but <em>lose</em> money (usually much more) when an individual defaults on the loan. To keep the problem simple, suppose that the bank gains $1 every time they make a loan which is successfully paid back, and that the bank loses $2 every time they make a loan which ends in default. The first scenario happens when the bank makes a true positive identification, while the second case happens when the bank makes a false negative classification.  For a given threshold, the expected gain for the bank when making a loan is then</p><div class="no-row-height column-margin column-container"><span class="margin-aside">Remember that the “positive” outcome in this data set is default.</span></div></div>
-<p><span class="math display">\[
+<p>How do we choose the tradeoff that works best for us? To answer this kind of question, we need to reflect back on the <em>purpose</em> for which we are building a classifier. According to <a href="#tbl-errors" class="quarto-xref">Table&nbsp;<span>4.1</span></a>, there are two ways to be correct (true positive, true negative) and two ways to make an error (false positive, false negative). In order to choose an appropriate tradeoff, we need to think about the <em>benefit</em> of being right in relation to the <em>cost</em> of being wrong. We can define an <em>expected benefit from prediction</em> like this:</p>
+<p><span id="eq-cost-benefit"><span class="math display">\[
 \begin{aligned}
-    \mathbb{E}[\mathrm{gain}] = 1\times \text{TN} - 2\times \text{FN}\;.
+    \text{Benefit} =  &amp;\phantom{-}\text{TP}\times (\text{benefit of TP}) + \text{TN} \times (\text{benefit of TN}) \\  
+    &amp; \color{white}{-}\text{FP} \times (\text{cost of FP})  - \text{FN}\times(\text{cost of FN})\;.
+\end{aligned}
+\tag{4.2}\]</span></span></p>
+<p>To specify our estimated benefit, we must therefore specify the two costs and two benefits using information from our specific decision-making context.</p>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>How would you suggest setting the two cost and two benefit terms in <a href="#eq-cost-benefit" class="quarto-xref">Equation&nbsp;<span>4.2</span></a> in the following prediction contexts?</p>
+<ul>
+<li>Shark attack prediction.</li>
+<li>Prediction of whether or not an email is spam.</li>
+<li>Prediction of whether or not a patient has a rare disease.</li>
+<li>Prediction of whether an individual is likely to be arrested for a crime if released on parole.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="page-columns page-full"><p>So far, we have framed the prediction problem of credit default from the bank’s perspective – the bank assesses customers and makes a decision. To continue in this vein, let’s consider how a bank might fill out each of the four terms above. In the lending business, a bank can <em>make</em> money when loans are fully repaid with interest, but <em>lose</em> money (usually much more) when an individual defaults on the loan. On the other hand, when the bank chooses not to make a loan at all (in response to a positive prediction that an individual is likely to default), no credit is extended and there is no gain or loss. So, heuristically, our four terms might look something like this: </p><div class="no-row-height column-margin column-container"><span class="margin-aside">In practice, the actual costs and benefits</span></div></div>
+<ul>
+<li><strong>Cost of false positives</strong> (individual would have repaid but does not receive loan): 0$</li>
+<li><strong>Cost of false negatives</strong> (individual would not have repaid but receives loan): <span class="math inline">\(C\)</span></li>
+<li><strong>Benefit of true positives</strong> (individual would not have repaid and does not receive loan): 0$.</li>
+<li><strong>Benefit of true negatives</strong> (individual would have repaid and indeed receives loan): <span class="math inline">\(c &lt; C\)</span></li>
+</ul>
+<p>So, the expected gain for the bank when making a loan is: <span class="math display">\[
+\begin{aligned}
+    \mathbb{E}[\mathrm{gain}] = c\times \text{TN} - C\times \text{FN}\;.
 \end{aligned}
 \]</span></p>
-<p>Let’s plot the expected gain as a function of the threshold:</p>
-<div id="478e79f2" class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>TNR <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> FPR</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>FNR <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> TPR</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>cost_of_FN <span class="op">=</span> <span class="op">-</span><span class="fl">2.0</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>gain_of_TN <span class="op">=</span> <span class="fl">1.0</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>gain <span class="op">=</span>  gain_of_TN<span class="op">*</span>TNR  <span class="op">+</span> cost_of_FN<span class="op">*</span>FNR </span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>plt.plot(T, gain)</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>plt.gca().<span class="bu">set</span>(ylim <span class="op">=</span> (<span class="op">-</span><span class="fl">0.2</span>, <span class="fl">0.2</span>), xlim <span class="op">=</span> (<span class="dv">0</span>, <span class="fl">0.5</span>))</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"Threshold $t$"</span>, ylabel <span class="op">=</span> <span class="st">"Expected profit per loan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To keep the problem simple, suppose that the bank gains <span class="math inline">\(c = \$1\)</span> every time they make a loan which is successfully paid back, (benefit of true negatives) and that the bank loses <span class="math inline">\(C = \$5\)</span> every time they make a loan which ends in default (cost of false negatives). We can show how this expected gain depends on the threshold <span class="math inline">\(t\)</span> by plotting it as a function of <span class="math inline">\(t\)</span>. The structure of this code is very similar to the code we used to generate <a href="#fig-accuracy-threshold" class="quarto-xref">Figure&nbsp;<span>4.1</span></a>, but now we are computing the expected gain rather than the accuracy.</p>
+<div id="088d1b4e" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>best_benefit <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>best_threshold <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">101</span>): </span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> s <span class="op">&gt;=</span> t</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    tn <span class="op">=</span> ((y_pred <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_train <span class="op">==</span> <span class="dv">0</span>)).mean()</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    fn <span class="op">=</span> ((y_pred <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_train <span class="op">==</span> <span class="dv">1</span>)).mean()</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    benefit <span class="op">=</span> c<span class="op">*</span>tn <span class="op">-</span> C<span class="op">*</span>fn</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    ax.scatter(t, benefit, color <span class="op">=</span> <span class="st">"steelblue"</span>, s <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> benefit <span class="op">&gt;</span> best_benefit: </span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>        best_benefit <span class="op">=</span> benefit</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>        best_threshold <span class="op">=</span> t</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>ax.axvline(best_threshold, linestyle <span class="op">=</span> <span class="st">"--"</span>, color <span class="op">=</span> <span class="st">"grey"</span>, zorder <span class="op">=</span> <span class="op">-</span><span class="dv">10</span>)</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"Threshold $t$"</span>, ylabel <span class="op">=</span> <span class="st">"Net benefit"</span>, title <span class="op">=</span> <span class="ss">f"Best benefit $</span><span class="sc">{</span>best_benefit<span class="sc">:.2f}</span><span class="ss"> at best threshold t = </span><span class="sc">{</span>best_threshold<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="04-decision-theory_files/figure-html/cell-19-output-1.png" class="figure-img" width="605" height="428"></p>
+<p><img src="04-decision-theory_files/figure-html/cell-18-output-1.png" class="figure-img" width="514" height="368"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>For these costs, we observe that the bank can make a small expected profit (roughly 17 cents per loan) by using the given score function with threshold of roughly <span class="math inline">\(t \approx 0.21\)</span>. Note that this is very different from the value of the thresold <span class="math inline">\(t \approx 0.4\)</span> which maximized the unweighted accuracy of the predictor.</p>
+<p>For these costs, we observe that the bank can make a small expected profit (roughly 22 cents per loan) by using the given score function with threshold of roughly <span class="math inline">\(t \approx 0.26\)</span>. Note that this is very different from the value of the thresold <span class="math inline">\(t \approx 0.42\)</span> which maximized the unweighted accuracy of the predictor.</p>
 <p>At this stage, we could go on to estimate the profit gained by using this predictor and threshold on the test data set instead of the training data set. The code below simply consolidates the many steps that we have walked through in these notes, applied to the test data.</p>
-<div id="cc4f862b" class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> <span class="fl">0.21</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co"># compute the scores</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>s     <span class="op">=</span> linear_score(X_test, w)</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>preds <span class="op">=</span> s <span class="op">&gt;=</span> t</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co"># compute error rates</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>FPR   <span class="op">=</span> ((preds <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>)).<span class="bu">sum</span>() <span class="op">/</span> (y_test <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>TPR   <span class="op">=</span> ((preds <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>)).<span class="bu">sum</span>() <span class="op">/</span> (y_test <span class="op">==</span> <span class="dv">1</span>).<span class="bu">sum</span>()</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>TNR <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> FPR</span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>FNR <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> TPR</span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="co"># compute the expected gain</span></span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>gain <span class="op">=</span> gain_of_TN<span class="op">*</span>TNR  <span class="op">+</span> cost_of_FN<span class="op">*</span>FNR </span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>gain</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="18">
-<pre><code>0.17641653321131712</code></pre>
+<div id="56a0eb80" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> <span class="fl">0.26</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co"># compute the scores</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>s     <span class="op">=</span> linear_score(X_test, w)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>preds <span class="op">=</span> s <span class="op">&gt;=</span> t</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co"># compute error rates</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>FN   <span class="op">=</span> ((preds <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>)).mean() </span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>TN   <span class="op">=</span> ((preds <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>)).mean() </span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="co"># compute the expected gain</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>gain <span class="op">=</span> c<span class="op">*</span>TN  <span class="op">-</span> C<span class="op">*</span>FN</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>gain</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<pre><code>0.21941286271847957</code></pre>
 </div>
 </div>
 <p>Our performance on the test data is very slightly worse than our performance on the training data, which is to be expected.</p>
@@ -774,9 +850,9 @@ false negative, true positive</code></pre>
 <h2 class="anchored" data-anchor-id="who-sets-the-cost-who-pays-the-cost">Who Sets The Cost? Who Pays the Cost?</h2>
 <p>In our analysis above, we assumed a simple optimization objective: the bank is going to maximize its net profit. In formulating this objective, we made assumptions about the costs of different outcomes – <strong>to the bank</strong>. It’s important to note that the costs of errors to the bank may look very different from the costs of those errors to individuals. For example, if the bank’s prediction system recommends that an individual be denied a loan and the bank acts on this recommendation, then the bank pays no cost. On the other hand, the individual may experience major costs, depending on the purpose for which the loan was requested.</p>
 <p>This data set includes a coarse description of the purpose of each loan:</p>
-<div id="e3ea02de" class="cell" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>df_all.groupby(<span class="st">"loan_intent"</span>).size()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="19">
+<div id="70e250e2" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>df_all.groupby(<span class="st">"loan_intent"</span>).size()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
 <pre><code>loan_intent
 DEBTCONSOLIDATION    5212
 EDUCATION            6453

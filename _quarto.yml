@@ -27,6 +27,8 @@ format:
     callout-icon: false;
     callout-appearance: simple
     fig-cap-location: margin
+    highlight-style: atom-one
+    
 
 jupyter: conda-env-ml-0451-py
 

@@ -1,4 +1,20 @@
+---
+jupyter: conda-env-ml-0451-py
+---
+
 # Decision Theory in Classification
+
+Machine learning algorithms are often used to make recommendations to inform decisions: 
+
+- Should a patient receive additional confirmatory screening for a rare disease? 
+- Should an email be sent to the spam folder, or should it be sent to the primary inbox?
+- Should a prospective borrower be granted a loan? 
+
+An important feature of each of these examples is that there may be *asymmetric costs of error*. In many cases, it's worse to be wrong in one way than it is to be wrong in another. A patient who in fact *has* a rare disease but *is not* screened for it is at grave risk, while a patient who *does not* have a rare disease but *is* screened for it might only risk a higher bill. A frivolous email sent to the main inbox is an irritation, while an important email sent to the spam folder is an opportunity for consequential miscommunication. A prospective borrower who *is* granted a loan but *should not* have been granted a loan may default and lose money for the lender, while a prospective borrower who *is not* granted a loan but *should* have been granted a loan cannot default and therefore cannot incur losses for the lender. 
+
+In cases with asymmetric costs of error, selecting models based on *accuracy* may not be the right approach, since accuracy treats all types of error as equally weighty. In this set of notes, we'll go beyond accuracy and learn how to tune models for decision-making in the presence of asymmetric error costs. 
+
+We are going to *operationalize* this via the choice of the threshold $t$ in the score-based classification framework that we discussed [last time](03-score-based-classification.qmd). Let's do a quick recap: 
 
 ## Last time...
 
@@ -19,30 +35,21 @@ Then, we *classified* prospective borrowers into two categories based on a thres
 
 @eq-linear-model says that the score should be computed as a *linear function* of the features $\mathbf{x}_i$. Models with this property are called *linear models* and are fundamental in both classification and regression tasks. 
 
-
-In this set of notes, we are going to focus on one of the many questions we might ask about this framework: how do we choose the threshold $t$? [We'll study later how to find $\mathbf{w}$.]{.aside} As we'll see, this is a surprisingly tricky question that depends heavily on context. 
-
 ## Lending Data Set 
 
-To illustrate our discussion, we are going to pull up the lending data set from the previous section. 
+To illustrate our discussion, we are going to pull up the lending data set from the previous section. [This hidden code cell imports several standard Python libraries and reads in our data, saving the result in a variable called `df`.]{.aside}
 
 ```{python}
 #| code-fold: true
 import pandas as pd
+pd.options.mode.chained_assignment = None  
 import numpy as np
 from matplotlib import pyplot as plt
 np.set_printoptions(precision = 3)
 plt.style.use('seaborn-v0_8-whitegrid')
 
 url = "https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/credit-risk/credit_risk_dataset.csv"
-```
 
-```{python}
-#| echo: false
-pd.options.mode.chained_assignment = None  
-```
-
-```{python}
 df_all = pd.read_csv(url)
 df = df_all[["loan_int_rate", "loan_percent_income", "loan_status"]]
 df = df.dropna()
@@ -65,18 +72,16 @@ X_test = df_test[["loan_int_rate", "loan_percent_income"]]
 y_test = df_test["loan_status"]
 ```
 
+Now we're ready to proceed in making predictions and comparing our predictions to outcomes in both the training and test sets. 
+
 ## Vectorized Computation of Scores
 
-```{python}
-#| echo: false
-n = df_train.shape[0]
-```
 
-Suppose that we have a weight vector $\mathbf{w}$ and that we'd like to choose a threshold $t$. To do this, we will compute all the scores on the training data and do some experiments. How should we compute training scores? As we know, the $i$th score is given by @eq-linear-model. To compute scores for all $n$ of our training points, we could write a loop like this: [In our case, $n =$ `{python} n`, the number of rows in the training data.]{.aside} 
+Suppose that we have a weight vector $\mathbf{w}$ and that we'd like to choose a threshold $t$. To do this, we will compute all the scores on the training data and do some experiments. How should we compute training scores? As we know, the $i$th score is given by @eq-linear-model. To compute scores for all $n$ of our training points, we could write a loop like this: [In our case, $n =$ `{python} df_train.shape[0]`, the number of rows in the training data.]{.aside} 
 
 ```{python}
 #| eval: false
-
+n = df_train.shape[0]
 s = [] # vector of scores
 for i in range(n):
     s.append(compute_score(X[i], w))
@@ -103,10 +108,10 @@ $$
 \begin{aligned}
     \mathbf{X} = \left[
         \begin{matrix}
-            - \mathbf{x}_1 -  \\ 
-            -\mathbf{x}_2-  \\ 
+            \rule[.5ex]{2.5ex}{0.5pt} \; \mathbf{x}_1 \;\rule[.5ex]{2.5ex}{0.5pt}  \\ 
+            \rule[.5ex]{2.5ex}{0.5pt}\;\mathbf{x}_2 \; \rule[.5ex]{2.5ex}{0.5pt}  \\ 
             \vdots \\ 
-            -\mathbf{x}_n -
+            \rule[.5ex]{2.5ex}{0.5pt} \;  \mathbf{x}_n \;\rule[.5ex]{2.5ex}{0.5pt}
         \end{matrix}
         \right] = 
         \left[
@@ -129,7 +134,7 @@ def linear_score(X, w):
 #---
 ```
 
-Now, given $\mathbf{w}$, we can compute all the scores at once. 
+Now, given $\mathbf{w}$, we can compute all the scores at once. To do this, we'll finally choose a value for $\mathbf{w}$: [Again, the topic of *how to choose $\mathbf{w}$ is the topic of *model training*, which we'll study in detail soon.]{.aside}
 
 ```{python}
 #---
@@ -138,46 +143,71 @@ s = linear_score(X_train, w)
 #---
 ```
 
+Importantly, we were able to compute all of our scores on the training data without writing any loops. This is both easier for us to read/write and much faster for most computers to execute; the reason is that Numpy is able to use highly optimized C code to perform the matrix multiplication.
 
 Here is a histogram of the scores we just computed: 
 ```{python}
-hist = plt.hist(s)
-labs = plt.gca().set(xlabel = r"Score $s$", ylabel = "Frequency") 
+#| code-fold: true
+fig, ax = plt.subplots(1, 1, figsize = (6, 4))
+hist = ax.hist(s, bins = 50, color = "steelblue", alpha = 0.6, linewidth = 1, edgecolor = "black")
+labs = ax.set(xlabel = r"Score $s$", ylabel = "Frequency") 
 ```
+
+We see that most of the scores are relatively small, but that a small number of scores are over $0.5$. Numpy offers many helpful vectorized operations which make it quick to answer simple questions about the data. For example, what proportion of scores are larger than $0.5$? 
+
+```{python}
+#---
+(s > 0.5).mean()
+#---
+```
+
 
 ## Types of Error 
 
-Now that we have the scores, we can easily simulate decision-making with a given threshold. For example, the proportion predicted to default on their loan with a given threshold $t$ can be computed like this: 
+Once we have a vector of scores $\mathbf{s}$, we can create a vector of *predictions* simply by applying a threshold $t$. Here's our training predictions for the loan data using a threshold $t = 0.4$: [Recall that a prediction of `True` means that the individual is considered likely to default on their loan and therefore should *not* be offered credit.]{.aside}
 
 ```{python}
 #---
 t = 0.4
 preds = s >= t
-preds.mean()
+preds.head()
 #---
 ```
 
-
-
-So, how should we choose the threshold $t$? One possibility would be to try to choose the threshold in a way that maximizes the training accuracy, the number of times that the prediction agrees with the actual outcome (repaid or default) on the training data. Here's an example of a quick grid search: 
+What proportion of individuals are predicted to default? 
 
 ```{python}
+preds.mean()
+```
 
-for t in np.linspace(0, 1, 11):
+Of course, this result depends strongly on our choice of threshold $t$. How should we choose it? One possibility would be to try to choose the threshold in a way that maximizes the training accuracy, the number of times that the prediction agrees with the actual outcome (repaid or default) on the training data. Here's an example of a quick grid search: 
+
+```{python}
+#| fig-cap: "Accuracy as a function of threshold in the credit default prediction problem."
+#| label: fig-accuracy-threshold
+
+best_accuracy = 0
+best_threshold = 0
+
 #---
+fig, ax = plt.subplots(1, 1, figsize = (6, 4))
+for t in np.linspace(0, 1, 101): 
     y_pred = s >= t
     acc = (y_pred == y_train).mean()
+    ax.scatter(t, acc, color = "steelblue", s = 10)
+    if acc > best_accuracy: 
+        best_accuracy = acc
+        best_threshold = t
 #---
-    print(f"A threshold of {t:.1f} gives an accuracy of {acc:.2f}.")
+ax.axvline(best_threshold, linestyle = "--", color = "grey", zorder = -10)
+labs = ax.set(xlabel = r"Threshold $t$", ylabel = "Accuracy", title = f"Best accuracy {best_accuracy:.3f} at best threshold t = {best_threshold:.3f}")
 ```
 
 However, accuracy is not always the most relevant measure. For example, [Field and Stream estimates](https://www.fieldandstream.com/survival/how-many-shark-attacks-per-year/#:~:text=In%20recent%20years%2C%20there's%20been,%E2%80%94a%2010%2Dyear%20low.) that there are, globally, approximately 70 unprovoked shark attacks each year. Since the population of the world is currently around $8.1\times 10^9$  people, the average probability that a specific individual will suffer an unprovoked shark attack in a year is approximately $70 / (8.1 \times 10^9) \approx 8.6 \times 10^{-9}$. So, if we created a shark attack predictor which always predicted "no shark attack," our model would be correct approximately 99.999999% of the time. However, this model wouldn't be very *useful*, and wouldn't have anything to tell us about the activities that increase or reduce the risk of experience an attack. 
 
 A second reason we may wish to measure something other than accuracy has to do with *asymmetrical costs of error*. If we incorrectly predict that an individual will suffer a shark attack but no attack occurs, this is not that big a problem. Yes, we were wrong, but no one got hurt. In contrast, if we incorrectly predict that an individual will *not* suffer a shark attach, then this is a big problem which potentially involves grievous bodily injury, death, trauma, legal liability, etc. So, in designing our predictor, we might want to prioritizing avoiding the second kind of error, even if that leads us to make more of the first kind of error. 
 
-
-
-What *are* the types of error? For a binary outcome with a binary predictor, there are four possibilities: 
+What *are* the types of error? For a binary (yes/no) outcome with a binary predictor, there are four possibilities: 
 
 |                | Abbreviation| True Outcome   |   Predicted Outcome |  
 |----------------|----|:--------------:|:-------------------:|
@@ -196,12 +226,12 @@ Given a vector of true outcomes $\mathbf{y}$ and a vector of predictions $\hat{\
 t = 0.5
 y_pred = s >= t 
 
-# number where outcome == 0 and prediction == 1
+# false positives: outcome == 0 and prediction == 1
 ((y_train == 0)*(y_pred == 1)).sum()
 #---
 ```
 
-In practice, it's more convenient to compute all the error rates at once using the confusion matrix: 
+In practice, it's typically more convenient to compute all the error rates at once using the confusion matrix: 
 ```{python}
 
 from sklearn.metrics import confusion_matrix
@@ -229,26 +259,30 @@ It is common to normalize these counts into rates:
 
 Intuitively, the TPR measures the proportion of the time that the classifier predicts the correct (positive) label *when the true outcome was positive*. Similarly, the FPR measures the proportion of the time that the classifier predicts the incorrect (positive) label *when the true outcome was negative*. Because $\mathrm{TPR} = 1 - \mathrm{FNR}$ and $\mathrm{FPR} = 1 - \mathrm{TNR}$, folks usually only bother remembering and using $\mathrm{TPR}$ and $\mathrm{FNR}$. 
 
-Rather than computing these by hand, Scikit-learn offers a handy argument to `confusion_matrix` for computing these automatically and simultaneously: 
+Let's compute the False Positive Rate (FPR) manually: [Cases where `y_pred == 1` correspond to positive predictions, while cases where `y_train == 0` correspond to true negative outcomes.]{.aside} 
 
 ```{python}
-#---
-confusion_matrix(y_train, y_pred, normalize = "true")
-#---
-```
 
-Let's do a quick check against the FPR using manual vectorized code. [Cases where `y_pred == 1` correspond to positive predictions, while cases where `y_train == 0` correspond to true negative outcomes.]{.aside} 
-
-```{python}
-# agrees with the top right corner of the normalized confusion matrix
+# number of false positives / all true negatives
 #---
 ((y_pred == 1) & (y_train == 0)).sum() / (y_train == 0).sum()
 #---
 ```
 
+Rather than computing these by hand, Scikit-learn offers a handy argument to `confusion_matrix` for computing these automatically and simultaneously: 
+
+```{python}
+# top right corner agrees with manual computation. 
+#---
+confusion_matrix(y_train, y_pred, normalize = "true")
+#---
+```
+
+
+
 ### The ROC Curve
 
-For any given value of the threshold $t$, we can compute the TPR and FPR. We can think of this process as defining a parametrized function, a curve in TPR-FPR space. This curve is the ROC curve [ROC stands for "receiver operating characteristic," a term that reflects the origin of the curve in detection of objects by radar.]{.aside} 
+The four error rates are mathematically related to each other: $\mathrm{TPR} + \mathrm{FNR} = 1$ and $\mathrm{TNR} + \mathrm{FPR} = 1$. This means that there are really only two distinct numbers to keep track of: if we know the TPR and FPR, for example, then we can compute the FNR and TNR from them. It is common to explore the complete space of all possible TPRs and FPRs by varying the threshold $t$. This defines a parametrized function, a curve in TPR-FPR space. This curve is the ROC curve [ROC stands for "receiver operating characteristic," a term that reflects the origin of the curve in detection of objects by radar.]{.aside} 
 
 To compute an ROC curve, we simply need to compute the TPR and FPR for many different values of the threshold $t$ and plot them. 
 
@@ -278,62 +312,91 @@ labs = ax.set(xlabel = "False Positive Rate", ylabel = "True Positive Rate", tit
 
 We can think of the ROC curve as a description of all the possible tradeoffs between the TPR and FPR that are achievable for a given score as we vary the threshold $t$. For example, the curve tells us that if we are willing to tolerate a false positive rate of 0.40, then the best true positive rate we can achieve is approximately 0.77. 
 
-ROC curves are often used as a measure of the ability of a score function to classify data into two groups. Curves that bend farther towards the upper left corner of the plot are generally viewed as more effective classifiers. The area under the curve (AUC) is sometimes used as a single quantitative measure describing the classification quality. 
+ROC curves are often used as a measure of the ability of a score function to classify data into two groups. Curves that bend farther towards the upper left corner of the plot are generally viewed as more effective classifiers, while curves which follow the dashed line of equality correspond to models that are no better than random chance. The area under the curve (AUC) is sometimes used as a single quantitative measure describing the classification quality. 
 
 ### Cost of Errors and Optimal Thresholding
 
-How do we choose the tradeoff that works best for us? To answer this kind of question, we need to reflect back on the *purpose* for which we are building a classifier. According to @tbl-errors, there are two ways to be correct (true positive, true negative) and two ways to make an error (false positive, false negative). In order to choose an appropriate tradeoff, we need to think about the *benefit* of being right in relation to the *cost* of being wrong. 
-
-A logical way for a bank to approach this problem would be from the perspective of profit-maximization. In the lending business, a bank can *make* money when loans are fully repaid with interest, but *lose* money (usually much more) when an individual defaults on the loan. To keep the problem simple, suppose that the bank gains \$1 every time they make a loan which is successfully paid back, and that the bank loses \$2 every time they make a loan which ends in default. The first scenario happens when the bank makes a true positive identification, while the second case happens when the bank makes a false negative classification. [Remember that the "positive" outcome in this data set is default.]{.aside} For a given threshold, the expected gain for the bank when making a loan is then
+How do we choose the tradeoff that works best for us? To answer this kind of question, we need to reflect back on the *purpose* for which we are building a classifier. According to @tbl-errors, there are two ways to be correct (true positive, true negative) and two ways to make an error (false positive, false negative). In order to choose an appropriate tradeoff, we need to think about the *benefit* of being right in relation to the *cost* of being wrong. We can define an *expected benefit from prediction* like this: 
 
 $$
 \begin{aligned}
-    \mathbb{E}[\mathrm{gain}] = 1\times \text{TN} - 2\times \text{FN}\;.
+    \text{Benefit} =  &\phantom{-}\text{TP}\times (\text{benefit of TP}) + \text{TN} \times (\text{benefit of TN}) \\  
+    & \color{white}{-}\text{FP} \times (\text{cost of FP})  - \text{FN}\times(\text{cost of FN})\;.
+\end{aligned}
+$${#eq-cost-benefit}
+
+To specify our estimated benefit, we must therefore specify the two costs and two benefits using information from our specific decision-making context. 
+
+::: {.callout-note}
+
+How would you suggest setting the two cost and two benefit terms in @eq-cost-benefit in the following prediction contexts? 
+
+- Shark attack prediction. 
+- Prediction of whether or not an email is spam. 
+- Prediction of whether or not a patient has a rare disease.
+- Prediction of whether an individual is likely to be arrested for a crime if released on parole. 
+
+:::
+
+So far, we have framed the prediction problem of credit default from the bank's perspective -- the bank assesses customers and makes a decision. To continue in this vein, let's consider how a bank might fill out each of the four terms above. In the lending business, a bank can *make* money when loans are fully repaid with interest, but *lose* money (usually much more) when an individual defaults on the loan. On the other hand, when the bank chooses not to make a loan at all (in response to a positive prediction that an individual is likely to default), no credit is extended and there is no gain or loss. So, heuristically, our four terms might look something like this: [In practice, the actual costs and benefits  ]{.aside}
+
+- **Cost of false positives** (individual would have repaid but does not receive loan): 0\$
+- **Cost of false negatives** (individual would not have repaid but receives loan): $C$
+- **Benefit of true positives** (individual would not have repaid and does not receive loan): 0\$. 
+- **Benefit of true negatives** (individual would have repaid and indeed receives loan): $c < C$
+
+So, the expected gain for the bank when making a loan is: 
+$$
+\begin{aligned}
+    \mathbb{E}[\mathrm{gain}] = c\times \text{TN} - C\times \text{FN}\;.
 \end{aligned}
 $$
 
-Let's plot the expected gain as a function of the threshold: 
+To keep the problem simple, suppose that the bank gains $c = \$1$ every time they make a loan which is successfully paid back, (benefit of true negatives) and that the bank loses $C = \$5$ every time they make a loan which ends in default (cost of false negatives). We can show how this expected gain depends on the threshold $t$ by plotting it as a function of $t$. The structure of this code is very similar to the code we used to generate @fig-accuracy-threshold, but now we are computing the expected gain rather than the accuracy.
 
 ```{python}
 
-TNR = 1 - FPR
-FNR = 1 - TPR
+best_benefit = 0
+best_threshold = 0
 
-cost_of_FN = -2.0
-gain_of_TN = 1.0
+c = 1
+C = 5
 
-gain =  gain_of_TN*TNR  + cost_of_FN*FNR 
+fig, ax = plt.subplots(1, 1, figsize = (6, 4))
+for t in np.linspace(0, 1, 101): 
+    y_pred = s >= t
+    tn = ((y_pred == 0) & (y_train == 0)).mean()
+    fn = ((y_pred == 0) & (y_train == 1)).mean()
+    benefit = c*tn - C*fn
+    ax.scatter(t, benefit, color = "steelblue", s = 10)
+    if benefit > best_benefit: 
+        best_benefit = benefit
+        best_threshold = t
 
-plt.plot(T, gain)
-plt.gca().set(ylim = (-0.2, 0.2), xlim = (0, 0.5))
-labs = plt.gca().set(xlabel = r"Threshold $t$", ylabel = "Expected profit per loan")
+ax.axvline(best_threshold, linestyle = "--", color = "grey", zorder = -10)
+labs = ax.set(xlabel = r"Threshold $t$", ylabel = "Net benefit", title = f"Best benefit ${best_benefit:.2f} at best threshold t = {best_threshold:.3f}")
 ```
 
-For these costs, we observe that the bank can make a small expected profit (roughly 17 cents per loan) by using the given score function with threshold of roughly $t \approx 0.21$. Note that this is very different from the value of the thresold $t \approx 0.4$ which maximized the unweighted accuracy of the predictor. 
+For these costs, we observe that the bank can make a small expected profit (roughly 22 cents per loan) by using the given score function with threshold of roughly $t \approx 0.26$. Note that this is very different from the value of the thresold $t \approx 0.42$ which maximized the unweighted accuracy of the predictor. 
 
 At this stage, we could go on to estimate the profit gained by using this predictor and threshold on the test data set instead of the training data set. The code below simply consolidates the many steps that we have walked through in these notes, applied to the test data. 
 
 ```{python}
-t = 0.21
+t = 0.26
 
 # compute the scores
 s     = linear_score(X_test, w)
 preds = s >= t
 
 # compute error rates
-FPR   = ((preds == 1) & (y_test == 0)).sum() / (y_test == 0).sum()
-TPR   = ((preds == 1) & (y_test == 1)).sum() / (y_test == 1).sum()
-
-TNR = 1 - FPR
-FNR = 1 - TPR
-
+FN   = ((preds == 0) & (y_test == 1)).mean() 
+TN   = ((preds == 0) & (y_test == 0)).mean() 
 # compute the expected gain
-gain = gain_of_TN*TNR  + cost_of_FN*FNR 
+gain = c*TN  - C*FN
 gain
 ```
 
 Our performance on the test data is very slightly worse than our performance on the training data, which is to be expected. 
-
 
 ## Recap
 

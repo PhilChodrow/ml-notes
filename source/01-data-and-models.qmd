@@ -1,6 +1,7 @@
 ---
 code-fold: true
 code-summary: "Show code"
+jupyter: conda-env-ml-0451-py
 ---
 
 # Data, Patterns, and Models
