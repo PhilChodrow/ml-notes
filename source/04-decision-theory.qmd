@@ -148,6 +148,9 @@ Importantly, we were able to compute all of our scores on the training data with
 Here is a histogram of the scores we just computed: 
 ```{python}
 #| code-fold: true
+#| fig-cap: Histogram of scores computed via @eq-linear-model.
+#| label: fig-score-histogram
+
 fig, ax = plt.subplots(1, 1, figsize = (6, 4))
 hist = ax.hist(s, bins = 50, color = "steelblue", alpha = 0.6, linewidth = 1, edgecolor = "black")
 labs = ax.set(xlabel = r"Score $s$", ylabel = "Frequency") 
@@ -287,6 +290,8 @@ The four error rates are mathematically related to each other: $\mathrm{TPR} + \
 To compute an ROC curve, we simply need to compute the TPR and FPR for many different values of the threshold $t$ and plot them. 
 
 ```{python}
+#| fig-cap: "ROC curve for the credit default prediction problem."
+#| label: fig-roc-curve
 
 fig, ax = plt.subplots(1, 1, figsize = (6, 4))
 
