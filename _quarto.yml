@@ -30,7 +30,7 @@ format:
     highlight-style: atom-one
     
 
-jupyter: conda-env-ml-0451-py
+# jupyter: conda-env-ml-0451-py
 
 execute: 
   cache: false

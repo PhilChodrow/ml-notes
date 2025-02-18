@@ -302,7 +302,7 @@ So, why don't we just use as many features as it takes to get perfect accuracy o
 
 ```{python}
 #---
-plr = poly_LR(degree = 15, penalty = "none", max_iter = 1000000)
+plr = poly_LR(degree = 15, penalty = None, max_iter = 1000000)
 plr.fit(X_train, y_train)
 #---
 
@@ -333,7 +333,7 @@ for rep in range(10):
     X_test_,  y_test_  = make_moons(100, shuffle = True, noise = .4)
 
     for deg in degs:
-        plr_ = poly_LR(degree = deg, penalty = "none", max_iter = int(1e3))
+        plr_ = poly_LR(degree = deg, penalty = None, max_iter = int(1e3))
         plr_.fit(X_train_, y_train_)
         to_add = pd.DataFrame({"deg" : [deg],
                                "train" : [plr_.score(X_train_, y_train_)],

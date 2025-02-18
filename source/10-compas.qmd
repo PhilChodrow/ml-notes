@@ -1,3 +1,8 @@
+---
+jupyter: python3
+---
+
+
 # Introduction to Algorithmic Disparity: COMPAS
 
 Today we are going to study an extremely famous investigation into algorithmic decision-making in the sphere of criminal justice by @angwin2022machine, originally written for ProPublica in 2016. This investigation significantly accelerated the pace of research into bias and fairness in machine learning, due in combination to its simple message and publicly-available data.
@@ -131,7 +136,7 @@ Now that we've done that, we can ask: how likely are Black and white defendants 
 
 ```{python}
 #---
-compas.groupby("race")["two_year_recid", "predicted_high_risk"].mean()
+compas.groupby("race")[["two_year_recid", "predicted_high_risk"]].mean()
 #---
 ```
 

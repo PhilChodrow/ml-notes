@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>12&nbsp; Kernel Methods – Machine Learning</title>
+<title>13&nbsp; Kernel Methods – Machine Learning</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -85,7 +85,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../chapters/51-vectorization.html" rel="next">
-<link href="../chapters/40-linear-regression.html" rel="prev">
+<link href="../chapters/45-bias-variance.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -165,7 +165,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/20-perceptron.html">Machine Learning Models</a></li><li class="breadcrumb-item"><a href="../chapters/50-kernel-methods.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Kernel Methods</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/20-perceptron.html">Machine Learning Models</a></li><li class="breadcrumb-item"><a href="../chapters/50-kernel-methods.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Kernel Methods</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -298,14 +298,20 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../chapters/45-bias-variance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Another Look at Overfitting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../chapters/50-kernel-methods.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Kernel Methods</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Kernel Methods</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/51-vectorization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Vectorization and Feature Engineering</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Vectorization and Feature Engineering</span></span></a>
   </div>
 </li>
       </ul>
@@ -322,25 +328,25 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/60-intro-deep.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">The Problem of Features and Deep Learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Problem of Features and Deep Learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/61-modern-optimization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Contemporary Optimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Contemporary Optimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/70-image-classification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Deep Image Classification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Deep Image Classification</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/72-text-classification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Text Classification and Word Embedding</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Text Classification and Word Embedding</span></span></a>
   </div>
 </li>
       </ul>
@@ -357,13 +363,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/80-unsupervised-autoencoders.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Unsupervised Learning and Autoencoders</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Unsupervised Learning and Autoencoders</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/81-neural-autoencoders.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Neural Autoencoders and Dimensionality Reduction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Neural Autoencoders and Dimensionality Reduction</span></span></a>
   </div>
 </li>
       </ul>
@@ -392,9 +398,9 @@ window.Quarto = {
 <!-- main -->
 <main class="content page-columns page-full" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/20-perceptron.html">Machine Learning Models</a></li><li class="breadcrumb-item"><a href="../chapters/50-kernel-methods.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Kernel Methods</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/20-perceptron.html">Machine Learning Models</a></li><li class="breadcrumb-item"><a href="../chapters/50-kernel-methods.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Kernel Methods</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Kernel Methods</span></h1>
+<h1 class="title"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Kernel Methods</span></h1>
 </div>
 
 
@@ -423,7 +429,7 @@ window.Quarto = {
 \hat{\mathbf{w}} &amp;= \argmin_{\mathbf{w}} L(\mathbf{w}) \\
 &amp;= \argmin_{\mathbf{w}} \frac{1}{n}\sum_{i = 1}^n \ell(\langle \mathbf{w}, \phi(\mathbf{x}_i)\rangle, y_i) + \lambda R(\mathbf{w})\;,
 \end{aligned}
-\tag{12.1}\]</span></span></p>
+\tag{13.1}\]</span></span></p>
 <p>where <span class="math inline">\(R(\mathbf{w})\)</span> is a regularizer such as the <span class="math inline">\(\ell_1\)</span> or <span class="math inline">\(\ell_2\)</span> norm.</p>
 <div class="callout callout-style-simple callout-note">
 <div class="callout-body d-flex">
@@ -432,7 +438,7 @@ window.Quarto = {
 </div>
 <div class="callout-body-container">
 <div id="thm-span" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 12.1 (<span class="math inline">\(\hat{\mathbf{w}}\)</span> is spanned by the predictor data)</strong></span> Let <span class="math inline">\(\hat{\mathbf{w}}\)</span> be the solution to <a href="#eq-erm" class="quarto-xref">Equation&nbsp;<span>12.1</span></a>. Then, there exists a vector <span class="math inline">\(\hat{\mathbf{a}} \in \mathbb{R}^n\)</span> such that <span class="math inline">\(\hat{\mathbf{w}} = \sum_{i = 1}^{n} \hat{a}_{i} \phi(\mathbf{x}_i)  = \Phi(\mathbf{X})^T\hat{\mathbf{a}}\)</span>.</p>
+<p><span class="theorem-title"><strong>Theorem 13.1 (<span class="math inline">\(\hat{\mathbf{w}}\)</span> is spanned by the predictor data)</strong></span> Let <span class="math inline">\(\hat{\mathbf{w}}\)</span> be the solution to <a href="#eq-erm" class="quarto-xref">Equation&nbsp;<span>13.1</span></a>. Then, there exists a vector <span class="math inline">\(\hat{\mathbf{a}} \in \mathbb{R}^n\)</span> such that <span class="math inline">\(\hat{\mathbf{w}} = \sum_{i = 1}^{n} \hat{a}_{i} \phi(\mathbf{x}_i)  = \Phi(\mathbf{X})^T\hat{\mathbf{a}}\)</span>.</p>
 </div>
 </div>
 </div>
@@ -470,14 +476,14 @@ window.Quarto = {
 </section>
 <section id="the-kernel-matrix" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="the-kernel-matrix">The Kernel Matrix</h2>
-<p>What does <a href="#thm-span" class="quarto-xref">Theorem&nbsp;<span>12.1</span></a> get us? To see what it gets us, let’s use ridge regression as a running example. Ignoring factors of <span class="math inline">\(\frac{1}{n}\)</span> for convenience, the ridge-regression objective function is</p>
+<p>What does <a href="#thm-span" class="quarto-xref">Theorem&nbsp;<span>13.1</span></a> get us? To see what it gets us, let’s use ridge regression as a running example. Ignoring factors of <span class="math inline">\(\frac{1}{n}\)</span> for convenience, the ridge-regression objective function is</p>
 <p><span class="math display">\[
 \begin{aligned}
     L(\mathbf{w}) &amp;= \lVert \Phi(\mathbf{X})\mathbf{w} - \mathbf{y} \rVert_2^2 + \lambda \lVert \mathbf{w} \rVert_2^2\;. \\
     &amp;= \lVert \Phi(\mathbf{X})\mathbf{w} - \mathbf{y} \rVert_2^2 + \lambda \mathbf{w}^T\mathbf{w}\;.
 \end{aligned}
 \]</span></p>
-<p>Let’s plug in the equation <span class="math inline">\(\mathbf{w} = \Phi(\mathbf{X})^T\mathbf{a}\)</span> from <a href="#thm-span" class="quarto-xref">Theorem&nbsp;<span>12.1</span></a>. This allows us to re-express the loss as a function of the vector <span class="math inline">\(\mathbf{a}\)</span>.</p>
+<p>Let’s plug in the equation <span class="math inline">\(\mathbf{w} = \Phi(\mathbf{X})^T\mathbf{a}\)</span> from <a href="#thm-span" class="quarto-xref">Theorem&nbsp;<span>13.1</span></a>. This allows us to re-express the loss as a function of the vector <span class="math inline">\(\mathbf{a}\)</span>.</p>
 <p><span class="math display">\[
 \begin{aligned}
     L(\mathbf{a}) &amp;= \lVert\Phi(\mathbf{X})\Phi(\mathbf{X})^T\mathbf{a} - \mathbf{y}\rVert_2^2+ \lambda \mathbf{a}^T\Phi(\mathbf{X})\Phi(\mathbf{X})^T\mathbf{a}\;.
@@ -502,8 +508,8 @@ window.Quarto = {
 \begin{aligned}
     \hat{\mathbf{a}} = (\mathbf{K} + \lambda \mathbf{I})^{-1}\mathbf{y}\;.
 \end{aligned}
-\tag{12.2}\]</span></span></p>
-<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">Once we have the optimal <span class="math inline">\(\hat{\mathbf{a}}\)</span>, we could if we wanted convert back to the optimal <span class="math inline">\(\hat{\mathbf{w}}\)</span> using <a href="#thm-span" class="quarto-xref">Theorem&nbsp;<span>12.1</span></a>.</span></div></div>
+\tag{13.2}\]</span></span></p>
+<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">Once we have the optimal <span class="math inline">\(\hat{\mathbf{a}}\)</span>, we could if we wanted convert back to the optimal <span class="math inline">\(\hat{\mathbf{w}}\)</span> using <a href="#thm-span" class="quarto-xref">Theorem&nbsp;<span>13.1</span></a>.</span></div></div>
 <p>To make a prediction at a data point <span class="math inline">\(\mathbf{x}\)</span>, we compute</p>
 <p><span id="eq-kernel-predictor"><span class="math display">\[
 \begin{aligned}
@@ -511,13 +517,13 @@ s &amp;= \langle \phi(\mathbf{x}), \hat{\mathbf{w}} \rangle \\
   &amp;= \langle \phi(\mathbf{x}), \Phi(\mathbf{X})^T\hat{\mathbf{a}}\rangle \\
   &amp;= \sum_{i = 1}^n \hat{a}_i k(\mathbf{x}, \mathbf{x}_i)\;,
 \end{aligned}
-\tag{12.3}\]</span></span></p>
+\tag{13.3}\]</span></span></p>
 <p>where again each <span class="math inline">\(k(\mathbf{x}, \mathbf{x}_i) = \langle \phi(\mathbf{x}), \phi(\mathbf{x}_i) \rangle\)</span>.</p>
 <p>So far, this is all just different notation for the same ridge regression that we talked about previously. What’s the point?</p>
 </section>
 <section id="the-kernel-trick" class="level2">
 <h2 class="anchored" data-anchor-id="the-kernel-trick">The Kernel Trick</h2>
-<p>Let’s remind ourselves: where is the feature matrix <span class="math inline">\(\Phi(\mathbf{X})\)</span> in <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>12.2</span></a>? It appears only through the kernel matrix <span class="math inline">\(\mathbf{K} = \Phi(\mathbf{X})\Phi(\mathbf{X})^T\)</span> with entries <span class="math inline">\(k_{ij} = k(\mathbf{x}_i, \mathbf{x}_j) = \langle \phi(\mathbf{x}_i), \phi(\mathbf{x}_j) \rangle\)</span>. This means that as long as we know how to calculate these inner products, we never actually have to explicitly compute any of the features <span class="math inline">\(\phi(\mathbf{x})\)</span>. This idea, though simple, is so fundamental that it has an informal name – it’s the “kernel trick.”</p>
+<p>Let’s remind ourselves: where is the feature matrix <span class="math inline">\(\Phi(\mathbf{X})\)</span> in <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>13.2</span></a>? It appears only through the kernel matrix <span class="math inline">\(\mathbf{K} = \Phi(\mathbf{X})\Phi(\mathbf{X})^T\)</span> with entries <span class="math inline">\(k_{ij} = k(\mathbf{x}_i, \mathbf{x}_j) = \langle \phi(\mathbf{x}_i), \phi(\mathbf{x}_j) \rangle\)</span>. This means that as long as we know how to calculate these inner products, we never actually have to explicitly compute any of the features <span class="math inline">\(\phi(\mathbf{x})\)</span>. This idea, though simple, is so fundamental that it has an informal name – it’s the “kernel trick.”</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -528,7 +534,7 @@ Kernel Trick
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Suppose that we can find some function <span class="math inline">\(k:\mathbb{R}^p\times \mathbb{R}^p \rightarrow \mathbb{R}\)</span> and some feature map <span class="math inline">\(\phi\)</span> with the property that <span class="math inline">\(k(\mathbf{x}_i, \mathbf{x}_j) = \langle \phi(\mathbf{x}_i), \phi(\mathbf{x}_j) \rangle\)</span>. Then, computing <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>12.2</span></a> and making predictions via <a href="#eq-kernel-predictor" class="quarto-xref">Equation&nbsp;<span>12.3</span></a> is equivalent to doing regular ridge regression with feature map <span class="math inline">\(\phi\)</span>.</p>
+<p>Suppose that we can find some function <span class="math inline">\(k:\mathbb{R}^p\times \mathbb{R}^p \rightarrow \mathbb{R}\)</span> and some feature map <span class="math inline">\(\phi\)</span> with the property that <span class="math inline">\(k(\mathbf{x}_i, \mathbf{x}_j) = \langle \phi(\mathbf{x}_i), \phi(\mathbf{x}_j) \rangle\)</span>. Then, computing <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>13.2</span></a> and making predictions via <a href="#eq-kernel-predictor" class="quarto-xref">Equation&nbsp;<span>13.3</span></a> is equivalent to doing regular ridge regression with feature map <span class="math inline">\(\phi\)</span>.</p>
 </div>
 </div>
 </section>
@@ -594,7 +600,7 @@ Positive-Definite Kernel
 </section>
 <section id="implementing-kernel-ridge-regression" class="level2">
 <h2 class="anchored" data-anchor-id="implementing-kernel-ridge-regression">Implementing Kernel Ridge Regression</h2>
-<p>Let’s now implement kernel ridge regression from <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>12.2</span></a>. Here’s some data with a nonlinear trend.</p>
+<p>Let’s now implement kernel ridge regression from <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>13.2</span></a>. Here’s some data with a nonlinear trend.</p>
 <div id="cell-6" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
@@ -652,7 +658,7 @@ Positive-Definite Kernel
 </div>
 </div>
 </div>
-<p>Now we’ll implement kernelized ridge regression. We’ll implement a class to hold instance variables and implement the mathematics described by <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>12.2</span></a> and <a href="#eq-kernel-predictor" class="quarto-xref">Equation&nbsp;<span>12.3</span></a>. Since we don’t need to do any gradient descent with this class, we’ll implement it using the standard <code>sklearn</code> API.</p>
+<p>Now we’ll implement kernelized ridge regression. We’ll implement a class to hold instance variables and implement the mathematics described by <a href="#eq-kernel-ridge" class="quarto-xref">Equation&nbsp;<span>13.2</span></a> and <a href="#eq-kernel-predictor" class="quarto-xref">Equation&nbsp;<span>13.3</span></a>. Since we don’t need to do any gradient descent with this class, we’ll implement it using the standard <code>sklearn</code> API.</p>
 <div id="cell-9" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> KernelRidgeRegression:</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1377,13 +1383,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../chapters/40-linear-regression.html" class="pagination-link" aria-label="Linear Regression">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Linear Regression</span></span>
+      <a href="../chapters/45-bias-variance.html" class="pagination-link" aria-label="Another Look at Overfitting">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Another Look at Overfitting</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../chapters/51-vectorization.html" class="pagination-link" aria-label="Vectorization and Feature Engineering">
-        <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Vectorization and Feature Engineering</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Vectorization and Feature Engineering</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

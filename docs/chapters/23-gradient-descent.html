@@ -278,14 +278,20 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../chapters/45-bias-variance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Another Look at Overfitting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../chapters/50-kernel-methods.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Kernel Methods</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Kernel Methods</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/51-vectorization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Vectorization and Feature Engineering</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Vectorization and Feature Engineering</span></span></a>
   </div>
 </li>
       </ul>
@@ -302,25 +308,25 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/60-intro-deep.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">The Problem of Features and Deep Learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Problem of Features and Deep Learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/61-modern-optimization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Contemporary Optimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Contemporary Optimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/70-image-classification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Deep Image Classification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Deep Image Classification</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/72-text-classification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Text Classification and Word Embedding</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Text Classification and Word Embedding</span></span></a>
   </div>
 </li>
       </ul>
@@ -337,13 +343,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/80-unsupervised-autoencoders.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Unsupervised Learning and Autoencoders</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Unsupervised Learning and Autoencoders</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/81-neural-autoencoders.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Neural Autoencoders and Dimensionality Reduction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Neural Autoencoders and Dimensionality Reduction</span></span></a>
   </div>
 </li>
       </ul>
@@ -411,7 +417,7 @@ window.Quarto = {
 &amp; - &amp; \mathbf{x}_{n} &amp; - \end{matrix}\right]
 \]</span></p>
 <p>and <span class="math inline">\(\mathbf{y}\)</span> is the vector of targets, which we usually assume to be binary in the context of classification. The per-observation <em>loss function</em> <span class="math inline">\(\ell: \mathbb{R}\times \mathbb{R}\rightarrow \mathbb{R}\)</span> measures the quality of the score <span class="math inline">\(s_i = \langle \mathbf{w}, \mathbf{x}_i \rangle\)</span> assigned to data point <span class="math inline">\(i\)</span> by comparing it to <span class="math inline">\(y_i\)</span> and outputing a real number <span class="math inline">\(\ell(s_i, y_i)\)</span>.</p>
-<p>So, our mathematical task is to find a vector of weights <span class="math inline">\(\mathbf{w}\)</span> that solves <a href="50-kernel-methods.html#eq-erm" class="quarto-xref">Equation&nbsp;<span>12.1</span></a>. How do we do it? The modern answer is <em>gradient descent</em>, and this set of lecture notes is about what that means and why it works.</p>
+<p>So, our mathematical task is to find a vector of weights <span class="math inline">\(\mathbf{w}\)</span> that solves <a href="50-kernel-methods.html#eq-erm" class="quarto-xref">Equation&nbsp;<span>13.1</span></a>. How do we do it? The modern answer is <em>gradient descent</em>, and this set of lecture notes is about what that means and why it works.</p>
 <section id="linear-approximations-of-single-variable-functions" class="level2">
 <h2 class="anchored" data-anchor-id="linear-approximations-of-single-variable-functions">Linear Approximations of Single-Variable Functions</h2>
 <p>Recall the limit definition of a derivative of a single-variable function. Let <span class="math inline">\(g:\mathbb{R} \rightarrow \mathbb{R}\)</span>. The derivative of <span class="math inline">\(g\)</span> at point <span class="math inline">\(w_0\)</span>, if it exists, is</p>
@@ -690,7 +696,7 @@ g(\mathbf{w}_0 + \delta \mathbf{w}) = g(\mathbf{w}_0) + \langle \nabla g(\mathbf
 </section>
 <section id="gradient-of-the-empirical-risk" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="gradient-of-the-empirical-risk">Gradient of the Empirical Risk</h2>
-<p>Remember that our big objective here was to solve <a href="50-kernel-methods.html#eq-erm" class="quarto-xref">Equation&nbsp;<span>12.1</span></a> using gradient descent. To do this, we need to be able to calculate <span class="math inline">\(\nabla L(\mathbf{w})\)</span>, where the gradient is with respect to the entries of <span class="math inline">\(\mathbf{w}\)</span>. Fortunately, the specific <em>linear</em> structure of the score function <span class="math inline">\(s_i = \langle \mathbf{w}, \mathbf{x}_i \rangle\)</span> makes this relatively simple: indeed, we actually only need to worry about the <em>single</em> variable derivatives of the per-observation loss <span class="math inline">\(\ell\)</span>. To see this, we can compute</p>
+<p>Remember that our big objective here was to solve <a href="50-kernel-methods.html#eq-erm" class="quarto-xref">Equation&nbsp;<span>13.1</span></a> using gradient descent. To do this, we need to be able to calculate <span class="math inline">\(\nabla L(\mathbf{w})\)</span>, where the gradient is with respect to the entries of <span class="math inline">\(\mathbf{w}\)</span>. Fortunately, the specific <em>linear</em> structure of the score function <span class="math inline">\(s_i = \langle \mathbf{w}, \mathbf{x}_i \rangle\)</span> makes this relatively simple: indeed, we actually only need to worry about the <em>single</em> variable derivatives of the per-observation loss <span class="math inline">\(\ell\)</span>. To see this, we can compute</p>
 <p><span id="eq-empirical-risk-gradient"><span class="math display">\[
 \begin{align}
 \nabla L(\mathbf{w}) &amp;= \nabla \left(\frac{1}{n} \sum_{i = 1}^n \ell(\langle \mathbf{w}, \mathbf{x}_i\rangle , y_i)\right) \\

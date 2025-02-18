@@ -20,6 +20,7 @@ book:
         - source/23-gradient-descent.ipynb
         - source/30-features-regularization.qmd
         - source/40-linear-regression.ipynb
+        - source/45-bias-variance.qmd
         - source/50-kernel-methods.ipynb
         - source/51-vectorization.ipynb
     - part: "Deep Learning"

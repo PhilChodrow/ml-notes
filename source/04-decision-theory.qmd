@@ -1,5 +1,5 @@
 ---
-jupyter: conda-env-ml-0451-py
+jupyter: python3
 ---
 
 # Decision Theory in Classification

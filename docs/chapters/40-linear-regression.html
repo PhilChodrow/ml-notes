@@ -64,7 +64,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../chapters/50-kernel-methods.html" rel="next">
+<link href="../chapters/45-bias-variance.html" rel="next">
 <link href="../chapters/30-features-regularization.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -278,14 +278,20 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../chapters/45-bias-variance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Another Look at Overfitting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../chapters/50-kernel-methods.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Kernel Methods</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Kernel Methods</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/51-vectorization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Vectorization and Feature Engineering</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Vectorization and Feature Engineering</span></span></a>
   </div>
 </li>
       </ul>
@@ -302,25 +308,25 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/60-intro-deep.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">The Problem of Features and Deep Learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Problem of Features and Deep Learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/61-modern-optimization.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Contemporary Optimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Contemporary Optimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/70-image-classification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Deep Image Classification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Deep Image Classification</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/72-text-classification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Text Classification and Word Embedding</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Text Classification and Word Embedding</span></span></a>
   </div>
 </li>
       </ul>
@@ -337,13 +343,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/80-unsupervised-autoencoders.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Unsupervised Learning and Autoencoders</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Unsupervised Learning and Autoencoders</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/81-neural-autoencoders.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Neural Autoencoders and Dimensionality Reduction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Neural Autoencoders and Dimensionality Reduction</span></span></a>
   </div>
 </li>
       </ul>
@@ -718,7 +724,7 @@ window.Quarto = {
 <section id="gradient-methods" class="level3">
 <h3 class="anchored" data-anchor-id="gradient-methods">Gradient Methods</h3>
 <p>More fundamentally, suppose that we have a <em>very</em> large number <span class="math inline">\(p\)</span> of features. The matrix <span class="math inline">\(\Phi(\mathbf{X})^T\Phi(\mathbf{X}) + \lambda \mathbf{I}\)</span> is a <span class="math inline">\(p\times p\)</span> matrix. The computational cost of <em>inverting</em> this matrix is <span class="math inline">\(\Theta(n^\gamma)\)</span> for some <span class="math inline">\(\gamma\)</span> between <span class="math inline">\(2\)</span> and <span class="math inline">\(3\)</span>. For sufficiently large <span class="math inline">\(p\)</span>, this may simply be infeasible. There are several approaches.</p>
-<p>To perform <strong>gradient descent</strong> with least-squares linear regression, all we need is a formula for the gradient. <a href="61-modern-optimization.html#eq-gradient" class="quarto-xref">Equation&nbsp;<span>15.1</span></a> gives this formula – we just plug in the gradient of the regularizing term and iterate to convergence.</p>
+<p>To perform <strong>gradient descent</strong> with least-squares linear regression, all we need is a formula for the gradient. <a href="61-modern-optimization.html#eq-gradient" class="quarto-xref">Equation&nbsp;<span>16.1</span></a> gives this formula – we just plug in the gradient of the regularizing term and iterate to convergence.</p>
 <p>Sometimes <em>even this</em> is too hard: for sufficiently large <span class="math inline">\(p\)</span>, even computing the matrix multiplication <span class="math inline">\(\Phi(\mathbf{X})^T\Phi(\mathbf{X})\)</span> required for gradient descent is too computationally intensive. In this case, <em>stochastic</em> gradient methods can be used; we’ll study these in a coming lecture.</p>
 
 
@@ -1153,8 +1159,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../chapters/50-kernel-methods.html" class="pagination-link" aria-label="Kernel Methods">
-        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Kernel Methods</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../chapters/45-bias-variance.html" class="pagination-link" aria-label="Another Look at Overfitting">
+        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Another Look at Overfitting</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
