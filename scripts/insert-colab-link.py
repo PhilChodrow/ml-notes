@@ -9,7 +9,7 @@ for f in os.listdir("docs/chapters"):
             
             notebook_path = f.replace(".html", ".ipynb")
             
-            colab_link_line = f'<p><i><a href="http://colab.research.google.com/github/philchodrow/ml-notes/blob/main/docs/live-notebooks/{notebook_path}">Open the live notebook</a> in Google Colab.</i></p>'
+            colab_link_line = f'<p><i><a href="http://colab.research.google.com/github/philchodrow/ml-notes/blob/main/docs/live-notebooks/{notebook_path}">Open the live notebook</a> in Google Colab or <a href="https://www.philchodrow.prof/ml-notes/live-notebooks/{notebook_path}">download the live notebook</a></i></p>.'
             
             text = file.read()
             text = re.sub(pattern, r'\1\n\n' + colab_link_line, text)

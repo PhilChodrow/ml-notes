@@ -400,7 +400,7 @@ window.Quarto = {
 
 </header>
 
-<p><i><a href="http://colab.research.google.com/github/philchodrow/ml-notes/blob/main/docs/live-notebooks/60-intro-deep.ipynb">Open the live notebook</a> in Google Colab.</i></p>
+<p><i><a href="http://colab.research.google.com/github/philchodrow/ml-notes/blob/main/docs/live-notebooks/60-intro-deep.ipynb">Open the live notebook</a> in Google Colab or <a href="https://www.philchodrow.prof/ml-notes/live-notebooks/60-intro-deep.ipynb">download the live notebook</a></i></p>.
 
 
 <p>Let’s begin by recalling and slightly expanding the empirical risk minimization framework that we’ve developed throughout this course. In the simplest approach to empirical risk minimization, we began with a matrix of features <span class="math inline">\(\mathbf{X} \in \mathbb{R}^{n\times p}\)</span> and a vector of targets <span class="math inline">\(\mathbf{y} \in \mathbb{R}^n\)</span>. We defined a linear score <span class="math inline">\(s =  \langle \mathbf{w}, \mathbf{x}\rangle\)</span> which we interpreted as producing predictions of the value of <span class="math inline">\(y\)</span>. We then defined a loss function <span class="math inline">\(\ell: \mathbb{R}\times \mathbb{R} \rightarrow \mathbb{R}\)</span> that told us the quality of the prediction <span class="math inline">\(s\)</span> by comparing it to a true target <span class="math inline">\(y\)</span>. Our learning problem was to find <span class="math inline">\(\mathbf{w}\)</span> by minimizing the <em>empirical risk</em>: the mean (or sum) of the risk across all data points:</p>
