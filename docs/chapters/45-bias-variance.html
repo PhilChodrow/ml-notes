@@ -428,7 +428,7 @@ window.Quarto = {
 </blockquote>
 <p>This is a <em>theoretical</em> way of asking how well we would expect a model to perform on a prediction task. As we’ll see, this way of asking the question will lead us to a helpful decomposition that lets us understand the sources of error in predictive modeling.</p>
 <div class="page-columns page-full"><p>First, let’s visualize the kind of experiment we’re talking about here. We’ll generate some simple data for a regression task and then train a regression model on it multiple times. Here are a few runs: </p><div class="no-row-height column-margin column-container"><span class="margin-aside">The code in this hidden cell imports several packages and sets plot options.</span></div></div>
-<div id="665988b8" class="cell" data-execution_count="1">
+<div id="df13c2dd" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -439,7 +439,7 @@ window.Quarto = {
 </details>
 </div>
 <p>In this set of lecture notes, we’ll use the following bespoke implementation of least-squares linear regression with polynomial feature maps:</p>
-<div id="38557ea8" class="cell" data-execution_count="2">
+<div id="d904ffad" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># polynomial feature map</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> form_feature_matrix(x, order<span class="op">=</span><span class="dv">1</span>):     </span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> torch.zeros((<span class="bu">len</span>(x), order<span class="op">+</span><span class="dv">1</span>))</span>
@@ -501,7 +501,7 @@ Figure&nbsp;12.1: Three data sets produced from the same data generating process
 </div>
 <p>Note that, although each plot is similar, both the data set and the regression model that we learn from the data set are <em>slightly</em> different. This means that we’d get slightly different performance metrics each time.</p>
 <div class="page-columns page-full"><p>In each repetition, we’ll save the targets and the predictions: </p><div class="no-row-height column-margin column-container"><span class="margin-aside">This hidden block fits a model and tests it against a test set many times and saves the results.</span></div></div>
-<div id="f2c75cf0" class="cell" data-execution_count="4">
+<div id="ee68e1d2" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>n_reps <span class="op">=</span> <span class="dv">1000</span></span>
@@ -581,7 +581,7 @@ Figure&nbsp;12.2: The 1,000 linear regression lines learned on generated data se
 <section id="numerical-example" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="numerical-example">Numerical Example</h2>
 <div class="page-columns page-full"><p>Let’s compute each of these terms from the linear regression experiment that we did earlier. Since our analysis above was at a specific data point, we are going to compute values at each data point and then compare. </p><div class="no-row-height column-margin column-container"><span class="margin-aside">Passing <code>dim = 0</code> to each of these method calls ensures that the results for each data point are pooled separately.</span></div></div>
-<div id="98c6c478" class="cell" data-execution_count="6">
+<div id="65bf1641" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>noise    <span class="op">=</span> targets.var(dim <span class="op">=</span> <span class="dv">0</span>, correction <span class="op">=</span> <span class="dv">0</span>) </span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>variance <span class="op">=</span> predictions.var(dim <span class="op">=</span> <span class="dv">0</span>, correction <span class="op">=</span> <span class="dv">0</span>) </span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>bias     <span class="op">=</span> (targets.mean(dim <span class="op">=</span> <span class="dv">0</span>) <span class="op">-</span> predictions.mean(dim <span class="op">=</span> <span class="dv">0</span>))<span class="op">**</span><span class="dv">2</span></span>
@@ -668,7 +668,7 @@ Figure&nbsp;12.3: Illustration of the bias-variance decomposition in linear regr
 <div id="fig-polynomial-regression" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-polynomial-regression-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="45-bias-variance_files/figure-html/fig-polynomial-regression-output-1.png" width="650" height="278" class="figure-img">
+<img src="45-bias-variance_files/figure-html/fig-polynomial-regression-output-1.png" width="661" height="278" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-polynomial-regression-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;12.4: Illustration of fitting polynomial regression models of different orders to a sinusoidal data set.

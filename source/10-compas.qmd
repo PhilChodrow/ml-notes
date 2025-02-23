@@ -9,6 +9,15 @@ Today we are going to study an extremely famous investigation into algorithmic d
 
 [It's helpful to look at a [sample form](https://www.documentcloud.org/documents/2702103-Sample-Risk-Assessment-COMPAS-CORE) used for feature collection in the COMPAS risk assessment.]{.aside}
 
+::: {.callout-note}
+
+## Explore! 
+
+What do you notice in the COMPAS sample form? Are there kinds of information collected that concern you in the context of predictive recommendations that may impact a person's freedom?
+
+:::
+
+
 You may have already read about the COMPAS algorithm in [the original article at ProPublica](https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing). Our goal today is to reproduce some of the main findings of this article and set the stage for a more systematic treatment of bias and fairness in machine learning. 
 
 *Parts of these lecture notes are inspired by the [original ProPublica analysis](https://github.com/propublica/compas-analysis) and Allen Downey's [expository case study](https://github.com/AllenDowney/RecidivismCaseStudy) on the same data.*
