@@ -8,10 +8,14 @@ For this study, we'll return to the COMPAS data that we studied [last time](../c
 import pandas as pd
 import seaborn as sns
 import numpy as np
+from matplotlib import pyplot as plt
+import matplotlib.cm as cm
 sns.set_style("whitegrid")
 np.set_printoptions(precision = 3)
 pd.set_option('display.precision', 3)
+```
 
+```{python}
 url = "https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/compas/compas.csv"
 compas = pd.read_csv(url)
 ```
@@ -25,7 +29,7 @@ compas = compas[cols]
 # using Angwin's definition
 compas["predicted_high_risk"] = 1*(compas["decile_score"] > 4)
 
-
+# subsetting by race
 is_white = compas["race"] == "Caucasian"
 is_black = compas["race"] == "African-American"
 
@@ -80,7 +84,9 @@ Let's write a Python function to empirically check independence that will accept
 ```{python}
 #---
 def test_independence(df, group_col, target, pred):
-    return df.groupby(group_col)[pred].aggregate([np.mean, len])
+    out = df.groupby(group_col)[pred].agg(["mean", "size"])
+    out.columns = ["positive prediction rate", "n"]
+    return out.reset_index()
 #---
 ```
 
@@ -293,16 +299,75 @@ Now suppose that I want to enforce error rate balance and sufficiency for two gr
 
 :::
 
-::: {.callout-note}
+The calculation above defines an inevitable tradeoff: if we want to ensure sufficiency when there are different prevalences between groups, then we will need to accept some amount of error rate imbalance. Similarly, if we want to ensure error rate balance, then we will need to accept some amount of disparity in sufficiency. There are a few ways to visualize this tradeoff. To start, let's solve for the PPV in terms of the ratio between the TPR and FPR:
 
-## Discussion
+$$
+\begin{aligned}
+    \mathrm{PPV} = \frac{p \frac{\mathrm{TPR}}{\mathrm{FPR}}}{1-p + p \frac{\mathrm{TPR}}{\mathrm{FPR}}}  \\ 
+\end{aligned}
+$${#eq-solve-for-ppv}
 
-Do you feel that it is more important for a recidivism prediction algorithm like COMPAS to satisfy error rate balance or sufficiency? Why?
+We can think of the ratio $\frac{\mathrm{TPR}}{\mathrm{FPR}}$ as yet another compact measure of classifier quality: when this ratio is high, a positive prediction is a strong signal of a positive outcome. We can plot the PPV against this ratio: 
+
+```{python}
+#| code-fold: true
+#| fig-cap: Realizable PPV as a function of TPR/FPR ratio, plotted as curves. The actual combinations of PPV and TPR/FPR are shown as solid points on the curves. Dashed lines show the reductions in classifier performance that would be necessary to achieve sufficiency (horizontal dashed line) or error rate balance (vertical dashed line).
+#| label: fig-tradeoff-curves
+
+# gather various data for plot
+error_rates = test_error_rate_balance(compas, "race", "two_year_recid", "predicted_high_risk")
+
+tpr_fpr_ratio_black = error_rates.loc[1, "predicted_high_risk"] / error_rates.loc[0, "predicted_high_risk"]
+tpr_fpr_ratio_white = error_rates.loc[3, "predicted_high_risk"] / error_rates.loc[2, "predicted_high_risk"]
+
+sufficiency = test_sufficiency(compas, "race", "two_year_recid", "predicted_high_risk")
+
+PPV_black = sufficiency.loc[2, "correct"]
+PPV_white = sufficiency.loc[3, "correct"]
+
+p = compas.groupby("race")["two_year_recid"].mean()
+p_black = p.loc["African-American"]
+p_white = p.loc["Caucasian"]
+
+# construct plot
+
+fig, ax = plt.subplots(1, 1, figsize = (5, 3.5))
+
+tpr_fpr_ratio = np.linspace(0, 5, 100)
+
+for i, p in enumerate([p_black, p_white]): # prevalences
+    
+    ppv = p*tpr_fpr_ratio/(1-p + p*tpr_fpr_ratio)
+
+    ax.plot(tpr_fpr_ratio, ppv, color = cm.BuPu((i+.8)/2))
 
 
-:::
+ax.set(ylim = (0, 1), )
+plt.scatter(tpr_fpr_ratio_black, PPV_black, color = cm.BuPu((0+.8)/2), label = "Black defendants", zorder = 10)
+
+hypothetical_ppv = p_white*tpr_fpr_ratio_black/(1-p_white + p_white*tpr_fpr_ratio_black)
+
+plt.plot([tpr_fpr_ratio_black, tpr_fpr_ratio_black], [hypothetical_ppv, PPV_black], linestyle = "--", color = "black", linewidth = 1, zorder = 1)
 
 
+hypothetical_tpr_fpr_ratio = 1.375
+
+
+plt.scatter(tpr_fpr_ratio_white, PPV_white, color = cm.BuPu((i+.8)/2), label = "White defendants")
+
+plt.plot([tpr_fpr_ratio_white, hypothetical_tpr_fpr_ratio], [PPV_white, PPV_white, ], linestyle = "--", color = "black", linewidth = 1, zorder = 1)
+
+plt.legend()
+ax.set(xlabel = "TPR/FPR", ylabel = "PPV")
+    
+```
+
+@fig-tradeoff-curves highlights the classifier design tradeoffs necessary to achieve either sufficiency or error rate balance. We've plotted the possible ratios between TPR and FPR on the horizontal axis and the corresponding possible PPVs on the vertical axis, all at the given prevalences among white and Black defendants, according to @eq-solve-for-ppv. The solid points show the actual PPVs and TPR/FPR ratios for the COMPAS algorithm. Perfect sufficiency corresponds to each point being level with each other horizontally, while perfect error rate balance corresponds to each point being level with each other vertically. The fundamental difficulty is that we can't move to the right and upward on these curves without access to better, more powerful classifiers, which usually requires more data. So, in order to achieve either of these criteria, we need to *decrease* classifier performance on at leaset one of the groups. We've visualized two options: 
+
+1. To achieve sufficiency, we could slightly reduce both the TPR/FPR and the PPV on Black defendants, which would place their point at the end of the horizontal dashed line. 
+2. To achieve error-rate balance, we could instead decrease both the TPR/FPR and the PPV on white defendants by a larger amount, which would place their point at the end of the vertical dashed line. 
+
+Both of these options highlight one of the fundamental difficulties of fairness in machine learning: can it really be the right thing to do to selectively *decrease* the predictive ability of a model on certain groups? 
 
 ## Fairness, Context, and Legitimacy
 

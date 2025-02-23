@@ -425,36 +425,39 @@ window.Quarto = {
 
 <p>In these notes, we’ll review three fundamental definitions of fairness for decision-making systems. While texts like <span class="citation" data-cites="barocasFairnessMachineLearning2023">Barocas, Hardt, and Narayanan (<a href="#ref-barocasFairnessMachineLearning2023" role="doc-biblioref">2023</a>)</span> couch their definitions in the language of probability, our focus in these notes will be to relate the formal mathematical language to operational computations on data sets in Python. In doing so, we’ll review some computational techniques via <code>pandas</code>, <code>numpy</code>, and <code>seaborn</code> from last time. After reviewing these definitions, we’ll review a simple, famous result about the ability of decision systems to satisfy multiple definitions.</p>
 <p>For this study, we’ll return to the COMPAS data that we studied <a href="../chapters/10-compas.html">last time</a>.</p>
-<div id="f12282c2" class="cell" data-execution_count="1">
+<div id="059b5692" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>sns.set_style(<span class="st">"whitegrid"</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>np.set_printoptions(precision <span class="op">=</span> <span class="dv">3</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.precision'</span>, <span class="dv">3</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/compas/compas.csv"</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> pd.read_csv(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.cm <span class="im">as</span> cm</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>sns.set_style(<span class="st">"whitegrid"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>np.set_printoptions(precision <span class="op">=</span> <span class="dv">3</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.precision'</span>, <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="1824b660" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/compas/compas.csv"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> pd.read_csv(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>For this discussion, we again only need to consider a subset of the columns, and we’ll focus exclusively on white (Caucasian) and Black (African-American) defendants:</p>
-<div id="1c358f24" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> [<span class="st">"sex"</span>, <span class="st">"race"</span>, <span class="st">"decile_score"</span>, <span class="st">"two_year_recid"</span>]</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> compas[cols]</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># using Angwin's definition</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>compas[<span class="st">"predicted_high_risk"</span>] <span class="op">=</span> <span class="dv">1</span><span class="op">*</span>(compas[<span class="st">"decile_score"</span>] <span class="op">&gt;</span> <span class="dv">4</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>is_white <span class="op">=</span> compas[<span class="st">"race"</span>] <span class="op">==</span> <span class="st">"Caucasian"</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>is_black <span class="op">=</span> compas[<span class="st">"race"</span>] <span class="op">==</span> <span class="st">"African-American"</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> compas[is_white <span class="op">|</span> is_black]</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> compas.copy()</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"># excerpt of the data</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>compas.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
+<div id="c7617242" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> [<span class="st">"sex"</span>, <span class="st">"race"</span>, <span class="st">"decile_score"</span>, <span class="st">"two_year_recid"</span>]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> compas[cols]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># using Angwin's definition</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>compas[<span class="st">"predicted_high_risk"</span>] <span class="op">=</span> <span class="dv">1</span><span class="op">*</span>(compas[<span class="st">"decile_score"</span>] <span class="op">&gt;</span> <span class="dv">4</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># subsetting by race</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>is_white <span class="op">=</span> compas[<span class="st">"race"</span>] <span class="op">==</span> <span class="st">"Caucasian"</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>is_black <span class="op">=</span> compas[<span class="st">"race"</span>] <span class="op">==</span> <span class="st">"African-American"</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> compas[is_white <span class="op">|</span> is_black]</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>compas <span class="op">=</span> compas.copy()</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># excerpt of the data</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>compas.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
 <div>
 
 
@@ -550,18 +553,16 @@ window.Quarto = {
 <li><code>target</code>, the name of the column holding the binary outcomes.</li>
 <li><code>pred</code>, the name of the column holding the predicted binary outcomes.</li>
 </ul>
-<div id="f430e4bd" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_independence(df, group_col, target, pred):</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.groupby(group_col)[pred].aggregate([np.mean, <span class="bu">len</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="7cdfd47b" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_independence(df, group_col, target, pred):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> df.groupby(group_col)[pred].agg([<span class="st">"mean"</span>, <span class="st">"size"</span>])</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    out.columns <span class="op">=</span> [<span class="st">"positive prediction rate"</span>, <span class="st">"n"</span>]</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out.reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s run our function to check for independence:</p>
-<div id="cf283e93" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>test_independence(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>/var/folders/xn/wvbwvw0d6dx46h9_2bkrknnw0000gn/T/ipykernel_50250/3597676542.py:2: FutureWarning: The provided callable &lt;function mean at 0x105415a20&gt; is currently using SeriesGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
-  return df.groupby(group_col)[pred].aggregate([np.mean, len])</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="4">
+<div id="84c6c6c6" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>test_independence(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
 <div>
 
 
@@ -569,23 +570,21 @@ window.Quarto = {
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">mean</th>
-<th data-quarto-table-cell-role="th">len</th>
-</tr>
-<tr class="odd">
 <th data-quarto-table-cell-role="th">race</th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">positive prediction rate</th>
+<th data-quarto-table-cell-role="th">n</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">African-American</td>
+<td data-quarto-table-cell-role="th">0</td>
+<td>African-American</td>
 <td>0.588</td>
 <td>3696</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">Caucasian</td>
+<td data-quarto-table-cell-role="th">1</td>
+<td>Caucasian</td>
 <td>0.348</td>
 <td>2454</td>
 </tr>
@@ -627,14 +626,14 @@ window.Quarto = {
 \end{aligned}
 \]</span></p>
 <p>Let’s write another function with the same API to give a summary of error rates between two groups using these formulas. As we know, it’s pretty convenient to do this with confusion matrices. It’s not much more difficult to do it “by hand” using vectorized Pandas computations:</p>
-<div id="0f4d2ee4" class="cell" data-execution_count="5">
+<div id="8647e66b" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_error_rate_balance(df, group_col, target, pred):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.groupby([group_col, target])[pred].mean().reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can use this function to do an empirical test for error rate balance:</p>
-<div id="fde92ae7" class="cell" data-execution_count="6">
+<div id="819fbc54" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>test_error_rate_balance(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
+<div class="cell-output cell-output-display" data-execution_count="7">
 <div>
 
 
@@ -709,15 +708,15 @@ window.Quarto = {
 \end{aligned}
 \]</span></p>
 <p>Let’s write a function to check for sufficiency in the COMPAS predictions. This function will compute the positive and negative predictive values by group:</p>
-<div id="6417335a" class="cell" data-execution_count="7">
+<div id="bc960f1c" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_sufficiency(df, group_col, target, pred):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    df_ <span class="op">=</span> df.copy()</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    df_[<span class="st">"correct"</span>] <span class="op">=</span> df_[pred] <span class="op">==</span> df_[target]</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_.groupby([pred, group_col])[<span class="st">"correct"</span>].mean().reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="ec4dc90f" class="cell" data-execution_count="8">
+<div id="a360567a" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>test_sufficiency(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="9">
 <div>
 
 
@@ -764,7 +763,7 @@ window.Quarto = {
 <p>The negative predictive values are in the rows in which <code>predicted_high_risk == 0</code> and the positive predictive values are in the rows in which <code>predicted_high_risk == 1</code>. We observe that the negative predictive value is slightly higher for white defendants, while the positive predictive value is slightly higher for Black defendants. These differences, however, are much lower than the error rate disparity noted above.</p>
 </section>
 </section>
-<section id="can-we-have-it-all" class="level2">
+<section id="can-we-have-it-all" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="can-we-have-it-all">Can We Have It All?</h2>
 <p>Ok, well COMPAS isn’t an ideal algorithm by any means. But couldn’t we just define some more conceptions of fairness, pick the ones that we wanted to use, and then design an algorithm that satisfied all of them?</p>
 <p>Sadly, no: we can’t even have error rate balance and sufficiency simultaneously.</p>
@@ -837,19 +836,81 @@ window.Quarto = {
 \tag{6.1}\]</span></span></p>
 <p>Now suppose that I want to enforce error rate balance and sufficiency for two groups <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>, where <span class="math inline">\(p_a \neq p_b\)</span>. So, from error rate balance I am going to require that <span class="math inline">\(\mathrm{TPR}_a = \mathrm{TPR}_b\)</span>, <span class="math inline">\(\mathrm{FPR}_a = \mathrm{FPR}_b\)</span>, and from sufficiency I am going to enforce that <span class="math inline">\(\mathrm{PPV}_a = \mathrm{PPV}_b\)</span>. Now, however, we have a problem: by <a href="#eq-rearranged-for-p" class="quarto-xref">Equation&nbsp;<span>6.1</span></a>, it must also be the case that <span class="math inline">\(p_a = p_b\)</span>. This contradicts our assumption from the theorem. We cannot mathematically satisfy both error rate balance and sufficiency. This completes the proof.</p>
 </div>
-<div class="callout callout-style-simple callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
+<p>The calculation above defines an inevitable tradeoff: if we want to ensure sufficiency when there are different prevalences between groups, then we will need to accept some amount of error rate imbalance. Similarly, if we want to ensure error rate balance, then we will need to accept some amount of disparity in sufficiency. There are a few ways to visualize this tradeoff. To start, let’s solve for the PPV in terms of the ratio between the TPR and FPR:</p>
+<p><span id="eq-solve-for-ppv"><span class="math display">\[
+\begin{aligned}
+    \mathrm{PPV} = \frac{p \frac{\mathrm{TPR}}{\mathrm{FPR}}}{1-p + p \frac{\mathrm{TPR}}{\mathrm{FPR}}}  \\
+\end{aligned}
+\tag{6.2}\]</span></span></p>
+<p>We can think of the ratio <span class="math inline">\(\frac{\mathrm{TPR}}{\mathrm{FPR}}\)</span> as yet another compact measure of classifier quality: when this ratio is high, a positive prediction is a strong signal of a positive outcome. We can plot the PPV against this ratio:</p>
+<div id="cell-fig-tradeoff-curves" class="cell page-columns page-full" data-execution_count="10">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># gather various data for plot</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>error_rates <span class="op">=</span> test_error_rate_balance(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>tpr_fpr_ratio_black <span class="op">=</span> error_rates.loc[<span class="dv">1</span>, <span class="st">"predicted_high_risk"</span>] <span class="op">/</span> error_rates.loc[<span class="dv">0</span>, <span class="st">"predicted_high_risk"</span>]</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>tpr_fpr_ratio_white <span class="op">=</span> error_rates.loc[<span class="dv">3</span>, <span class="st">"predicted_high_risk"</span>] <span class="op">/</span> error_rates.loc[<span class="dv">2</span>, <span class="st">"predicted_high_risk"</span>]</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>sufficiency <span class="op">=</span> test_sufficiency(compas, <span class="st">"race"</span>, <span class="st">"two_year_recid"</span>, <span class="st">"predicted_high_risk"</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>PPV_black <span class="op">=</span> sufficiency.loc[<span class="dv">2</span>, <span class="st">"correct"</span>]</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>PPV_white <span class="op">=</span> sufficiency.loc[<span class="dv">3</span>, <span class="st">"correct"</span>]</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> compas.groupby(<span class="st">"race"</span>)[<span class="st">"two_year_recid"</span>].mean()</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>p_black <span class="op">=</span> p.loc[<span class="st">"African-American"</span>]</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>p_white <span class="op">=</span> p.loc[<span class="st">"Caucasian"</span>]</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co"># construct plot</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">5</span>, <span class="fl">3.5</span>))</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>tpr_fpr_ratio <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">100</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, p <span class="kw">in</span> <span class="bu">enumerate</span>([p_black, p_white]): <span class="co"># prevalences</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    ppv <span class="op">=</span> p<span class="op">*</span>tpr_fpr_ratio<span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>p <span class="op">+</span> p<span class="op">*</span>tpr_fpr_ratio)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    ax.plot(tpr_fpr_ratio, ppv, color <span class="op">=</span> cm.BuPu((i<span class="op">+</span><span class="fl">.8</span>)<span class="op">/</span><span class="dv">2</span>))</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(ylim <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">1</span>), )</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>plt.scatter(tpr_fpr_ratio_black, PPV_black, color <span class="op">=</span> cm.BuPu((<span class="dv">0</span><span class="op">+</span><span class="fl">.8</span>)<span class="op">/</span><span class="dv">2</span>), label <span class="op">=</span> <span class="st">"Black defendants"</span>, zorder <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>hypothetical_ppv <span class="op">=</span> p_white<span class="op">*</span>tpr_fpr_ratio_black<span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>p_white <span class="op">+</span> p_white<span class="op">*</span>tpr_fpr_ratio_black)</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>plt.plot([tpr_fpr_ratio_black, tpr_fpr_ratio_black], [hypothetical_ppv, PPV_black], linestyle <span class="op">=</span> <span class="st">"--"</span>, color <span class="op">=</span> <span class="st">"black"</span>, linewidth <span class="op">=</span> <span class="dv">1</span>, zorder <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>hypothetical_tpr_fpr_ratio <span class="op">=</span> <span class="fl">1.375</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>plt.scatter(tpr_fpr_ratio_white, PPV_white, color <span class="op">=</span> cm.BuPu((i<span class="op">+</span><span class="fl">.8</span>)<span class="op">/</span><span class="dv">2</span>), label <span class="op">=</span> <span class="st">"White defendants"</span>)</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>plt.plot([tpr_fpr_ratio_white, hypothetical_tpr_fpr_ratio], [PPV_white, PPV_white, ], linestyle <span class="op">=</span> <span class="st">"--"</span>, color <span class="op">=</span> <span class="st">"black"</span>, linewidth <span class="op">=</span> <span class="dv">1</span>, zorder <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"TPR/FPR"</span>, ylabel <span class="op">=</span> <span class="st">"PPV"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-tradeoff-curves" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-tradeoff-curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="12-statistical-fairness_files/figure-html/fig-tradeoff-curves-output-1.png" width="436" height="321" class="figure-img">
 </div>
-<div class="callout-title-container flex-fill">
-Discussion
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-tradeoff-curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: Realizable PPV as a function of TPR/FPR ratio, plotted as curves. The actual combinations of PPV and TPR/FPR are shown as solid points on the curves. Dashed lines show the reductions in classifier performance that would be necessary to achieve sufficiency (horizontal dashed line) or error rate balance (vertical dashed line).
+</figcaption>
+</figure>
 </div>
 </div>
-<div class="callout-body-container callout-body">
-<p>Do you feel that it is more important for a recidivism prediction algorithm like COMPAS to satisfy error rate balance or sufficiency? Why?</p>
 </div>
-</div>
+<p><a href="#fig-tradeoff-curves" class="quarto-xref">Figure&nbsp;<span>6.1</span></a> highlights the classifier design tradeoffs necessary to achieve either sufficiency or error rate balance. We’ve plotted the possible ratios between TPR and FPR on the horizontal axis and the corresponding possible PPVs on the vertical axis, all at the given prevalences among white and Black defendants, according to <a href="#eq-solve-for-ppv" class="quarto-xref">Equation&nbsp;<span>6.2</span></a>. The solid points show the actual PPVs and TPR/FPR ratios for the COMPAS algorithm. Perfect sufficiency corresponds to each point being level with each other horizontally, while perfect error rate balance corresponds to each point being level with each other vertically. The fundamental difficulty is that we can’t move to the right and upward on these curves without access to better, more powerful classifiers, which usually requires more data. So, in order to achieve either of these criteria, we need to <em>decrease</em> classifier performance on at leaset one of the groups. We’ve visualized two options:</p>
+<ol type="1">
+<li>To achieve sufficiency, we could slightly reduce both the TPR/FPR and the PPV on Black defendants, which would place their point at the end of the horizontal dashed line.</li>
+<li>To achieve error-rate balance, we could instead decrease both the TPR/FPR and the PPV on white defendants by a larger amount, which would place their point at the end of the vertical dashed line.</li>
+</ol>
+<p>Both of these options highlight one of the fundamental difficulties of fairness in machine learning: can it really be the right thing to do to selectively <em>decrease</em> the predictive ability of a model on certain groups?</p>
 </section>
 <section id="fairness-context-and-legitimacy" class="level2">
 <h2 class="anchored" data-anchor-id="fairness-context-and-legitimacy">Fairness, Context, and Legitimacy</h2>
