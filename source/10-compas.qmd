@@ -84,7 +84,9 @@ compas.groupby("race").size()
 #---
 ```
 
-The decile score is the algorithm's prediction. Higher decile scores indicate that, according to the COMPAS model, the defendant has higher likelihood to be charged with a crime within the next two years. In the framework we've developed in this class, you can think of the decile score as being produced by computing a score like $s_i = \langle \mathbf{w}, \mathbf{x}_i \rangle$ for each defendant $i$, and then dividing these into the lowest 10% (decile score 1), the next 10% (decile score 2), the next 10% (decile score 3) and so on. 
+The decile score is the algorithm's prediction. Higher decile scores indicate that, according to the COMPAS model, the defendant has higher likelihood to be *charged with a crime* within the next two years. It's worth emphasizing that this isn't the same thing as *committing* a crime: whether or not you're charged also depends on the behavior of police and prosecutors, which are known to often display racial bias. 
+
+In the framework we've developed in this class, you can think of the decile score as being produced by computing a score like $s_i = \langle \mathbf{w}, \mathbf{x}_i \rangle$ for each defendant $i$, and then dividing these into the lowest 10% (decile score 1), the next 10% (decile score 2), the next 10% (decile score 3) and so on. 
 
 The easiest way to see how this looks is with a bar chart, which we can make efficiently using the `seaborn` (`sns`) package. 
 
@@ -125,13 +127,12 @@ compas.groupby("race")["two_year_recid"].mean()
 When interpreting these different prevalences, it is important to remember that 
 
 - Race is itself a socially-constructed system of human categorization invented by humans with political and economic motives to describe other humans as property [@bonilla-silvaRacismRacistsColorblind2018].  
-- The relation between arrest and actual criminal offense can display racial bias, with effects varying by geography [@fogliatoValidityArrestProxy2021]. 
+- The relation between arrest/charging and actual criminal offense can display racial bias, with effects varying by geography [@fogliatoValidityArrestProxy2021]. 
 - Decisions about which behaviors are criminal are contingent political decisions which have, historically, fallen hardest on Black Americans [@yusefCriminalizingRaceRacializing2017]. 
 
 :::
 
 The prevalences between the two groups are substantially different. This difference will have major consequences later on for the possibility of different kinds of fairness in classifiers. 
-
 
 We're going to treat the COMPAS algorithm as a binary classifier, but you might notice a problem: the algorithm's prediction is the `decile_score` column, which is not actually a `0`-`1` label. Following the analysis of @angwin2022machine, we are going to construct a new binary column in which we say that a defendant is `predicted_high_risk` if their `decile_score` is larger than 4. 
 
@@ -198,11 +199,11 @@ compas.groupby(["two_year_recid", "race"])["predicted_high_risk"].mean().reset_i
 #---
 ```
 
-The false positive rate for Black defendants is much higher than the false positive rate for white defendants. This was the main finding of @angwin2022machine. The FPR of 44% for Black defendants means that, out of every 100 Black defendants who *in fact will not commit another crime*, the algorithm nevertheless predicts that 44 of them will. In contrast, the FPR of 23% for white defendants indicates that only 23 out of 100 non-recidivating white defendants would be predicted to recidivate. 
+The false positive rate for Black defendants is much higher than the false positive rate for white defendants. This was the main finding of @angwin2022machine. The FPR of 44% for Black defendants means that, out of every 100 Black defendants who *in fact will not be charged with another crime*, the algorithm nevertheless predicts that 44 of them will. In contrast, the FPR of 23% for white defendants indicates that only 23 out of 100 non-recidivating white defendants would be predicted to be charged with another crime. 
 
 There are a few ways in which we can think of this result as reflecting bias: 
 
-- The algorithm has learned an implicit pattern wherein Black defendants are intrinsically more "criminal" than white defendants, even among people who factually never committed another crime. This is a bias in the patterns that the algorithm has learned in order to formulate its predictions. This is related to the idea of ***representational bias***, in which algorithms learn and reproduce toxic stereotypes about certain groups of people. 
+- The algorithm has learned an implicit pattern wherein Black defendants are intrinsically more "criminal" than white defendants, even among people who factually were not charged again within teh time window. This is a bias in the patterns that the algorithm has learned in order to formulate its predictions. This is related to the idea of ***representational bias***, in which algorithms learn and reproduce toxic stereotypes about certain groups of people. 
 - Regardless of how the algorithm forms its predictions, the *impact* of the algorithm being used in the penal system is that more Black defendants will be classified as high-risk, resulting in more denials of parole, bail, early release, or other forms of freedom from the penal system. So, the algorithm has disparate *impact* on people. This is sometimes called **allocative** or **distributional** bias: bias in how resources or opportunities (in this case, freedom) are allocated or distributed between groups. 
 
 [Sometimes predictive equality is also defined to require that the false negative rates (FNRs) be equal across the two groups as well.]{.aside}
@@ -225,7 +226,7 @@ This argument implicitly equates equality of error rates with lack of bias.
 
 ## The Rebuttal
 
-@angwin2022machine kicked off a vigorous discussion about what it means for an algorithm to fair and how to measure deviations from bias. In particular, Northpointe, the company that developed COMPAS, issued a report @flores2016false in which they argued that their algorithm *was* fair. Their argument is based on an idea of fairness which is sometimes called *sufficiency* @corbett-daviesAlgorithmicDecisionMaking2017. 
+@angwin2022machine kicked off a vigorous discussion about what it means for an algorithm to fair and how to measure deviations from bias. In particular, Northpointe, the company that developed COMPAS, issued a report by @flores2016false in which they argued that their algorithm *was* fair. Their argument is based on an idea of fairness which is sometimes called *sufficiency* [@corbett-daviesAlgorithmicDecisionMaking2017]. 
 
 Here's the intuition expressed by sufficiency. Imagine that you and your friend both received an A- in Data Structures. Suppose, however, that the instructor says different things to each of you: 
 
