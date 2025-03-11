@@ -427,7 +427,7 @@ window.Quarto = {
 
 <p>So far in these notes, we have almost exclusively considered the <em>classification problem</em>: given some data with categorical labels, we aim to learn patterns in the data that will allow us to predict new labels for new unseen data. In the <em>regression problem</em>, we instead aim to learn patterns in the data that will allow us to predict a <em>quantitative</em> variable. If you want to predict the future price of a stock, the GPA of a Middlebury College student, or the number of wildfires in Vermont per year, you need to solve a regression problem.</p>
 <p>In these lecture notes we’ll focus on the <em>linear</em> regression problem and some of its extensions. Linear regression is an easy object of focus for us because it can be formulated in the framework of empirical risk minimization that we have recently been developing. In its most fundamental form, linear regression is the task of fitting a line to a cloud of points that display some kind of trend. Here’s the simple picture:</p>
-<div id="e87fcc5c" class="cell" data-execution_count="1">
+<div id="2a1c8aff" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -559,7 +559,7 @@ window.Quarto = {
 \tag{11.5}\]</span></span></p>
 <div class="page-columns page-full"><p>provided that the matrix inverse exists. This is a closed-form expression for the least-squares regression problem: no gradient descent required! </p><div class="no-row-height column-margin column-container"><span class="margin-aside">This computation, though simple to describe, is not necessarily easy. The matrix <span class="math inline">\(\mathbf{X}^T\mathbf{X}\)</span> has dimensions <span class="math inline">\(p\times p\)</span>, where <span class="math inline">\(p\)</span> is the number of features. When the number of features is very large, inverting this matrix may be computationally prohibitive.</span></div></div>
 <p>Let’s implement this formula for linear regression as a simple class:</p>
-<div id="b5fa651f" class="cell" data-execution_count="2">
+<div id="b11f138b" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LinearRegression:</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.w <span class="op">=</span> <span class="va">None</span></span>
@@ -577,7 +577,7 @@ window.Quarto = {
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ((y_hat <span class="op">-</span> y)<span class="op">**</span><span class="dv">2</span>).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can test this class on the data that we generated above, finding relatively good agreement with the data:</p>
-<div id="e557533d" class="cell" data-execution_count="3">
+<div id="1043b352" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> LinearRegression()</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>lr.fit(X, y)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plot_regression_data(X, y, w <span class="op">=</span> lr.w)</span>
@@ -595,7 +595,7 @@ window.Quarto = {
 <section id="linear-regression-with-nonlinear-features" class="level2">
 <h2 class="anchored" data-anchor-id="linear-regression-with-nonlinear-features">Linear Regression with Nonlinear Features</h2>
 <p>Suppose now that we wish to fit a regression model to some data that displays the following, nonlinear trend:</p>
-<div id="37b11714" class="cell" data-execution_count="4">
+<div id="d9203a38" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> regression_data(<span class="dv">100</span>, w, x_max<span class="op">=</span><span class="dv">2</span><span class="op">*</span>torch.pi, phi <span class="op">=</span> torch.sin)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plot_regression_data(X, y, w <span class="op">=</span> w, phi <span class="op">=</span> torch.sin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -607,21 +607,21 @@ window.Quarto = {
 </div>
 </div>
 <p>One way to approach this is via polynomial feature maps, which we’ve seen before. Since we’re using torch, we just need to define a helper function that outputs a tensor. We’re dropping the constant column added by the <code>PolynomialFeatures</code> since we add that back in as part of our model internals.</p>
-<div id="a300c03e" class="cell" data-execution_count="5">
+<div id="493923e1" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PolynomialFeatures</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> poly_features(degree <span class="op">=</span> <span class="dv">2</span>):</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    pf <span class="op">=</span> PolynomialFeatures(degree <span class="op">=</span> degree)</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">lambda</span> x: torch.Tensor(pf.fit_transform(x)[:,<span class="dv">1</span>:])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>With the feature map <code>phi</code> implemented, we are now ready to fit a model using the same function as before:</p>
-<div id="ce1d858a" class="cell" data-execution_count="6">
+<div id="a2532c80" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>phi <span class="op">=</span> poly_features(degree <span class="op">=</span> <span class="dv">3</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>PHI <span class="op">=</span> phi(X)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> LinearRegression()</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>lr.fit(PHI, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>How did we do?</p>
-<div id="e82df811" class="cell" data-execution_count="7">
+<div id="baf4a85b" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plot_regression_data(X, y, w <span class="op">=</span> lr.w, phi <span class="op">=</span> phi)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>mse <span class="op">=</span> lr.mse(PHI, y)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>title <span class="op">=</span> ax.<span class="bu">set</span>(title <span class="op">=</span> <span class="ss">f"MSE = </span><span class="sc">{</span>mse<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -637,14 +637,14 @@ window.Quarto = {
 <section id="predicting-health-costs" class="level2">
 <h2 class="anchored" data-anchor-id="predicting-health-costs">Predicting Health Costs</h2>
 <p>Let’s use our linear regression model to predict the cost of healthcare per patient. The data set we’ll use is from <span class="citation" data-cites="obermeyerDissectingRacialBias2019b">Obermeyer et al. (<a href="#ref-obermeyerDissectingRacialBias2019b" role="doc-biblioref">2019</a>)</span>, which you may have encountered before. In this data set, each row corresponds to a patient. The data includes the gender, age, and race of the patient, as well as the results of various medical tests and other health-related characteristics.</p>
-<div id="c40a8d90" class="cell" data-execution_count="8">
+<div id="9418e544" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://gitlab.com/labsysmed/dissecting-bias/-/raw/master/data/data_new.csv?inline=false"</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(url)</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.dropna() <span class="co"># remove rows that have missing data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>For the purpose of our analysis today, we’ll discard the 1% of patients who had healthcare costs above $100,000. We’ll also consider only a subset of the columns in the data set, including a few selected medical features, age, gender, and race. We’ll also convert these into dummy columns.</p>
-<div id="e444c8b1" class="cell" data-execution_count="9">
+<div id="17fa34fa" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df[df[<span class="st">"cost_t"</span>] <span class="op">&lt;=</span> <span class="dv">100000</span>]</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> [col <span class="cf">for</span> col <span class="kw">in</span> df.columns <span class="cf">if</span> <span class="st">"dem_age_band"</span> <span class="kw">in</span> col <span class="kw">and</span> <span class="st">"18-24"</span> <span class="kw">not</span> <span class="kw">in</span> col]</span>
@@ -818,17 +818,17 @@ window.Quarto = {
 </div>
 </div>
 <p>Now we can convert our feature data into a tensor. We’ll also construct a tensor holding the cost of medical care received by the patient.</p>
-<div id="66bf6360" class="cell" data-execution_count="10">
+<div id="616ac4b9" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> torch.tensor(X_df.values, dtype<span class="op">=</span>torch.float32)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.tensor(df[<span class="st">"cost_t"</span>].values, dtype<span class="op">=</span>torch.float32)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Finally, we’ll split the data into training and validation sets for model evaluation.</p>
-<div id="8bc2bee2" class="cell" data-execution_count="11">
+<div id="f8e10d95" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>X_train, X_val, y_train, y_val <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">802</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s begin by calculating a baseline model performance. For this experiment, we’ll consider the baseline prediction to be the mean cost per patient:</p>
-<div id="531bebb2" class="cell" data-execution_count="12">
+<div id="78a94f21" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>mean_cost <span class="op">=</span> y_train.mean()</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>mse_baseline <span class="op">=</span> ((mean_cost <span class="op">-</span> y_val)<span class="op">**</span><span class="dv">2</span>).mean()</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>mse_baseline</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -838,7 +838,7 @@ window.Quarto = {
 </div>
 <p>The MSE of the baseline is quite high, indicating that different patients have very different amounts of healthcare spending. We’d like to achieve MSEs which are meaningfully lower than this on our validation set when modeling.</p>
 <p>Let’s begin our modeling efforts by fitting a simple linear regression model:</p>
-<div id="06dbff88" class="cell" data-execution_count="13">
+<div id="6cf0c7af" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> LinearRegression()</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>lr.fit(X_train, y_train)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>lr_performance <span class="op">=</span> lr.mse(X_val, y_val)</span>
@@ -848,7 +848,7 @@ window.Quarto = {
 </div>
 </div>
 <p>This is already an improvement on the validation data! Can we do better? Maybe if we modeled some kind of nonlinear trend using polynomial features? To train and evaluate the model, we just need to construct the feature matrix by applying the feature map to the training and validation data.</p>
-<div id="a2cd224f" class="cell" data-execution_count="14">
+<div id="8042a142" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>phi <span class="op">=</span> poly_features(degree <span class="op">=</span> <span class="dv">2</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>PHI_train <span class="op">=</span> phi(X_train)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> LinearRegression()</span>
@@ -907,7 +907,7 @@ window.Quarto = {
 \end{aligned}
 \]</span></p>
 <p>Let’s construct a new class to implement ridge regression. We’ll let this class inherit from <code>LinearRegression</code> so that we can use the same methods for prediction and scoring.</p>
-<div id="d553798d" class="cell" data-execution_count="15">
+<div id="48b7a94d" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RidgeRegression(LinearRegression):</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> fit(<span class="va">self</span>, X, y, lam <span class="op">=</span> <span class="fl">0.01</span>):</span>
@@ -920,7 +920,7 @@ window.Quarto = {
 <span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.w <span class="op">=</span> torch.inverse(X_.t()<span class="op">@</span>X_ <span class="op">+</span> lam<span class="op">*</span>U)<span class="op">@</span>X_.t()<span class="op">@</span>y</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s go ahead and try out our ridge regression implementation:</p>
-<div id="80e8587c" class="cell" data-execution_count="16">
+<div id="1ab6d582" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>rr <span class="op">=</span> RidgeRegression()</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>rr.fit(X_train, y_train, lam <span class="op">=</span> <span class="dv">100</span>)</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>rr_performance <span class="op">=</span> rr.mse(X_val, y_val)</span>
@@ -930,7 +930,7 @@ window.Quarto = {
 </div>
 </div>
 <p>This is already a modest improvement over the linear regression performance of tensor(1.7944e+08). Importantly, we can do even better with more features: it is possible to show that the matrix <span class="math inline">\(\Phi(\mathbf{X})^T\Phi(\mathbf{X}) + \lambda \mathbf{U}\)</span> is invertible whenever <span class="math inline">\(\lambda &gt; 0\)</span>. Let’s try the same computation as last time:</p>
-<div id="5de650c0" class="cell" data-execution_count="17">
+<div id="8a682512" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>pf <span class="op">=</span> PolynomialFeatures(degree <span class="op">=</span> <span class="dv">2</span>)</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>phi <span class="op">=</span> <span class="kw">lambda</span> X: torch.Tensor(pf.fit_transform(X)[:,<span class="dv">1</span>:])</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -939,7 +939,7 @@ window.Quarto = {
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>rr.fit(PHI_train, y_train, lam <span class="op">=</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Unlike with simple linear regression, we were able to fit our model. Even better, we’ve realized another small reduction in the MSE:</p>
-<div id="4948b860" class="cell" data-execution_count="18">
+<div id="a897aa40" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>PHI_val <span class="op">=</span> phi(X_val)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>rr_features_performance <span class="op">=</span> rr.mse(PHI_val, y_val)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(rr_features_performance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
