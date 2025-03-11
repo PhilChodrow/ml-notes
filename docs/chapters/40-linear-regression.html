@@ -54,10 +54,30 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -102,6 +122,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -365,15 +388,14 @@ window.Quarto = {
    
   <ul>
   <li><a href="#linear-regression-as-empirical-risk-minimization" id="toc-linear-regression-as-empirical-risk-minimization" class="nav-link active" data-scroll-target="#linear-regression-as-empirical-risk-minimization">Linear Regression as Empirical Risk Minimization</a></li>
-  <li><a href="#matrix-vector-formulation" id="toc-matrix-vector-formulation" class="nav-link" data-scroll-target="#matrix-vector-formulation">Matrix-Vector Formulation</a>
-  <ul class="collapse">
+  <li><a href="#matrix-vector-formulation" id="toc-matrix-vector-formulation" class="nav-link" data-scroll-target="#matrix-vector-formulation">Matrix-Vector Formulation</a></li>
+  <li><a href="#closed-form-expression-for-linear-regression" id="toc-closed-form-expression-for-linear-regression" class="nav-link" data-scroll-target="#closed-form-expression-for-linear-regression">Closed-Form Expression for Linear Regression</a></li>
+  <li><a href="#linear-regression-with-nonlinear-features" id="toc-linear-regression-with-nonlinear-features" class="nav-link" data-scroll-target="#linear-regression-with-nonlinear-features">Linear Regression with Nonlinear Features</a></li>
+  <li><a href="#predicting-health-costs" id="toc-predicting-health-costs" class="nav-link" data-scroll-target="#predicting-health-costs">Predicting Health Costs</a></li>
   <li><a href="#ridge-regression" id="toc-ridge-regression" class="nav-link" data-scroll-target="#ridge-regression">Ridge Regression</a></li>
-  </ul></li>
-  <li><a href="#nonlinear-feature-maps" id="toc-nonlinear-feature-maps" class="nav-link" data-scroll-target="#nonlinear-feature-maps">Nonlinear Feature Maps</a></li>
   <li><a href="#computational-complexity" id="toc-computational-complexity" class="nav-link" data-scroll-target="#computational-complexity">Computational Complexity</a>
   <ul class="collapse">
   <li><a href="#other-regularizers" id="toc-other-regularizers" class="nav-link" data-scroll-target="#other-regularizers">Other Regularizers</a></li>
-  <li><a href="#kernels" id="toc-kernels" class="nav-link" data-scroll-target="#kernels">Kernels</a></li>
   <li><a href="#gradient-methods" id="toc-gradient-methods" class="nav-link" data-scroll-target="#gradient-methods">Gradient Methods</a></li>
   </ul></li>
   </ul>
@@ -405,67 +427,68 @@ window.Quarto = {
 
 <p>So far in these notes, we have almost exclusively considered the <em>classification problem</em>: given some data with categorical labels, we aim to learn patterns in the data that will allow us to predict new labels for new unseen data. In the <em>regression problem</em>, we instead aim to learn patterns in the data that will allow us to predict a <em>quantitative</em> variable. If you want to predict the future price of a stock, the GPA of a Middlebury College student, or the number of wildfires in Vermont per year, you need to solve a regression problem.</p>
 <p>In these lecture notes we’ll focus on the <em>linear</em> regression problem and some of its extensions. Linear regression is an easy object of focus for us because it can be formulated in the framework of empirical risk minimization that we have recently been developing. In its most fundamental form, linear regression is the task of fitting a line to a cloud of points that display some kind of trend. Here’s the simple picture:</p>
-<div id="cell-1" class="cell" data-execution_count="1">
+<div id="e87fcc5c" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> regression_data(n <span class="op">=</span> <span class="dv">100</span>, w <span class="op">=</span> torch.Tensor([<span class="op">-</span><span class="fl">0.7</span>, <span class="fl">0.5</span>]), phi <span class="op">=</span> <span class="kw">lambda</span> x: x, x_max <span class="op">=</span> <span class="dv">1</span>):</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> torch.zeros(n, <span class="dv">2</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> torch.rand(n)<span class="op">*</span>x_max</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    x, ix <span class="op">=</span> torch.sort(x)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    X[:, <span class="dv">1</span>] <span class="op">=</span> x</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    X[:, <span class="dv">0</span>] <span class="op">=</span> torch.ones(n)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> X <span class="op">-</span> X.mean(dim <span class="op">=</span> <span class="dv">0</span>,keepdims <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> phi(X)<span class="op">@</span>w <span class="op">+</span> <span class="fl">0.05</span><span class="op">*</span>torch.randn(n)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> y <span class="op">-</span> y.mean()</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X, y</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_regression_data(X, y, w <span class="op">=</span> <span class="va">None</span>, phi <span class="op">=</span> <span class="kw">lambda</span> x: x, pattern_label <span class="op">=</span> <span class="st">"pattern"</span>, ax <span class="op">=</span> <span class="va">None</span>, legend <span class="op">=</span> <span class="va">True</span>, xlabel <span class="op">=</span> <span class="va">True</span>, ylabel <span class="op">=</span> <span class="va">True</span>, title <span class="op">=</span> <span class="va">None</span>):</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ax <span class="kw">is</span> <span class="va">None</span>: </span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> xlabel: </span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature (x)"</span>)</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ylabel: </span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> ax.<span class="bu">set</span>(ylabel <span class="op">=</span> <span class="st">"Target (y)"</span>)</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> title: </span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        t <span class="op">=</span> ax.<span class="bu">set</span>(title <span class="op">=</span> title)</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    ax.scatter(X[:,<span class="dv">1</span>], y, facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"steelblue"</span>, label <span class="op">=</span> <span class="st">"data"</span>)</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> w <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: </span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>        m_points <span class="op">=</span> <span class="dv">1001</span></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>        X_ <span class="op">=</span> torch.zeros(m_points, <span class="dv">2</span>)</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.linspace(X[:,<span class="dv">1</span>].<span class="bu">min</span>().item()<span class="op">-</span><span class="fl">0.01</span>, X[:,<span class="dv">1</span>].<span class="bu">max</span>().item()<span class="op">+</span><span class="fl">0.01</span>, m_points)</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        X_[:,<span class="dv">1</span>] <span class="op">=</span> x</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        X_[:, <span class="dv">0</span>] <span class="op">=</span> torch.ones(m_points)</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        X_ <span class="op">=</span> X_ <span class="op">-</span> X_.mean(dim <span class="op">=</span> <span class="dv">0</span>,keepdims <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>        y_ <span class="op">=</span> phi(X_)<span class="op">@</span>w </span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        ax.plot(X_[:,<span class="dv">1</span>], y_, linestyle <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"black"</span>, label <span class="op">=</span> pattern_label)</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> legend:</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>            ax.legend()</span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pad(x):</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> torch.cat([torch.ones(x.size(<span class="dv">0</span>), <span class="dv">1</span>), x], dim <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> regression_data(n <span class="op">=</span> <span class="dv">100</span>, w <span class="op">=</span> torch.Tensor([<span class="fl">0.4</span>, <span class="fl">0.5</span>]), phi <span class="op">=</span> <span class="kw">lambda</span> x: x, x_max <span class="op">=</span> <span class="dv">1</span>):</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> torch.rand(n, <span class="dv">1</span>)<span class="op">*</span>x_max</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    x, ix <span class="op">=</span> torch.sort(x)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    PHI <span class="op">=</span> phi(x)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    PHI_ <span class="op">=</span> pad(PHI)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> PHI_<span class="op">@</span>w <span class="op">+</span> <span class="fl">0.05</span><span class="op">*</span>torch.randn(n)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x, y</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_regression_data(X, y, w <span class="op">=</span> <span class="va">None</span>, phi <span class="op">=</span> <span class="kw">lambda</span> x: x, pattern_label <span class="op">=</span> <span class="st">"pattern"</span>, ax <span class="op">=</span> <span class="va">None</span>, legend <span class="op">=</span> <span class="va">True</span>, xlabel <span class="op">=</span> <span class="va">True</span>, ylabel <span class="op">=</span> <span class="va">True</span>, title <span class="op">=</span> <span class="va">None</span>):</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ax <span class="kw">is</span> <span class="va">None</span>: </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> xlabel: </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature (x)"</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ylabel: </span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">=</span> ax.<span class="bu">set</span>(ylabel <span class="op">=</span> <span class="st">"Target (y)"</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> title: </span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        t <span class="op">=</span> ax.<span class="bu">set</span>(title <span class="op">=</span> title)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    ax.scatter(X, y, facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"steelblue"</span>, label <span class="op">=</span> <span class="st">"data"</span>)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> w <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: </span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        m_points <span class="op">=</span> <span class="dv">1001</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        x_ <span class="op">=</span> torch.linspace(X.<span class="bu">min</span>().item()<span class="op">-</span><span class="fl">0.01</span>, X.<span class="bu">max</span>().item()<span class="op">+</span><span class="fl">0.01</span>, m_points)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>        x_ <span class="op">=</span> x_.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        PHI <span class="op">=</span> phi(x_)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        PHI_ <span class="op">=</span> pad(PHI)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        y_ <span class="op">=</span> PHI_<span class="op">@</span>w </span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>        ax.plot(x_, y_, linestyle <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"black"</span>, label <span class="op">=</span> pattern_label)</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> legend:</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>            ax.legend()</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ax</span>
 <span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> torch.Tensor([<span class="fl">0.4</span>, <span class="fl">0.5</span>])</span>
 <span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> regression_data(w <span class="op">=</span> w)</span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>plot_regression_data(X, y, w <span class="op">=</span> w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> regression_data(w <span class="op">=</span> w)</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>plot_regression_data(X, y, w <span class="op">=</span> w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="40-linear-regression_files/figure-html/cell-2-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="40-linear-regression_files/figure-html/cell-2-output-1.png" class="figure-img" width="506" height="349"></p>
 </figure>
 </div>
 </div>
@@ -474,14 +497,16 @@ window.Quarto = {
 <p>Theoretically, linear regression is <em>just another kind of empirical risk minimization</em>. In practice, it has a few extra tricks.</p>
 <section id="linear-regression-as-empirical-risk-minimization" class="level2">
 <h2 class="anchored" data-anchor-id="linear-regression-as-empirical-risk-minimization">Linear Regression as Empirical Risk Minimization</h2>
-<p><a href="../chapters/30-features-regularization.html">Last time</a>, we studied the most general form of the empirical risk minimization problem:</p>
-<p><span id="eq-regularized-erm"><span class="math display">\[
-\DeclareMathOperator*{\argmin}{argmin}
+<p>Consider the unregularized empirical risk minimization problem</p>
+<p><span id="eq-unregularized-erm"><span class="math display">\[
 \begin{aligned}
-    \hat{\mathbf{w}} = \argmin_{\mathbf{w}} L(\mathbf{w}) = \argmin_{\mathbf{w}} \frac{1}{n} \sum_{i = 1}^n \ell (\langle\mathbf{w}, \phi(\mathbf{x}_i)\rangle, y_i) + \lambda R(\mathbf{w})\;.
+\DeclareMathOperator*{\argmin}{argmin}
+\newcommand{\bracket}[1]{\left\langle #1 \right\rangle}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+    \hat{\mathbf{w}} = \argmin_{\mathbf{w}} L(\mathbf{w}) = \argmin_{\mathbf{w}} \frac{1}{n} \sum_{i = 1}^n \ell (\bracket{\mathbf{w}, \phi(\mathbf{x}_i)}, y_i)\;.
 \end{aligned}
 \tag{11.1}\]</span></span></p>
-<p>Here, <span class="math inline">\(\ell\)</span> is the <em>per-observation loss function</em>, <span class="math inline">\(\phi\)</span> is a <em>feature map</em>, <span class="math inline">\(R(\mathbf{w})\)</span> is a regularizing term. When studying convexity, we introduced several different choices of <span class="math inline">\(\ell\)</span>, including the 0-1 loss, logistic loss, and hinge loss.</p>
+<p>Here, <span class="math inline">\(\ell\)</span> is the <em>per-observation loss function</em> and <span class="math inline">\(\phi\)</span> is a <em>feature map</em>. When studying convexity, we introduced several different choices of <span class="math inline">\(\ell\)</span>, including the 0-1 loss, logistic loss, and hinge loss.</p>
 <p>Doing linear regression is as simple as choosing a different loss function. The most common choice is the square loss:</p>
 <p><span class="math display">\[
 \begin{aligned}
@@ -494,14 +519,14 @@ window.Quarto = {
 <i class="callout-icon"></i>
 </div>
 <div class="callout-body-container">
-<p>Check that this function is convex as a function of <span class="math inline">\(s\)</span>!</p>
+<p>Check that this per-observation loss function is convex as a function of <span class="math inline">\(s\)</span>.</p>
 </div>
 </div>
 </div>
 <p>With this choice, empirical risk minimization becomes <em>least-squares linear regression</em>, with loss function</p>
 <p><span id="eq-least-squares"><span class="math display">\[
 \begin{aligned}
-    L(\mathbf{w}) = \underbrace{\frac{1}{n} \sum_{i = 1}^n (\langle\mathbf{w}, \phi(\mathbf{x}_i)\rangle - y_i)^2}_{\text{mean-squared error}} + \lambda R(\mathbf{w})\;.
+    L(\mathbf{w}) = \underbrace{\frac{1}{n} \sum_{i = 1}^n (\bracket{\mathbf{w}, \phi(\mathbf{x}_i)} - y_i)^2}_{\text{mean-squared error}}\;.
 \end{aligned}
 \tag{11.2}\]</span></span></p>
 <p>The first term in this expression is the mean-squared error (MSE). Motivation via the MSE is the most common way that least-squares linear regression is motivated in statistics courses.</p>
@@ -512,214 +537,424 @@ window.Quarto = {
 <div class="page-columns page-full"><p>It is possible to write <a href="#eq-least-squares" class="quarto-xref">Equation&nbsp;<span>11.2</span></a> much more simply using matrix-vector notation: </p><div class="no-row-height column-margin column-container"><span class="margin-aside">Here, <span class="math inline">\(\lVert \mathbv{v} \rVert_2^2 = \sum_{i}v_i^2\)</span> is the squared Euclidean norm.</span></div></div>
 <p><span id="eq-least-squares-matrix"><span class="math display">\[
 \begin{aligned}
-    L(\mathbf{w}) = \frac{1}{n} \lVert\phi(\mathbf{X})\mathbf{w} - \mathbf{y}\rVert_2^2 + \lambda R(\mathbf{w})\;.
+    L(\mathbf{w}) = \frac{1}{n} \norm{\phi(\mathbf{X})\mathbf{w} - \mathbf{y}}_2^2\;.
 \end{aligned}
 \tag{11.3}\]</span></span></p>
 <div class="page-columns page-full"><p>By rules of multivariable differentiation, the gradient of the empirical risk <span class="math inline">\(L(\mathbf{w})\)</span> is </p><div class="no-row-height column-margin column-container"><span class="margin-aside">We looked at some gradients for the regularization term <span class="math inline">\(R(\mathbf{w})\)</span> in <a href="../chapters/30-features-regularization.html">previous notes</a>.</span></div></div>
 <p><span id="eq-gradient"><span class="math display">\[
-\nabla L(\mathbf{w}) = \frac{2}{n}\phi(\mathbf{X})^T(\phi(\mathbf{X})\mathbf{w} - \mathbf{y}) + \lambda \nabla R(\mathbf{w})\;.
+\nabla L(\mathbf{w}) = \frac{2}{n}\phi(\mathbf{X})^T(\phi(\mathbf{X})\mathbf{w} - \mathbf{y})\;.
 \tag{11.4}\]</span></span></p>
 <p>Using this gradient for a gradient-descent scheme would be a perfectly reasonable way to go about solving a least-squares linear regression problem.</p>
-<section id="ridge-regression" class="level3">
-<h3 class="anchored" data-anchor-id="ridge-regression">Ridge Regression</h3>
-<p>Suppose for a moment that we choose <span class="math inline">\(R(\mathbf{w}) = \lVert \mathbf{w} \rVert_2^2\)</span>, the <span class="math inline">\(\ell_2\)</span> or <em>ridge</em> penalty. [When using this regularizing term, we usually need to assume that, for each feature <span class="math inline">\(j\)</span>, <span class="math inline">\(\sum_{i = 1}^n\phi_{ij}(\mathbf{X}) = 0\)</span>. This is called <em>column centering</em> and can be achieved simply by subtracting the column mean from each entry of <span class="math inline">\(\mathbf{X}\)</span>. The reason we need to do this is that it guarantees that the weight of the constant feature is <span class="math inline">\(0\)</span>, which ensures that it’s not a problem for us to include it in the regularization term <span class="math inline">\(R(\mathbf{w})\)</span>. The function <code>regression_data</code> from above always produces column-centered data.] In order to make the math work out nicely, it’s convenient to assume that <span class="math inline">\(\lambda = \Lambda / n\)</span> for some <span class="math inline">\(\Lambda\)</span>.</p>
-<p>In this case, the empirical risk objective function is</p>
-<p><span class="math display">\[
+</section>
+<section id="closed-form-expression-for-linear-regression" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="closed-form-expression-for-linear-regression">Closed-Form Expression for Linear Regression</h2>
+<p>However, there is something special about least-squares linear regression: it’s actually not necessary to use gradient descent for small instances! Instead, we can solve the equation <span class="math inline">\(\nabla L(\hat{\mathbf{w}}) = \mathbf{0}\)</span> directly. Starting from <a href="61-modern-optimization.html#eq-gradient" class="quarto-xref">Equation&nbsp;<span>16.1</span></a>, we can calculate</p>
+<p><span id="eq-linear-regression-closed"><span class="math display">\[
+\begin{aligned}
+    \mathbf{0} &amp;= \frac{2}{n}\phi(\mathbf{X})^T(\phi(\mathbf{X})\hat{\mathbf{w}} - \mathbf{y})\;, \\
+    \mathbf{0} &amp;= \phi(\mathbf{X})^T\phi(\mathbf{X})\hat{\mathbf{w}} - \phi(\mathbf{X})^T\mathbf{y}\;, \\
+    \phi(\mathbf{X})^T\phi(\mathbf{X})\hat{\mathbf{w}} &amp;= \phi(\mathbf{X})^T\mathbf{y} \\
+    \hat{\mathbf{w}} &amp;= \left[\phi(\mathbf{X})^T\phi(\mathbf{X})\right]^{-1}\phi(\mathbf{X})^T\mathbf{y}\;,
+\end{aligned}
+\tag{11.5}\]</span></span></p>
+<div class="page-columns page-full"><p>provided that the matrix inverse exists. This is a closed-form expression for the least-squares regression problem: no gradient descent required! </p><div class="no-row-height column-margin column-container"><span class="margin-aside">This computation, though simple to describe, is not necessarily easy. The matrix <span class="math inline">\(\mathbf{X}^T\mathbf{X}\)</span> has dimensions <span class="math inline">\(p\times p\)</span>, where <span class="math inline">\(p\)</span> is the number of features. When the number of features is very large, inverting this matrix may be computationally prohibitive.</span></div></div>
+<p>Let’s implement this formula for linear regression as a simple class:</p>
+<div id="b5fa651f" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LinearRegression:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.w <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> fit(<span class="va">self</span>, X, y):</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        X_ <span class="op">=</span> pad(X)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.w <span class="op">=</span> torch.inverse(X_.T<span class="op">@</span>X_)<span class="op">@</span>X_.T<span class="op">@</span>y</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> predict(<span class="va">self</span>, X):</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        X_ <span class="op">=</span> pad(X)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> X_<span class="op">@</span>self.w</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> mse(<span class="va">self</span>, X, y):</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        y_hat <span class="op">=</span> <span class="va">self</span>.predict(X)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ((y_hat <span class="op">-</span> y)<span class="op">**</span><span class="dv">2</span>).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can test this class on the data that we generated above, finding relatively good agreement with the data:</p>
+<div id="e557533d" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> LinearRegression()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>lr.fit(X, y)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plot_regression_data(X, y, w <span class="op">=</span> lr.w)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>mse <span class="op">=</span> lr.mse(X, y)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>title <span class="op">=</span> ax.<span class="bu">set</span>(title <span class="op">=</span> <span class="ss">f"MSE = </span><span class="sc">{</span>mse<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="40-linear-regression_files/figure-html/cell-4-output-1.png" class="figure-img" width="506" height="368"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="linear-regression-with-nonlinear-features" class="level2">
+<h2 class="anchored" data-anchor-id="linear-regression-with-nonlinear-features">Linear Regression with Nonlinear Features</h2>
+<p>Suppose now that we wish to fit a regression model to some data that displays the following, nonlinear trend:</p>
+<div id="37b11714" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> regression_data(<span class="dv">100</span>, w, x_max<span class="op">=</span><span class="dv">2</span><span class="op">*</span>torch.pi, phi <span class="op">=</span> torch.sin)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plot_regression_data(X, y, w <span class="op">=</span> w, phi <span class="op">=</span> torch.sin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="40-linear-regression_files/figure-html/cell-5-output-1.png" class="figure-img" width="514" height="349"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>One way to approach this is via polynomial feature maps, which we’ve seen before. Since we’re using torch, we just need to define a helper function that outputs a tensor. We’re dropping the constant column added by the <code>PolynomialFeatures</code> since we add that back in as part of our model internals.</p>
+<div id="a300c03e" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PolynomialFeatures</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> poly_features(degree <span class="op">=</span> <span class="dv">2</span>):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    pf <span class="op">=</span> PolynomialFeatures(degree <span class="op">=</span> degree)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">lambda</span> x: torch.Tensor(pf.fit_transform(x)[:,<span class="dv">1</span>:])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>With the feature map <code>phi</code> implemented, we are now ready to fit a model using the same function as before:</p>
+<div id="ce1d858a" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>phi <span class="op">=</span> poly_features(degree <span class="op">=</span> <span class="dv">3</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>PHI <span class="op">=</span> phi(X)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> LinearRegression()</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>lr.fit(PHI, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>How did we do?</p>
+<div id="e82df811" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plot_regression_data(X, y, w <span class="op">=</span> lr.w, phi <span class="op">=</span> phi)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>mse <span class="op">=</span> lr.mse(PHI, y)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>title <span class="op">=</span> ax.<span class="bu">set</span>(title <span class="op">=</span> <span class="ss">f"MSE = </span><span class="sc">{</span>mse<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="40-linear-regression_files/figure-html/cell-8-output-1.png" class="figure-img" width="514" height="368"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="predicting-health-costs" class="level2">
+<h2 class="anchored" data-anchor-id="predicting-health-costs">Predicting Health Costs</h2>
+<p>Let’s use our linear regression model to predict the cost of healthcare per patient. The data set we’ll use is from <span class="citation" data-cites="obermeyerDissectingRacialBias2019b">Obermeyer et al. (<a href="#ref-obermeyerDissectingRacialBias2019b" role="doc-biblioref">2019</a>)</span>, which you may have encountered before. In this data set, each row corresponds to a patient. The data includes the gender, age, and race of the patient, as well as the results of various medical tests and other health-related characteristics.</p>
+<div id="c40a8d90" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://gitlab.com/labsysmed/dissecting-bias/-/raw/master/data/data_new.csv?inline=false"</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(url)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.dropna() <span class="co"># remove rows that have missing data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For the purpose of our analysis today, we’ll discard the 1% of patients who had healthcare costs above $100,000. We’ll also consider only a subset of the columns in the data set, including a few selected medical features, age, gender, and race. We’ll also convert these into dummy columns.</p>
+<div id="e444c8b1" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df[df[<span class="st">"cost_t"</span>] <span class="op">&lt;=</span> <span class="dv">100000</span>]</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> [col <span class="cf">for</span> col <span class="kw">in</span> df.columns <span class="cf">if</span> <span class="st">"dem_age_band"</span> <span class="kw">in</span> col <span class="kw">and</span> <span class="st">"18-24"</span> <span class="kw">not</span> <span class="kw">in</span> col]</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>cols <span class="op">+=</span> [col <span class="cf">for</span> col <span class="kw">in</span> df.columns <span class="cf">if</span> <span class="st">"elixhauser"</span> <span class="kw">in</span> col]</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>cols <span class="op">+=</span> [col <span class="cf">for</span> col <span class="kw">in</span> df.columns <span class="cf">if</span> <span class="st">"trig"</span> <span class="kw">in</span> col]</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>cols <span class="op">+=</span> [<span class="st">"dem_female"</span>, <span class="st">"race"</span>]</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>X_df <span class="op">=</span> df[cols]</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>X_df <span class="op">=</span> <span class="dv">1</span><span class="op">*</span>pd.get_dummies(X_df, drop_first<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>col_names <span class="op">=</span> X_df.columns <span class="co"># for later</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>X_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">dem_age_band_25-34_tm1</th>
+<th data-quarto-table-cell-role="th">dem_age_band_35-44_tm1</th>
+<th data-quarto-table-cell-role="th">dem_age_band_45-54_tm1</th>
+<th data-quarto-table-cell-role="th">dem_age_band_55-64_tm1</th>
+<th data-quarto-table-cell-role="th">dem_age_band_65-74_tm1</th>
+<th data-quarto-table-cell-role="th">dem_age_band_75+_tm1</th>
+<th data-quarto-table-cell-role="th">alcohol_elixhauser_tm1</th>
+<th data-quarto-table-cell-role="th">anemia_elixhauser_tm1</th>
+<th data-quarto-table-cell-role="th">arrhythmia_elixhauser_tm1</th>
+<th data-quarto-table-cell-role="th">arthritis_elixhauser_tm1</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">trig_min-high_tm1</th>
+<th data-quarto-table-cell-role="th">trig_min-normal_tm1</th>
+<th data-quarto-table-cell-role="th">trig_mean-low_tm1</th>
+<th data-quarto-table-cell-role="th">trig_mean-high_tm1</th>
+<th data-quarto-table-cell-role="th">trig_mean-normal_tm1</th>
+<th data-quarto-table-cell-role="th">trig_max-low_tm1</th>
+<th data-quarto-table-cell-role="th">trig_max-high_tm1</th>
+<th data-quarto-table-cell-role="th">trig_max-normal_tm1</th>
+<th data-quarto-table-cell-role="th">dem_female</th>
+<th data-quarto-table-cell-role="th">race_white</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>...</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">8</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>...</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">15</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>...</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">19</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>...</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">21</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>...</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 41 columns</p>
+</div>
+</div>
+</div>
+<p>Now we can convert our feature data into a tensor. We’ll also construct a tensor holding the cost of medical care received by the patient.</p>
+<div id="66bf6360" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> torch.tensor(X_df.values, dtype<span class="op">=</span>torch.float32)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.tensor(df[<span class="st">"cost_t"</span>].values, dtype<span class="op">=</span>torch.float32)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, we’ll split the data into training and validation sets for model evaluation.</p>
+<div id="8bc2bee2" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>X_train, X_val, y_train, y_val <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">802</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s begin by calculating a baseline model performance. For this experiment, we’ll consider the baseline prediction to be the mean cost per patient:</p>
+<div id="531bebb2" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>mean_cost <span class="op">=</span> y_train.mean()</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>mse_baseline <span class="op">=</span> ((mean_cost <span class="op">-</span> y_val)<span class="op">**</span><span class="dv">2</span>).mean()</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>mse_baseline</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>tensor(1.9167e+08)</code></pre>
+</div>
+</div>
+<p>The MSE of the baseline is quite high, indicating that different patients have very different amounts of healthcare spending. We’d like to achieve MSEs which are meaningfully lower than this on our validation set when modeling.</p>
+<p>Let’s begin our modeling efforts by fitting a simple linear regression model:</p>
+<div id="06dbff88" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> LinearRegression()</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>lr.fit(X_train, y_train)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>lr_performance <span class="op">=</span> lr.mse(X_val, y_val)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(lr_performance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor(1.7944e+08)</code></pre>
+</div>
+</div>
+<p>This is already an improvement on the validation data! Can we do better? Maybe if we modeled some kind of nonlinear trend using polynomial features? To train and evaluate the model, we just need to construct the feature matrix by applying the feature map to the training and validation data.</p>
+<div id="a2cd224f" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>phi <span class="op">=</span> poly_features(degree <span class="op">=</span> <span class="dv">2</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>PHI_train <span class="op">=</span> phi(X_train)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> LinearRegression()</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>lr.fit(PHI_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>_LinAlgError                              Traceback (most recent call last)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>File <span class="op">/</span>Users<span class="op">/</span>philchodrow<span class="op">/</span>teaching<span class="op">/</span>ml<span class="op">-</span>notes<span class="op">/</span>source<span class="op">/</span>linear<span class="op">-</span>regression.qmd:<span class="dv">3</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>      <span class="dv">1</span> PHI_train <span class="op">=</span> phi(X_train)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>      <span class="dv">2</span> lr <span class="op">=</span> LinearRegression()</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="op">----&gt;</span> <span class="dv">3</span> lr.fit(PHI_train, y_train)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>Cell In[<span class="dv">62</span>], line <span class="dv">64</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>     <span class="dv">62</span> <span class="kw">def</span> fit(<span class="va">self</span>, X, y):</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>     <span class="dv">63</span>     X_ <span class="op">=</span> pad(X)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="op">---&gt;</span> <span class="dv">64</span>     <span class="va">self</span>.w <span class="op">=</span> torch.inverse(X_.T<span class="op">@</span>X_)<span class="op">@</span>X_.T<span class="op">@</span>y</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>_LinAlgError: linalg.inv: The diagonal element <span class="dv">45</span> <span class="kw">is</span> zero, the inversion could <span class="kw">not</span> be completed because the <span class="bu">input</span> matrix <span class="kw">is</span> singular.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The problem here is in the call <code>torch.inverse(X_.T@X_)</code> which is used in the <code>fit</code> method. According to the error, the matrix that we are trying to invert, <span class="math inline">\(\Phi(\mathbf{X})^T\Phi(\mathbf{X})\)</span>, is singular; i.e.&nbsp;the columns are linearly dependent. The reason this happens is that the polynomial feature map <span class="math inline">\(\Phi\)</span> we’ve applied produces a <em>lot</em> of new columns. In fact, we face this issue in a lot of modern machine learning problems: we might have so many features that we don’t even <em>know</em> whether the data is linearly dependent or not. Simply applying linear regression according to <a href="#eq-linear-regression-closed" class="quarto-xref">Equation&nbsp;<span>11.5</span></a> will not work for such data sets. We can address this issue using <em>regularization</em>.</p>
+</section>
+<section id="ridge-regression" class="level2">
+<h2 class="anchored" data-anchor-id="ridge-regression">Ridge Regression</h2>
+<p>In ridge regression, we modify the empirical risk minimization problem <a href="#eq-least-squares" class="quarto-xref">Equation&nbsp;<span>11.2</span></a> by adding a <em>regularization term</em> to the loss function. The ridge-regularized empirical risk minimization problem is</p>
+<p><span id="eq-ridge-regression"><span class="math display">\[
 \begin{aligned}
     L(\mathbf{w}) &amp;= \frac{1}{n}\left[ \lVert \Phi(\mathbf{X}) \mathbf{w} - \mathbf{y} \rVert_2^2 + \Lambda \lVert \mathbf{w}\rVert_2^2 \right] \\
-           &amp;= \underbrace{\frac{1}{n} \sum_{i = 1}^n (\langle\mathbf{w}, \phi(\mathbf{x}_i)\rangle - y_i)^2} + \frac{\Lambda}{n} \sum_{j = 1}^p w_{j}^2  \;.
-\end{aligned}
-\]</span></p>
-<p>The gradient of the loss function is <span id="eq-gradient"><span class="math display">\[
-\nabla L(\mathbf{w}) = \frac{2}{n}\phi(\mathbf{X})^T(\phi(\mathbf{X})\mathbf{w} - \mathbf{y}) + 2\frac{\Lambda}{n} \mathbf{w}\;.
-\tag{11.5}\]</span></span></p>
-<p>Unusually in this class, we can actually find the minimum of <span class="math inline">\(L(\mathbf{w})\)</span> using the first-derivative test: we set <span class="math inline">\(\nabla L(\hat{\mathbf{w}}) = \mathbf{0}\)</span> and solve for <span class="math inline">\(\hat{\mathbf{w}}\)</span>. This equation is:</p>
-<p><span class="math display">\[
-\mathbf{0} = \frac{2}{n}\phi(\mathbf{X})^T(\phi(\mathbf{X})\mathbf{w} - \mathbf{y}) + 2\frac{\Lambda}{n}  \mathbf{w}\;.
-\]</span></p>
-<p>We can cancel the <span class="math inline">\(\frac{2}{n}\)</span>s and move everything that depends on <span class="math inline">\(\mathbf{w}\)</span> to one side of the equation:</p>
-<p><span class="math display">\[
-- \phi(\mathbf{X})^T\phi(\mathbf{X})\hat{\mathbf{w}} - \Lambda \hat{\mathbf{w}}  = -\phi(\mathbf{X})^T\mathbf{y} \;.
-\]</span></p>
-<p>or</p>
-<p><span class="math display">\[
-\left[\phi(\mathbf{X})^T\phi(\mathbf{X}) + \Lambda \mathbf{I} \right]\hat{\mathbf{w}}  = \phi(\mathbf{X})^T\mathbf{y} \;.
-\]</span></p>
-<p>This is a matrix-vector equation of the familiar form <span class="math inline">\(\mathbf{A}\mathbf{x} = \mathbf{b}\)</span>, where <span class="math inline">\(\mathbf{A} = \phi(\mathbf{X})^T\phi(\mathbf{X}) + \Lambda \mathbf{I} \in \mathbb{R}^{p \times p}\)</span>, <span class="math inline">\(\mathbf{x} = \mathbf{w} \in \mathbb{R}^{p}\)</span>, and <span class="math inline">\(\mathbf{b} = \phi(\mathbf{X})^T\mathbf{y} \in \mathbb{R}^p\)</span>.</p>
-<p>You may remember from linear algebra that this equation has exactly one solution *provided that the matrix <span class="math inline">\(\mathbf{A} = \phi(\mathbf{X})^T\phi(\mathbf{X}) + \Lambda \mathbf{I}\)</span> has full rank (<span class="math inline">\(p\)</span> linearly independent rows/columns), which implies that it is invertible. This is guaranteed to be the case provided that <span class="math inline">\(\Lambda &gt; 0\)</span>. So, we can invert the matrix and find that the optimal choice of <span class="math inline">\(\hat{vw}\)</span> is</p>
-<p><span id="eq-ridge-regression-closed"><span class="math display">\[
-\begin{aligned}
-    \hat{\mathbf{w}} = \left[\phi(\mathbf{X})^T\phi(\mathbf{X}) + \Lambda \mathbf{I} \right]^{-1} \phi(\mathbf{X})^T\mathbf{y}\;.
+           &amp;= \underbrace{\frac{1}{n} \sum_{i = 1}^n (\bracket{\mathbf{w}, \phi(\mathbf{x}_i)} - y_i)^2} + \frac{\Lambda}{n} \sum_{j = 2}^p w_{j}^2  \;.
 \end{aligned}
 \tag{11.6}\]</span></span></p>
-<p>Let’s see this formula in action. We’ll start by fitting a model to the linear trend that we saw in the beginning of these notes:</p>
-<div id="cell-3" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>plot_regression_data(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="40-linear-regression_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
-</figure>
+<p>The second term in this expression is the <em>penalty term</em>. We can see that this term is large when the entries <span class="math inline">\(w_{j}\)</span> are large in magnitude. The effect of applying this term is therefore to shrink the entries of <span class="math inline">\(\mathbf{w}\)</span> towards zero. The parameter <span class="math inline">\(\Lambda\)</span> controls the strength of this effect: small values of <span class="math inline">\(\Lambda\)</span> lead to results very similar to standard linear regression, while large values of <span class="math inline">\(\Lambda\)</span> lead to very small values of <span class="math inline">\(\mathbf{w}\)</span>.</p>
+<p>There is a small important subtlety in the regularization term in <a href="#eq-ridge-regression" class="quarto-xref">Equation&nbsp;<span>11.6</span></a>: the sum over the entries of <span class="math inline">\(\mathbf{w}\)</span> starts at <span class="math inline">\(j = 2\)</span>. We do this because the first entry of <span class="math inline">\(\mathbf{w}\)</span>, <span class="math inline">\(w_1\)</span>, corresponds to the constant feature and therefore corresponds to the overall scale of the data. Regularizing this term usually leads to systematic over- or under-estimation, and so we leave it out of the regularization term.</p>
+<p>Fortunately, it’s possible to derive a closed-form expression for the ridge regression problem in a way which is very similar to regular linear regression. We can write the regularized empirical risk in matrix form as</p>
+<p><span class="math display">\[
+\begin{aligned}
+    L(\mathbf{w}) &amp;= \frac{1}{n} \norm{\Phi(\mathbf{X})\mathbf{w} - \mathbf{y}}_2^2 + \frac{\Lambda}{n}\norm{\mathbf{U}\mathbf{w}}_2^2\;,
+\end{aligned}
+\]</span></p>
+<p>where we’ve defined the matrix <span class="math display">\[
+\begin{aligned}
+    \mathbf{U} = \begin{pmatrix}
+        0 &amp; \mathbf{0}  \\
+        \mathbf{0} &amp; \mathbf{I}  
+    \end{pmatrix}
+\end{aligned}
+\]</span></p>
+<p>with a <span class="math inline">\(0\)</span> on the upper-left corner and the <span class="math inline">\((p-1)\times (p-1)\)</span> identity matrix <span class="math inline">\(\mathbf{I}\)</span> in the lower-right corner. The effect of multiplication by <span class="math inline">\(\mathbf{U}\)</span> is to zero out the first entry of <span class="math inline">\(\mathbf{w}\)</span>, therefore excluding it from the regularization term.</p>
+<p>The gradient of the loss is</p>
+<p><span class="math display">\[
+\begin{aligned}
+    \nabla L(\mathbf{w}) &amp;= \frac{2}{n}\phi(\mathbf{X})^T(\phi(\mathbf{X})\mathbf{w} - \mathbf{y}) + 2\frac{\Lambda}{n} \mathbf{U}\mathbf{w}\;.
+\end{aligned}
+\]</span></p>
+<p>Solving for <span class="math inline">\(\mathbf{w}\)</span> like before, we find our optimal parameter vector from the formula:</p>
+<p><span class="math display">\[
+\begin{aligned}
+    \hat{\mathbf{w}} = \left[\phi(\mathbf{X})^T\phi(\mathbf{X}) + \Lambda \mathbf{U} \right]^{-1} \phi(\mathbf{X})^T\mathbf{y}\;.
+\end{aligned}
+\]</span></p>
+<p>Let’s construct a new class to implement ridge regression. We’ll let this class inherit from <code>LinearRegression</code> so that we can use the same methods for prediction and scoring.</p>
+<div id="d553798d" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RidgeRegression(LinearRegression):</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> fit(<span class="va">self</span>, X, y, lam <span class="op">=</span> <span class="fl">0.01</span>):</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        X_ <span class="op">=</span> pad(X)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        n, p <span class="op">=</span> X_.size(<span class="dv">0</span>), X_.size(<span class="dv">1</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># main computation</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        U <span class="op">=</span> torch.zeros(p, p)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>        U[<span class="dv">1</span>:, <span class="dv">1</span>:] <span class="op">=</span> torch.eye(p<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.w <span class="op">=</span> torch.inverse(X_.t()<span class="op">@</span>X_ <span class="op">+</span> lam<span class="op">*</span>U)<span class="op">@</span>X_.t()<span class="op">@</span>y</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s go ahead and try out our ridge regression implementation:</p>
+<div id="80e8587c" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>rr <span class="op">=</span> RidgeRegression()</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>rr.fit(X_train, y_train, lam <span class="op">=</span> <span class="dv">100</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>rr_performance <span class="op">=</span> rr.mse(X_val, y_val)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(rr_performance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor(1.7933e+08)</code></pre>
 </div>
 </div>
+<p>This is already a modest improvement over the linear regression performance of tensor(1.7944e+08). Importantly, we can do even better with more features: it is possible to show that the matrix <span class="math inline">\(\Phi(\mathbf{X})^T\Phi(\mathbf{X}) + \lambda \mathbf{U}\)</span> is invertible whenever <span class="math inline">\(\lambda &gt; 0\)</span>. Let’s try the same computation as last time:</p>
+<div id="5de650c0" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>pf <span class="op">=</span> PolynomialFeatures(degree <span class="op">=</span> <span class="dv">2</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>phi <span class="op">=</span> <span class="kw">lambda</span> X: torch.Tensor(pf.fit_transform(X)[:,<span class="dv">1</span>:])</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>PHI_train <span class="op">=</span> phi(X_train)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>rr <span class="op">=</span> RidgeRegression()</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>rr.fit(PHI_train, y_train, lam <span class="op">=</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now we can implement <a href="#eq-ridge-regression-closed" class="quarto-xref">Equation&nbsp;<span>11.6</span></a>.</p>
-<div id="cell-5" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ridge_regression(X, y, lam <span class="op">=</span> <span class="fl">1.0</span>):</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> X.size(<span class="dv">1</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    w_hat <span class="op">=</span> torch.inverse(X.T<span class="op">@</span>X <span class="op">+</span> lam<span class="op">*</span>torch.eye(p))<span class="op">@</span>X.T<span class="op">@</span>y</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> w_hat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>To assess the quality of our fit, let’s measure the MSE (the unregularized term of the empirical risk):</p>
-<div id="cell-7" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse(X, y, w):</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ((X<span class="op">@</span>w <span class="op">-</span> y)<span class="op">**</span><span class="dv">2</span>).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Training our model is as simple as calling the function we implemented.</p>
-<div id="cell-9" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>w_hat <span class="op">=</span> ridge_regression(X, y, lam <span class="op">=</span> <span class="fl">1.0</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>plot_regression_data(X, y, w <span class="op">=</span> w_hat, title <span class="op">=</span> <span class="ss">f"MSE = </span><span class="sc">{</span>mse(X, y, w_hat)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="40-linear-regression_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
-</figure>
+<p>Unlike with simple linear regression, we were able to fit our model. Even better, we’ve realized another small reduction in the MSE:</p>
+<div id="4948b860" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>PHI_val <span class="op">=</span> phi(X_val)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>rr_features_performance <span class="op">=</span> rr.mse(PHI_val, y_val)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(rr_features_performance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor(1.7917e+08)</code></pre>
 </div>
 </div>
-</div>
-<p>How did we do on the test data?</p>
-<div id="cell-11" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>X_test, y_test <span class="op">=</span> regression_data(<span class="dv">100</span>, w)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>plot_regression_data(X_test, y_test, w <span class="op">=</span> w_hat, title <span class="op">=</span> <span class="ss">f"MSE = </span><span class="sc">{</span>mse(X_test, y_test, w_hat)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="40-linear-regression_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Not bad! The MSE is similar on the training and testing data, suggesting that we have not overfit.</p>
-<p>The effect of increasing <span class="math inline">\(\Lambda\)</span> is to reduce the values of the entries <span class="math inline">\(\hat{\mathbf{w}}\)</span>. Choosing <span class="math inline">\(\Lambda\)</span> to be too large can lead to undesirable fits:</p>
-<div id="cell-13" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>w_hat <span class="op">=</span> ridge_regression(X, y, lam <span class="op">=</span> <span class="fl">100.0</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>plot_regression_data(X, y, w <span class="op">=</span> w_hat, title <span class="op">=</span> <span class="ss">f"MSE = </span><span class="sc">{</span>mse(X, y, w_hat)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="40-linear-regression_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-</section>
-<section id="nonlinear-feature-maps" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="nonlinear-feature-maps">Nonlinear Feature Maps</h2>
-<p>Suppose now that we want to model data with a nonlinear trend:</p>
-<div id="cell-15" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> regression_data(<span class="dv">100</span>, w, x_max<span class="op">=</span><span class="dv">2</span><span class="op">*</span>torch.pi, phi <span class="op">=</span> torch.sin)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>plot_regression_data(X, y, w, phi <span class="op">=</span> torch.sin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="40-linear-regression_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>As usual, we can apply a nonlinear feature map in order to be able to model this nonlinear pattern using techniques from convex linear models. First we’ll implement a feature map for our data:</p>
-<div id="cell-17" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PolynomialFeatures</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>pf <span class="op">=</span> PolynomialFeatures(degree <span class="op">=</span> <span class="dv">5</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>phi <span class="op">=</span> <span class="kw">lambda</span> X: torch.Tensor(pf.fit_transform(X))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>After computing the matrix of features, we can use our some ridge-regression solver from before:</p>
-<div id="cell-19" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>PHI <span class="op">=</span> phi(X)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>w_hat <span class="op">=</span> ridge_regression(PHI, y, lam <span class="op">=</span> <span class="dv">1</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>plot_regression_data(X, y, w <span class="op">=</span> w_hat, phi <span class="op">=</span> phi, title <span class="op">=</span> <span class="ss">f"MSE = </span><span class="sc">{</span>mse(phi(X), y, w_hat)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="40-linear-regression_files/figure-html/cell-11-output-1.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>This looks like it works fine! Choosing polynomial features of too high a degree leads to problems at the boundaries, though:</p>
-<div id="cell-21" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>pf <span class="op">=</span> PolynomialFeatures(degree <span class="op">=</span> <span class="dv">15</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>phi <span class="op">=</span> <span class="kw">lambda</span> X: torch.Tensor(pf.fit_transform(X))</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>PHI <span class="op">=</span> phi(X)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>w_hat <span class="op">=</span> ridge_regression(PHI, y, lam <span class="op">=</span> <span class="dv">1</span>)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>plot_regression_data(X, y, w <span class="op">=</span> w_hat, phi <span class="op">=</span> phi, title <span class="op">=</span> <span class="ss">f"MSE = </span><span class="sc">{</span>mse(phi(X), y, w_hat)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="40-linear-regression_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Although we can try to address this problem with further regularization, the results can be hard to predict:</p>
-<div id="cell-23" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>w_hat <span class="op">=</span> ridge_regression(PHI, y, lam <span class="op">=</span> <span class="dv">100</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>plot_regression_data(X, y, w <span class="op">=</span> w_hat, phi <span class="op">=</span> phi, title <span class="op">=</span> <span class="ss">f"MSE = </span><span class="sc">{</span>mse(phi(X), y, w_hat)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="40-linear-regression_files/figure-html/cell-13-output-1.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Hmmm, is that better?</p>
-<p>Here’s a more systematic sweep in which we vary the both the regularization strength <span class="math inline">\(\lambda\)</span> and the degree of the polynomial features <span class="math inline">\(d\)</span>. We fit the model using our ridge regression function above, and then evaluate the MSE on a test set.</p>
-<div id="cell-25" class="cell" data-execution_count="13">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># test set</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>X_test, y_test <span class="op">=</span> regression_data(<span class="dv">100</span>, w, x_max<span class="op">=</span><span class="dv">2</span><span class="op">*</span>torch.pi, phi <span class="op">=</span> torch.sin)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>degrees <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>]</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>LAM     <span class="op">=</span> [<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">100</span>]</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">4</span>, <span class="dv">4</span>, figsize <span class="op">=</span> (<span class="dv">10</span>, <span class="dv">8</span>))</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co"># main loop</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>):</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>): </span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        pf <span class="op">=</span> PolynomialFeatures(degree <span class="op">=</span> degrees[i])</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        phi <span class="op">=</span> <span class="kw">lambda</span> X: torch.Tensor(pf.fit_transform(X))</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        PHI <span class="op">=</span> phi(X)</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        w_hat <span class="op">=</span> ridge_regression(PHI, y, lam <span class="op">=</span> LAM[j])</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        plot_regression_data(X_test, y_test, w <span class="op">=</span> w_hat, phi <span class="op">=</span> phi, ax <span class="op">=</span> ax[i, j], legend <span class="op">=</span> <span class="va">False</span>, xlabel <span class="op">=</span> i <span class="op">==</span> <span class="dv">3</span>, ylabel <span class="op">=</span> j <span class="op">==</span> <span class="dv">0</span>)</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        ax[i,j].<span class="bu">set</span>(title <span class="op">=</span> <span class="vs">fr"$d = $</span><span class="sc">{</span>degrees[i]<span class="sc">}</span><span class="vs">, $\Lambda = $</span><span class="sc">{</span>LAM[j]<span class="sc">}</span><span class="vs">, MSE = </span><span class="sc">{</span>mse(phi(X_test), y_test, w_hat)<span class="sc">:.4f}</span><span class="vs">"</span>)</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="40-linear-regression_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>We observe that there is a “happy medium” for the choice of polynomial degree and regularization strength: degree-5 polynomial features with light regularization seem to perform best on unseen data. In most applications, these hyperparameters are selected using cross-validation.</p>
-<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">Regression with polynomial features is not usually advised due to the strange behavior of the predictors at the boundary of the domain, which is on display in several of the plots above. We’ll soon study kernel methods, which offer a preferable alternative to polynomial regression.</span></div></div>
+<p>It’s also possible to train with even higher-dimensional feature maps, although this tends to make our computations slow (inverting large matrices is expensive) and is not guaranteed to lead to performance improvements.</p>
 </section>
 <section id="computational-complexity" class="level2">
 <h2 class="anchored" data-anchor-id="computational-complexity">Computational Complexity</h2>
 <p>Is that all there is to least-squares linear regression? Of course not!</p>
 <section id="other-regularizers" class="level3">
 <h3 class="anchored" data-anchor-id="other-regularizers">Other Regularizers</h3>
-<p>Not if we use different regularization terms! An especially popular regularizer is the <span class="math inline">\(\ell_1\)</span> regularizer that we <a href="../chapters/30-features-regularization.html">discussed previous</a>. If we use this regularizer in addition to or instead of the <span class="math inline">\(\ell_2\)</span> regularization term, then we can’t use the closed-form matrix formula above.</p>
-</section>
-<section id="kernels" class="level3">
-<h3 class="anchored" data-anchor-id="kernels">Kernels</h3>
-<p>Using polynomial feature maps is not always ideal due to poor behavior at the data boundaries, but how else can we model nonlinearities in our data? We’ll soon learn how to use <em>kernels</em> to introduce manageable nonlinearities.</p>
+<p>Not if we use different regularization terms! An especially popular regularizer is the <span class="math inline">\(\ell_1\)</span> regularizer, which penalizes entries of <span class="math inline">\(\mathbf{w}\)</span> based on their absolute value rather than their square. If we use this regularizer in addition to or instead of the <span class="math inline">\(\ell_2\)</span> regularization term, then we can’t use the closed-form matrix formula above.</p>
 </section>
 <section id="gradient-methods" class="level3">
 <h3 class="anchored" data-anchor-id="gradient-methods">Gradient Methods</h3>
@@ -728,6 +963,11 @@ window.Quarto = {
 <p>Sometimes <em>even this</em> is too hard: for sufficiently large <span class="math inline">\(p\)</span>, even computing the matrix multiplication <span class="math inline">\(\Phi(\mathbf{X})^T\Phi(\mathbf{X})\)</span> required for gradient descent is too computationally intensive. In this case, <em>stochastic</em> gradient methods can be used; we’ll study these in a coming lecture.</p>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-obermeyerDissectingRacialBias2019b" class="csl-entry" role="listitem">
+Obermeyer, Ziad, Brian Powers, Christine Vogeli, and Sendhil Mullainathan. 2019. <span>“Dissecting Racial Bias in an Algorithm Used to Manage the Health of Populations.”</span> <em>Science</em> 366 (6464): 447–53. <a href="https://doi.org/10.1126/science.aax2342">https://doi.org/10.1126/science.aax2342</a>.
+</div>
+</div>
 </section>
 </section>
 

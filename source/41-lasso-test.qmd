@@ -1,0 +1,75 @@
+```{python}
+import torch
+from matplotlib import pyplot as plt
+plt.style.use('seaborn-v0_8-whitegrid')
+```
+
+
+```{python}
+p = 100
+
+w = torch.randn(p)
+b = 1.0
+
+def regression_data(n, p, w, b):
+    X = torch.randn(n, p)
+    y = X @ w + b + 0.1 * torch.randn(n)
+    return X, y
+
+X, y = regression_data(100, p, w, b)
+```
+
+```{python}
+
+def lasso_loss(X, y, w, b, alpha):
+    return 0.5 * (X @ w + b - y).pow(2).mean() + alpha * w.abs().sum()
+
+
+def lasso_fit(X, y, alpha, lr=0.1, n_iter=100):
+    p = X.shape[1]
+    w = torch.zeros(p, requires_grad=True)
+    b = torch.zeros(1, requires_grad=True)
+    for i in range(n_iter):
+        loss = lasso_loss(X, y, w, b, alpha)
+        print(loss)
+        loss.backward()
+        with torch.no_grad():
+            w -= lr * w.grad
+            b -= lr * b.grad
+            w.grad.zero_()
+            b.grad.zero_()
+    return w, b
+```
+
+```{python}
+w_hat, b_hat = lasso_fit(X, y, alpha = 100, lr = 0.001, n_iter = 10000)
+```
+
+```{python}
+plt.scatter(torch.arange(p), torch.sort(w_hat).values.detach().numpy())
+```
+
+
+```{python}
+def lass_fit_coordinate_descent(X, y, alpha, lr=0.1, n_iter=100):
+    n, p = X.shape
+    w = torch.zeros(p, requires_grad=True)
+    b = torch.zeros(1, requires_grad=True)
+    for i in range(n_iter):
+        for j in range(p):
+            loss = lasso_loss(X, y, w, b, alpha)
+            print(loss)
+            loss.backward()
+            with torch.no_grad():
+                w[j] -= lr * w.grad[j]
+                w.grad.zero_()
+    return w, b
+```
+
+```{python}
+w_hat, b_hat = lass_fit_coordinate_descent(X, y, alpha = 2, lr = 0.001, n_iter = 10000)
+```
+
+```{python}
+plt.scatter(torch.arange(p), torch.sort(w_hat).values.detach().numpy())
+```

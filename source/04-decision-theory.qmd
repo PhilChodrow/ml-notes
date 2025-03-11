@@ -255,7 +255,7 @@ It is common to normalize these counts into rates:
 
 |                | Abbreviation| Formula   | |
 |----------------|----|:--------------:|-|
-| True  negative  rate | TNR | $\frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}$|
+| True  negative  rate | TNR | $\frac{\mathrm{TN}}{\mathrm{FP} + \mathrm{TN}}$|
 | False positive rate | FPR | $\frac{\mathrm{FP}}{\mathrm{FP} + \mathrm{TN}}$|
 | False negative rate | FNR | $\frac{\mathrm{FN}}{\mathrm{TP} + \mathrm{FN}}$|
 | True  positive rate  | TPR | $\frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}$| 
