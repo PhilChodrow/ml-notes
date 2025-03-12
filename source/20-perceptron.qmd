@@ -302,7 +302,7 @@ from hidden.perceptron import Perceptron, PerceptronOptimizer
 #| fig-cap: 'Several iterations of the perceptron algorithm. In each panel, the dashed line is the hyperplane corresponding to the previous weight vector $\mathbf{w}^{(t)}$, while the solid line is the hyperplane for the updated weight vector $\mathbf{w}^{t+1}$. The empty circle is the point $i$ used in the update; only iterations in which $i$ was a mistake are shown. The loss is computed as in @eq-loss.'
 #| label: fig-demonstration
 
-torch.manual_seed(123456)
+torch.manual_seed(1234567)
 
 # initialize a perceptron 
 p = Perceptron()
