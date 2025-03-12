@@ -167,7 +167,7 @@ Now let's go ahead and run the perceptron algorithm on some data. First we shoul
 
 ```{python}
 torch.manual_seed(1234)
-X, y = perceptron_data(n_points = 50, noise = 0.25)
+X, y = perceptron_data(n_points = 50, noise = 0.3)
 fig, ax = plt.subplots(1, 1, figsize = (4, 4))
 ax.set(xlim = (-1, 2), ylim = (-1, 2))
 plot_perceptron_data(X, y, ax)
