@@ -583,7 +583,7 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 <section id="example" class="level3">
 <h3 class="anchored" data-anchor-id="example">Example</h3>
 <p>Now let’s go ahead and run the perceptron algorithm on some data. First we should set up our feature matrix <span class="math inline">\(\mathbf{X}\)</span> and target vector <span class="math inline">\(\mathbf{y}\)</span>.</p>
-<div id="a98f5bc8" class="cell" data-execution_count="3">
+<div id="205c3684" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">1234</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> perceptron_data(n_points <span class="op">=</span> <span class="dv">50</span>, noise <span class="op">=</span> <span class="fl">0.3</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
@@ -599,10 +599,10 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 </div>
 <p>You may be able to eyeball the fact that this data is <em>linearly separable</em>: it is possible to draw a line that perfectly separates the two clusters. We can think of the perceptron algorithm as searching for such a line.</p>
 <p>Let’s start with a random guess for the weight vector <span class="math inline">\(\mathbf{w}\)</span>:</p>
-<div id="b9b674f1" class="cell" data-execution_count="4">
+<div id="a6135604" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> torch.Tensor([<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="628eea4b" class="cell" data-execution_count="5">
+<div id="d088f481" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
@@ -619,22 +619,22 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 </div>
 </div>
 <p>Well, that doesn’t seem very promising. So, let’s do the perceptron update! First, we need to pick a random data point:</p>
-<div id="e1ef85b2" class="cell" data-execution_count="6">
+<div id="276d0e4f" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display" data-execution_count="6">
-<pre><code>&lt;torch._C.Generator at 0x120bab050&gt;</code></pre>
+<pre><code>&lt;torch._C.Generator at 0x12451aff0&gt;</code></pre>
 </div>
 </div>
-<div id="a16eb9f5" class="cell" data-execution_count="7">
+<div id="0c9cca2b" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> X.shape[<span class="dv">0</span>] <span class="co"># number of data points</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>i <span class="op">=</span> torch.randint(n, size <span class="op">=</span> (<span class="dv">1</span>,)) <span class="co"># index of a random data point</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>x_i <span class="op">=</span> X[[i],] <span class="co"># the random data point itself</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we need to compute the score:</p>
-<div id="4e8e5154" class="cell" data-execution_count="8">
+<div id="47160440" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>s_i <span class="op">=</span> x_i<span class="op">@</span>w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We need to compare the score to the value of the target <span class="math inline">\(y_i\)</span>:</p>
-<div id="cfe2a940" class="cell" data-execution_count="9">
+<div id="4afda3f0" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>y_i <span class="op">=</span> y[i]</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>s_i, y_i</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
@@ -642,11 +642,11 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 </div>
 </div>
 <p>In this case, the score and the target have opposite signs, which means that we need to perform the perceptron update:</p>
-<div id="031bc4a4" class="cell" data-execution_count="10">
+<div id="76c5e6c1" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> w <span class="op">+</span> (<span class="dv">2</span><span class="op">*</span>y_i<span class="op">-</span><span class="dv">1</span>)<span class="op">*</span>x_i</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>If we now check the decision boundary again, it appears visually that it has improved slightly:</p>
-<div id="8c418e7e" class="cell" data-execution_count="11">
+<div id="b21aa371" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
@@ -667,7 +667,7 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 <h3 class="anchored" data-anchor-id="a-minimal-training-loop">A Minimal Training Loop</h3>
 <p>Now it’s time for us to introduce a <em>training loop</em>. In the training loop, we simply repeat the above procedure for a specified number of times (or until convergence). We’re going to illustrate this using a specific <em>organization</em> of our computational steps, which will stick with us throughout most of the rest of these notes.</p>
 <div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">The classes <code>Perceptron</code> and <code>PerceptronOptimizer</code> are defined in an external script. You’ll have the opportunity to implement and experiment with these classes in an upcoming assignment.</span></div></div>
-<div id="b9868004" class="cell" data-execution_count="12">
+<div id="9b7e7ab1" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hidden.perceptron <span class="im">import</span> Perceptron, PerceptronOptimizer</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># instantiate a model and an optimizer</span></span>
@@ -696,7 +696,7 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 <span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    opt.step(x_i, y_i)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can track the progress of our training by checking the values of the loss function over time:</p>
-<div id="ecb36855" class="cell" data-execution_count="13">
+<div id="6cc13cd1" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plt.plot(loss_vec, color <span class="op">=</span> <span class="st">"slategrey"</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(torch.arange(<span class="bu">len</span>(loss_vec)), loss_vec, color <span class="op">=</span> <span class="st">"slategrey"</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Perceptron Iteration (Updates Only)"</span>, ylabel <span class="op">=</span> <span class="st">"loss"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -784,16 +784,16 @@ Figure&nbsp;7.3: Several iterations of the perceptron algorithm. In each panel, 
 <p>Does the perceptron algorithm always improve our accuracy? Is it guaranteed to terminate? If it does terminate, is the result guaranteed to be a weight vector <span class="math inline">\(\mathbf{w}\)</span> that perfectly separates the two data classes?</p>
 <section id="local-improvement-on-data-point-i" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="local-improvement-on-data-point-i">Local Improvement on Data Point <span class="math inline">\(i\)</span></h3>
-<p>Let’s first check that the perceptron update in <a href="#eq-perceptron-update" class="quarto-xref">Equation&nbsp;<span>7.6</span></a> actually improves the prediction on data point <span class="math inline">\(i\)</span> if there is currently a mistake on that point (i.e.&nbsp;if <span class="math inline">\(s^{(t)}_i y_i &lt; 0\)</span>). We can do this by computing the new <span class="math inline">\(s_i^{(t+1)}\)</span>. Remember, what we want is for the sign of <span class="math inline">\(s_i^{(t+1)}\)</span> to match <span class="math inline">\(y_i\)</span>.</p>
+<p>Let’s first check that the perceptron update in <a href="#eq-perceptron-update" class="quarto-xref">Equation&nbsp;<span>7.6</span></a> actually improves the prediction on data point <span class="math inline">\(i\)</span> if there is currently a mistake on that point (i.e.&nbsp;if <span class="math inline">\(s^{(t)}_i y_i &lt; 0\)</span>). We can do this by computing the new <span class="math inline">\(s_i^{(t+1)}\)</span>. Remember, what we want is for the sign of <span class="math inline">\(s_i^{(t+1)}\)</span> to match <span class="math inline">\(2y_i-1\)</span>.</p>
 <p><span class="math display">\[
 \begin{align}
 s_i^{(t+1)} &amp;= \langle \mathbf{w}^{(t+1)}, \mathbf{x}_i\rangle  &amp;\text{(definition of $s_i^{(t+1)}$)}\\
-               &amp;= \langle \mathbf{w}^{(t)} + y_i\mathbf{x}_i, \mathbf{x}_i\rangle &amp;\text{(perceptron update)} \\
-               &amp;= \langle \mathbf{w}^{(t)},\mathbf{x}_i\rangle + y_i\langle \mathbf{x}_i, \mathbf{x}_i\rangle &amp;\text{(linearity of $\langle \cdot\rangle$)}\\
-               &amp;= s_i^{(t)} + y_i \lVert \mathbf{x}_i\rVert_2^2\;. &amp;\text{(definition of $s_i^{(t)}$ and $\lVert \mathbf{x}_i\rVert$)}
+               &amp;= \langle \mathbf{w}^{(t)} + (2y_i-1)\mathbf{x}_i, \mathbf{x}_i\rangle &amp;\text{(perceptron update)} \\
+               &amp;= \langle \mathbf{w}^{(t)},\mathbf{x}_i\rangle + (2y_i-1)\langle \mathbf{x}_i, \mathbf{x}_i\rangle &amp;\text{(linearity of $\langle \cdot\rangle$)}\\
+               &amp;= s_i^{(t)} + (2y_i-1) \lVert \mathbf{x}_i\rVert_2^2\;. &amp;\text{(definition of $s_i^{(t)}$ and $\lVert \mathbf{x}_i\rVert$)}
 \end{align}
 \]</span></p>
-<div class="page-columns page-full"><p> Since <span class="math inline">\(\lVert\mathbf{x}_i\rVert &gt; 0\)</span>, we conclude that <span class="math inline">\(s_i\)</span> always moves in the right direction: if <span class="math inline">\(y_i = 1\)</span> then <span class="math inline">\(s_i^{(t+1)} &gt; s_i^{(t)}\)</span>, while if <span class="math inline">\(y_i = -1\)</span> then <span class="math inline">\(s_i^{(t+1)} &lt; s_i^{(t)}\)</span>.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">Again, this is only if <span class="math inline">\(s^{(t)}_i y_i &lt; 0\)</span>; otherwise there is no change in <span class="math inline">\(s_i^{(t)}\)</span> in the current iteration.</span></div></div>
+<div class="page-columns page-full"><p> Since <span class="math inline">\(\lVert\mathbf{x}_i\rVert &gt; 0\)</span>, we conclude that <span class="math inline">\(s_i\)</span> always moves in the right direction: if <span class="math inline">\(y_i = 1\)</span> then <span class="math inline">\(s_i^{(t+1)} &gt; s_i^{(t)}\)</span>, while if <span class="math inline">\(y_i = 0\)</span> then <span class="math inline">\(s_i^{(t+1)} &lt; s_i^{(t)}\)</span>.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">Again, this is only if <span class="math inline">\(s^{(t)}_i (2y_i-1) &lt; 0\)</span>; otherwise there is no change in <span class="math inline">\(s_i^{(t)}\)</span> in the current iteration.</span></div></div>
 </section>
 <section id="global-properties" class="level3">
 <h3 class="anchored" data-anchor-id="global-properties">Global Properties</h3>
