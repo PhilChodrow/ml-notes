@@ -15,7 +15,7 @@ book:
         - source/12-statistical-fairness.qmd
     - part: "Machine Learning Models"
       chapters:
-        - source/20-perceptron.ipynb
+        - source/20-perceptron.qmd
         - source/22-convex-erm.ipynb
         - source/23-gradient-descent.ipynb
         - source/30-features-regularization.qmd

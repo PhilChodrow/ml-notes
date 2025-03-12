@@ -431,7 +431,7 @@ window.Quarto = {
 </div></div><section id="our-data" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="our-data">Our Data</h3>
 <p>The perceptron algorithm aims to find a rule for separating two distinct groups in some data. Here’s an example of some data on which we might aim to apply the perceptron:</p>
-<div id="cell-fig-scatter" class="cell page-columns page-full" data-execution_count="3">
+<div id="cell-fig-scatter" class="cell page-columns page-full" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -447,30 +447,29 @@ window.Quarto = {
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> torch.cat((X, torch.ones((X.shape[<span class="dv">0</span>], <span class="dv">1</span>))), <span class="dv">1</span>)</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># convert y from {0, 1} to {-1, 1}</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="dv">2</span><span class="op">*</span>y <span class="op">-</span> <span class="dv">1</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X, y</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> perceptron_data(n_points <span class="op">=</span> <span class="dv">300</span>, noise <span class="op">=</span> <span class="fl">0.2</span>)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_perceptron_data(X, y, ax):</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> X.shape[<span class="dv">1</span>] <span class="op">==</span> <span class="dv">3</span>, <span class="st">"This function only works for data created with p_dims == 2"</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    targets <span class="op">=</span> [<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>]</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    markers <span class="op">=</span> [<span class="st">"o"</span> , <span class="st">","</span>]</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        ix <span class="op">=</span> y <span class="op">==</span> targets[i]</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X[ix,<span class="dv">0</span>], X[ix,<span class="dv">1</span>], s <span class="op">=</span> <span class="dv">20</span>,  c <span class="op">=</span> y[ix], facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"darkgrey"</span>, cmap <span class="op">=</span> <span class="st">"BrBG"</span>, vmin <span class="op">=</span> <span class="op">-</span><span class="dv">2</span>, vmax <span class="op">=</span> <span class="dv">2</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>, marker <span class="op">=</span> markers[i])</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"$x_1$"</span>, ylabel <span class="op">=</span> <span class="vs">r"$x_2$"</span>)</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> perceptron_data()</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>plot_perceptron_data(X, y, ax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X, y</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> perceptron_data(n_points <span class="op">=</span> <span class="dv">300</span>, noise <span class="op">=</span> <span class="fl">0.2</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_perceptron_data(X, y, ax):</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> X.shape[<span class="dv">1</span>] <span class="op">==</span> <span class="dv">3</span>, <span class="st">"This function only works for data created with p_dims == 2"</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    targets <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    markers <span class="op">=</span> [<span class="st">"o"</span> , <span class="st">","</span>]</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        ix <span class="op">=</span> y <span class="op">==</span> targets[i]</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X[ix,<span class="dv">0</span>], X[ix,<span class="dv">1</span>], s <span class="op">=</span> <span class="dv">20</span>,  c <span class="op">=</span> <span class="dv">2</span><span class="op">*</span>y[ix]<span class="op">-</span><span class="dv">1</span>, facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"darkgrey"</span>, cmap <span class="op">=</span> <span class="st">"BrBG"</span>, vmin <span class="op">=</span> <span class="op">-</span><span class="dv">2</span>, vmax <span class="op">=</span> <span class="dv">2</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>, marker <span class="op">=</span> markers[i])</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"$x_1$"</span>, ylabel <span class="op">=</span> <span class="vs">r"$x_2$"</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> perceptron_data()</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>plot_perceptron_data(X, y, ax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-scatter" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-cap-location="margin">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="20-perceptron_files/figure-html/fig-scatter-output-1.png" class="img-fluid figure-img">
+<img src="20-perceptron_files/figure-html/fig-scatter-output-1.png" width="596" height="423" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.1: 300 data points in the 2d plane, each of which has one of two labels.
@@ -488,9 +487,9 @@ Figure&nbsp;7.1: 300 data points in the 2d plane, each of which has one of two l
 &amp; \vdots &amp; \vdots &amp; \vdots \\
 &amp; - &amp; \mathbf{x}_{n} &amp; - \end{matrix}\right]
 \]</span></li>
-<li>A <em>target variable</em> <span class="math inline">\(y_i\)</span>. In this data set, the target variable is has components equal to either <span class="math inline">\(-1\)</span> or <span class="math inline">\(1\)</span>.  You can think of it as representing a piece of yes-no information like whether a student is a computer science major or not. The target variables can be collected into a <em>target vector</em> <span class="math inline">\(\mathbf{y} = (y_1, \ldots, y_{n})^T \in \{-1,1\}^{n}\)</span>.</li>
+<li>A <em>target variable</em> <span class="math inline">\(y_i\)</span>. In this data set, the target variable is has components equal to either <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>.  You can think of it as representing a piece of yes-no information like whether a student is a computer science major or not. The target variables can be collected into a <em>target vector</em> <span class="math inline">\(\mathbf{y} = (y_1, \ldots, y_{n})^T \in \{0,1\}^{n}\)</span>.</li>
 </ul>
-<div class="no-row-height column-margin column-container"><span class="margin-aside">In many applications we assume that the target variable has values in <span class="math inline">\(\{0, 1\}\)</span>. For the perceptron, it turns out to be extra convenient to use <span class="math inline">\(\{-1, 1\}\)</span> instead.</span></div><p>More generally, supervised prediction problems with <span class="math inline">\(n\)</span> data points and <span class="math inline">\(k\)</span> features can be summarized in terms of a <em>feature matrix</em> <span class="math inline">\(\mathbf{X} \in \mathbb{R}^{n \times p}\)</span> and a <em>target vector</em> <span class="math inline">\(\mathbf{y} \in \mathbb{R}^n\)</span>.</p>
+<div class="no-row-height column-margin column-container"><span class="margin-aside">For the perceptron, it turns out to be extra convenient to use targets of <span class="math inline">\(\{-1, 1\}\)</span> instead; we’ll handle this by transforming a target <span class="math inline">\(y\)</span> into <span class="math inline">\(2y-1\)</span> which has the right values.</span></div><p>More generally, supervised prediction problems with <span class="math inline">\(n\)</span> data points and <span class="math inline">\(k\)</span> features can be summarized in terms of a <em>feature matrix</em> <span class="math inline">\(\mathbf{X} \in \mathbb{R}^{n \times p}\)</span> and a <em>target vector</em> <span class="math inline">\(\mathbf{y} \in \mathbb{R}^n\)</span>.</p>
 </section>
 <section id="linear-classifiers" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="linear-classifiers">Linear Classifiers</h3>
@@ -509,12 +508,12 @@ Figure&nbsp;7.1: 300 data points in the 2d plane, each of which has one of two l
 <i class="callout-icon"></i>
 </div>
 <div class="callout-body-container">
-<p>Throughout the remainder of these notes, we will assume that <span class="math inline">\(\mathbf{x}\)</span> has constant final feature value equal to 1. We’ll therefore just write <span class="math inline">\(\tilde{\mathbf{x}}\)</span> and <span class="math inline">\(\tilde{\mathbf{w}}\)</span> instead of <span class="math inline">\(\mathbf{x}\)</span> and <span class="math inline">\(\mathbf{w}\)</span>.</p>
+<p>Throughout the remainder of these notes, we will assume that <span class="math inline">\(\mathbf{x}\)</span> has constant final feature value equal to 1. We’ll therefore just write <span class="math inline">\(\mathbf{x}\)</span> and <span class="math inline">\(\mathbf{w}\)</span> instead of <span class="math inline">\(\tilde{\mathbf{x}}\)</span> and <span class="math inline">\(\tilde{\mathbf{w}}\)</span>.</p>
 </div>
 </div>
 </div>
 <p>When <span class="math inline">\(k = 2\)</span>, a hyperplane is just a line. Here are two candidate hyperplanes that we could use to classify our data. Which one looks like it better separates the two classes?</p>
-<div id="cell-fig-scatter-with-separators" class="cell page-columns page-full" data-execution_count="4">
+<div id="cell-fig-scatter-with-separators" class="cell page-columns page-full" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> draw_line(w, x_min, x_max, ax, <span class="op">**</span>kwargs):</span>
@@ -538,7 +537,7 @@ Figure&nbsp;7.1: 300 data points in the 2d plane, each of which has one of two l
 <div id="fig-scatter-with-separators" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-cap-location="margin">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-scatter-with-separators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="20-perceptron_files/figure-html/fig-scatter-with-separators-output-1.png" class="img-fluid figure-img">
+<img src="20-perceptron_files/figure-html/fig-scatter-with-separators-output-1.png" width="372" height="349" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-scatter-with-separators-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.2: Two candidate separating hyperplanes for our data. Which one would you choose?
@@ -553,8 +552,8 @@ Figure&nbsp;7.2: Two candidate separating hyperplanes for our data. Which one wo
 \tag{7.3}\]</span></span></p>
 <p>That is, if someone gave you the weight vector <span class="math inline">\(\mathbf{w}^{(1)}\)</span>, <strong><em>you wouldn’t need to see the data labels</em></strong>: you could exactly recover them using <a href="#eq-perceptron-predict" class="quarto-xref">Equation&nbsp;<span>7.3</span></a>.</p>
 <p>Let’s make this a little more precise. For fixed <span class="math inline">\(\mathbf{w}\)</span>, let <span class="math inline">\(s_i \triangleq \langle \mathbf{w}, \mathbf{x}_i \rangle\)</span> by the score. The classification <em>accuracy</em> of the two-label perceptron with weight <span class="math inline">\(\mathbf{w}\)</span>is</p>
-<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">We’ve used a little math trick here: take a moment to convince yourself that <a href="#eq-perceptron-predict" class="quarto-xref">Equation&nbsp;<span>7.3</span></a> is equivalent to the statement that <span class="math inline">\(s_i y_i &gt; 0\)</span>.</span></div></div>
-<p><span class="math display">\[A(\mathbf{w}) \triangleq \frac{1}{n} \sum_{i = 1}^n \mathbb{1}[s_i y_i &gt; 0]\;.\]</span></p>
+<div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">We’ve used a little math trick here: take a moment to convince yourself that <a href="#eq-perceptron-predict" class="quarto-xref">Equation&nbsp;<span>7.3</span></a> is equivalent to the statement that <span class="math inline">\(s_i (2y_i-1) &gt; 0\)</span>.</span></div></div>
+<p><span class="math display">\[A(\mathbf{w}) \triangleq \frac{1}{n} \sum_{i = 1}^n \mathbb{1}[s_i (2y_i-1) &gt; 0]\;.\]</span></p>
 <p>Higher accuracy means that the vector <span class="math inline">\(\mathbf{w}\)</span> predicts more correct labels via <a href="#eq-perceptron-predict" class="quarto-xref">Equation&nbsp;<span>7.3</span></a>. The <em>loss</em> (also called the <em>empirical risk</em>) is</p>
 <p><span id="eq-loss"><span class="math display">\[
 R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
@@ -575,33 +574,33 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 <ul>
 <li>Pick a random data point <span class="math inline">\(i \in \{1,\ldots,n\}\)</span>.</li>
 <li>Compute <span class="math inline">\(s^{(t)}_i = \langle \mathbf{w}^{(t)}, \mathbf{x}_i \rangle\)</span>.</li>
-<li>If <span class="math inline">\(s^{(t)}_i y_i &gt; 0\)</span>, then point <span class="math inline">\(i\)</span> is currently correctly classified – do nothing!</li>
-<li>Else, if <span class="math inline">\(s^{(t)}_i y_i &lt; 0\)</span>, then perform the update <span id="eq-perceptron-update"><span class="math display">\[\mathbf{w}^{(t+1)} = \mathbf{w}^{(t)} + y_i \mathbf{x}_i\;. \tag{7.6}\]</span></span></li>
+<li>If <span class="math inline">\(s^{(t)}_i (2y_i-1) &gt; 0\)</span>, then point <span class="math inline">\(i\)</span> is currently correctly classified – do nothing!</li>
+<li>Else, if <span class="math inline">\(s^{(t)}_i (2y_i-1) &lt; 0\)</span>, then perform the update <span id="eq-perceptron-update"><span class="math display">\[\mathbf{w}^{(t+1)} = \mathbf{w}^{(t)} + (2y_i-1) \mathbf{x}_i\;. \tag{7.6}\]</span></span></li>
 </ul></li>
 </ol>
 <section id="example" class="level4">
 <h4 class="anchored" data-anchor-id="example">Example</h4>
 <p>Now let’s go ahead and run the perceptron algorithm on some data. First we should set up our feature matrix <span class="math inline">\(\mathbf{X}\)</span> and target vector <span class="math inline">\(\mathbf{y}\)</span>.</p>
-<div id="cell-5" class="cell" data-execution_count="5">
+<div id="1cbae881" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">1234</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> perceptron_data(n_points <span class="op">=</span> <span class="dv">50</span>, noise <span class="op">=</span> <span class="fl">0.3</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> perceptron_data(n_points <span class="op">=</span> <span class="dv">50</span>, noise <span class="op">=</span> <span class="fl">0.25</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlim <span class="op">=</span> (<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>), ylim <span class="op">=</span> (<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>))</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>plot_perceptron_data(X, y, ax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="20-perceptron_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="20-perceptron_files/figure-html/cell-4-output-1.png" class="figure-img" width="374" height="354"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>You may be able to eyeball the fact that this data is <em>linearly separable</em>: it is possible to draw a line that perfectly separates the two clusters. We can think of the perceptron algorithm as searching for such a line.</p>
 <p>Let’s start with a random guess for the weight vector <span class="math inline">\(\mathbf{w}\)</span>:</p>
-<div id="cell-7" class="cell" data-execution_count="6">
+<div id="81e706f3" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> torch.Tensor([<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-8" class="cell" data-execution_count="7">
+<div id="814cbdc0" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
@@ -612,40 +611,40 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="20-perceptron_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="20-perceptron_files/figure-html/cell-6-output-1.png" class="figure-img" width="374" height="354"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Well, that doesn’t seem very promising. So, let’s do the perceptron update! First, we need to pick a random data point:</p>
-<div id="cell-10" class="cell" data-execution_count="8">
-<div class="cell-output cell-output-display" data-execution_count="8">
-<pre><code>&lt;torch._C.Generator at 0x7fab411df3d0&gt;</code></pre>
+<div id="2bf61dd6" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>&lt;torch._C.Generator at 0x10d61aff0&gt;</code></pre>
 </div>
 </div>
-<div id="cell-11" class="cell" data-execution_count="9">
+<div id="0210665f" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> X.shape[<span class="dv">0</span>] <span class="co"># number of data points</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>i <span class="op">=</span> torch.randint(n, size <span class="op">=</span> (<span class="dv">1</span>,)) <span class="co"># index of a random data point</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>x_i <span class="op">=</span> X[[i],] <span class="co"># the random data point itself</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we need to compute the score:</p>
-<div id="cell-13" class="cell" data-execution_count="10">
+<div id="66230ca6" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>s_i <span class="op">=</span> x_i<span class="op">@</span>w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We need to compare the score to the value of the target <span class="math inline">\(y_i\)</span>:</p>
-<div id="cell-15" class="cell" data-execution_count="11">
+<div id="d85d7cf2" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>y_i <span class="op">=</span> y[i]</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>s_i, y_i</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>(tensor([1.1401]), tensor([-1]))</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre><code>(tensor([1.1167]), tensor([False]))</code></pre>
 </div>
 </div>
 <p>In this case, the score and the target have opposite signs, which means that we need to perform the perceptron update:</p>
-<div id="cell-17" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> w <span class="op">+</span> y_i<span class="op">*</span>x_i</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="1d9195b3" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> w <span class="op">+</span> (<span class="dv">2</span><span class="op">*</span>y_i<span class="op">-</span><span class="dv">1</span>)<span class="op">*</span>x_i</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>If we now check the decision boundary again, it appears visually that it has improved slightly:</p>
-<div id="cell-19" class="cell" data-execution_count="13">
+<div id="fc0fd376" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
@@ -656,7 +655,7 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="20-perceptron_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="20-perceptron_files/figure-html/cell-12-output-1.png" class="figure-img" width="374" height="354"></p>
 </figure>
 </div>
 </div>
@@ -667,7 +666,7 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 <h3 class="anchored" data-anchor-id="a-minimal-training-loop">A Minimal Training Loop</h3>
 <p>Now it’s time for us to introduce a <em>training loop</em>. In the training loop, we simply repeat the above procedure for a specified number of times (or until convergence). We’re going to illustrate this using a specific <em>organization</em> of our computational steps, which will stick with us throughout most of the rest of these notes.</p>
 <div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside">The classes <code>Perceptron</code> and <code>PerceptronOptimizer</code> are defined in an external script. You’ll have the opportunity to implement and experiment with these classes in an upcoming assignment.</span></div></div>
-<div id="cell-21" class="cell" data-execution_count="17">
+<div id="07d7c1a4" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hidden.perceptron <span class="im">import</span> Perceptron, PerceptronOptimizer</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># instantiate a model and an optimizer</span></span>
@@ -696,14 +695,14 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 <span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    opt.step(x_i, y_i)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can track the progress of our training by checking the values of the loss function over time:</p>
-<div id="cell-23" class="cell" data-execution_count="18">
+<div id="d8565756" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plt.plot(loss_vec, color <span class="op">=</span> <span class="st">"slategrey"</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(torch.arange(<span class="bu">len</span>(loss_vec)), loss_vec, color <span class="op">=</span> <span class="st">"slategrey"</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Perceptron Iteration (Updates Only)"</span>, ylabel <span class="op">=</span> <span class="st">"loss"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="20-perceptron_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="20-perceptron_files/figure-html/cell-14-output-1.png" class="figure-img" width="581" height="423"></p>
 </figure>
 </div>
 </div>
@@ -713,10 +712,10 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 <section id="illustration" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="illustration">Illustration</h2>
 <p>The following figure illustrates the perceptron algorithm in action over several iterations.</p>
-<div id="cell-fig-demonstration" class="cell page-columns page-full" data-execution_count="13">
+<div id="cell-fig-demonstration" class="cell page-columns page-full" data-execution_count="15">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">1234567</span>)</span>
+<div class="sourceCode cell-code" id="cb15" data-cap-location="margin"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>torch.manual_seed(<span class="dv">123456</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># initialize a perceptron </span></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> Perceptron()</span>
@@ -742,28 +741,34 @@ R(\mathbf{w}) \triangleq 1 - A(\mathbf{w})\;.
 <span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># make an optimization step -- this is where the update actually happens</span></span>
 <span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># now p.w is the new value </span></span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    i, local_loss <span class="op">=</span> opt.step(X, y)</span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># if a change was made, plot the old and new decision boundaries</span></span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># also add the new loss to loss_vec for plotting below</span></span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_loss <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>        plot_perceptron_data(X, y, ax)</span>
-<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>        draw_line(old_w, x_min <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>, x_max <span class="op">=</span> <span class="dv">2</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>, linestyle <span class="op">=</span> <span class="st">"dashed"</span>)</span>
-<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> p.loss(X, y).item()</span>
-<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>        loss_vec.append(loss)</span>
-<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>        draw_line(p.w, x_min <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>, x_max <span class="op">=</span> <span class="dv">2</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>)</span>
-<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X[i,<span class="dv">0</span>],X[i,<span class="dv">1</span>], color <span class="op">=</span> <span class="st">"black"</span>, facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"black"</span>, marker <span class="op">=</span> markers[marker_map[y[i].item()]])</span>
-<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>        <span class="co"># draw_line(w, -10, 10, ax, color = "black")</span></span>
-<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>        ax.set_title(<span class="ss">f"loss = </span><span class="sc">{</span>loss<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>        ax.<span class="bu">set</span>(xlim <span class="op">=</span> (<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>), ylim <span class="op">=</span> (<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>))</span>
-<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>        current_ax <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    i <span class="op">=</span> torch.randint(n, size <span class="op">=</span> (<span class="dv">1</span>,))</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>    x_i <span class="op">=</span> X[[i],:]</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    y_i <span class="op">=</span> y[i]</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>    local_loss <span class="op">=</span> p.loss(x_i, y_i).item()</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_loss <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>        opt.step(x_i, y_i)</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># if a change was made, plot the old and new decision boundaries</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># also add the new loss to loss_vec for plotting below</span></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_loss <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>        plot_perceptron_data(X, y, ax)</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>        draw_line(old_w, x_min <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>, x_max <span class="op">=</span> <span class="dv">2</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>, linestyle <span class="op">=</span> <span class="st">"dashed"</span>)</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> p.loss(X, y).item()</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>        loss_vec.append(loss)</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>        draw_line(p.w, x_min <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>, x_max <span class="op">=</span> <span class="dv">2</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ax.scatter(X[i,0],X[i,1], color = "black", facecolors = "none", edgecolors = "black", marker = markers[marker_map[y[i].item()]])</span></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>        <span class="co"># draw_line(w, -10, 10, ax, color = "black")</span></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>        ax.set_title(<span class="ss">f"loss = </span><span class="sc">{</span>loss<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>        ax.<span class="bu">set</span>(xlim <span class="op">=</span> (<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>), ylim <span class="op">=</span> (<span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>        current_ax <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-demonstration" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-cap-location="margin">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-demonstration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="20-perceptron_files/figure-html/fig-demonstration-output-1.png" class="img-fluid figure-img">
+<img src="20-perceptron_files/figure-html/fig-demonstration-output-1.png" width="661" height="470" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-demonstration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.3: Several iterations of the perceptron algorithm. In each panel, the dashed line is the hyperplane corresponding to the previous weight vector <span class="math inline">\(\mathbf{w}^{(t)}\)</span>, while the solid line is the hyperplane for the updated weight vector <span class="math inline">\(\mathbf{w}^{t+1}\)</span>. The empty circle is the point <span class="math inline">\(i\)</span> used in the update; only iterations in which <span class="math inline">\(i\)</span> was a mistake are shown. The loss is computed as in <a href="#eq-loss" class="quarto-xref">Equation&nbsp;<span>7.4</span></a>.
