@@ -126,10 +126,13 @@ def plot_loss(loss_fun, show_line = False):
 fig, axarr = plot_loss(loss_fun = lambda s, y: 1*(s*(2*y-1) < 0), show_line = False)
 ```
 
-Surprsingly, the problem with this loss function $\ell$ is that we can "draw lines under the function." What this means is that we can pick two points on the graph of the function, connect them with a line, and find that the line lies *under* the graph of the function in some regions: 
+The problem with this loss function $\ell$ is that we can "draw lines under the function." What this means is that we can pick two points on the graph of the function, connect them with a line, and find that the line lies *under* the graph of the function in some regions: 
 
 ```{python}
-fig, axarr = plot_loss(loss_fun = lambda s, y: 1*(s*(2*y-1) < 0), show_line = True)
+#---
+zero_one_loss = lambda s, y: 1*(s*(2*y-1) < 0)
+#---
+fig, axarr = plot_loss(loss_fun = zero_one_loss, show_line = True)
 ```
 
 Surprisingly, this specific geometric property is what's blocking us from achieving performant searchability for the problem of finding $\mathbf{w}$.  

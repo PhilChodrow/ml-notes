@@ -2,24 +2,26 @@
 
 SHELL = /bin/zsh
 
+PYTHON = env/bin/python3
+
 stage: 
-	python scripts/prep-qmd.py
+	$(PYTHON) scripts/prep-qmd.py
 	quarto render --profile publish
-	python scripts/create-ipynb.py
-	python scripts/insert-colab-link.py
+	$(PYTHON) scripts/create-ipynb.py
+	$(PYTHON) scripts/insert-colab-link.py
 
 publish: 
-	python scripts/prep-qmd.py
+	$(PYTHON) scripts/prep-qmd.py
 	quarto render --profile publish
-	python scripts/create-ipynb.py
-	python scripts/insert-colab-link.py
+	$(PYTHON) scripts/create-ipynb.py
+	$(PYTHON) scripts/insert-colab-link.py
 	git add .
 	git commit -m "Update"
 	git push
 
 prep: 
-	python scripts/create-ipynb.py
-	python scripts/prep-qmd.py
+	$(PYTHON) scripts/create-ipynb.py
+	$(PYTHON) scripts/prep-qmd.py
 
 preview: 
 	quarto preview --profile preview

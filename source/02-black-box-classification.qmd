@@ -1,6 +1,7 @@
 ---
 fig-cap-location: margin
 code-fold: false
+jupyter: python3
 ---
 
 # Classification as a Black Box
