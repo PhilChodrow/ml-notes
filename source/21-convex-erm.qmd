@@ -18,8 +18,12 @@ We also have a *target vector* $\mathbf{y} \in \{0,1\}^n$. [For convenience, we 
 #| code-fold: true
 
 import torch
+import numpy as np
 from matplotlib import pyplot as plt
 plt.style.use('seaborn-v0_8-whitegrid')
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 
 def classification_data(n_points = 300, noise = 0.2, p_dims = 2):
     
@@ -83,7 +87,7 @@ However, as we saw, this doesn't actually work that well. There are two problems
 
 So, how could we choose a *better loss function* that would allow us to create efficient algorithms? 
 
-## Convex Functions
+## Per-Observation Loss Functions
 
 Let's start by visualizing a single term of the perceptron loss function. We'll view this as a function of the score $s$ and the true target value $y$: 
 
@@ -91,16 +95,28 @@ $$
 \ell(s, y) = \mathbb{1}[s (2y-1) < 0]\;. 
 $$
 
+Let's implement this function in Python: 
+
+```{python}
+#---
+def zero_one_loss(s, y):
+    return 1*(s*(2*y-1) < 0)
+#---
+```
+
+
+
 Here's a plot of this function for each of the two possible values of $y$: 
 
 ```{python}
+#| code-fold: true
 from matplotlib import pyplot as plt 
 plt.style.use('seaborn-v0_8-whitegrid')
 # plt.rcParams["figure.figsize"] = (10, 4)
 
 def plot_loss(loss_fun, show_line = False):
 
-    fig, axarr = plt.subplots(1, 2) 
+    fig, axarr = plt.subplots(1, 2, figsize = (6, 3), sharey = True)
     s = torch.linspace(-1, 1, 10001)
 
     for j in range(2):
@@ -122,22 +138,26 @@ def plot_loss(loss_fun, show_line = False):
 
     plt.tight_layout()
     return fig, axarr
+```
 
-fig, axarr = plot_loss(loss_fun = lambda s, y: 1*(s*(2*y-1) < 0), show_line = False)
+The zero-one loss looks like this: 
+
+```{python}
+fig, axarr = plot_loss(loss_fun = zero_one_loss)
 ```
 
 The problem with this loss function $\ell$ is that we can "draw lines under the function." What this means is that we can pick two points on the graph of the function, connect them with a line, and find that the line lies *under* the graph of the function in some regions: 
 
 ```{python}
-#---
-zero_one_loss = lambda s, y: 1*(s*(2*y-1) < 0)
-#---
 fig, axarr = plot_loss(loss_fun = zero_one_loss, show_line = True)
 ```
 
 Surprisingly, this specific geometric property is what's blocking us from achieving performant searchability for the problem of finding $\mathbf{w}$.  
 
-## Convex Loss Functions
+## Convex Functions
+
+Intuitively, a convex function is just a function with the property that any line joining two points on the graph of the function must always lie *above* that graph. The geometric picture here is that a convex function is "bowl-shaped."
+
 
 ::: {.callout-note}
 ::: {#def-convex-set} 
@@ -168,7 +188,7 @@ $$
 :::
 :::
 
-Roughly, a convex function is "bowl-shaped," in the sense that any line connecting two points on its graph must lie above the graph.  The most familiar example of a convex function is our good friend the convex parabola: 
+The most familiar example of a convex function is our good friend the convex parabola: 
 
 ```{python}
 
@@ -181,22 +201,31 @@ plt.gca().set(xlabel = r"$x$", ylabel = r"$f(x)$")
 
 Note that any straight line connecting two points on this graph always stays above the graph of the parabola. As we saw above, the 0-1 loss function $\ell(s, y) = \mathbb{1}[s(2y-1)<0]$ does not have this property. 
 
-We can also define convex functions to replace the nonconvex 0-1 loss function from earlier. Here's an example, which is usually called the *hinge loss*, which is defined by the formula 
+
+### Two Convex Loss Functions
+
+The purpose of introducing convexity in this context is to replace the nonconvex 0-1 loss function with a convex substitute. [Such functions are also sometimes called *surrogate* loss functions.]{.aside} Here's an example, which is usually called the *hinge loss*, which is defined by the formula 
 
 $$
 \ell(s, y) = y \max \{0, s\} + (1 - y) \max\{0, -s\}\;.
 $$
 
+Let's implement and visualize the hinge loss: 
+
 ```{python}
+#---
+def hinge(s, y): 
+    return y * torch.max(torch.zeros_like(s), s)  + (1-y) * torch.max(torch.zeros_like(s), -s)
+#---
+```
 
-hinge = lambda s, y: y * (torch.max(torch.zeros_like(s), s))  + (1-y) * (torch.max(torch.zeros_like(s), -s))
-
+```{python}
 fig, axarr = plot_loss(loss_fun = hinge, show_line = True)
 ```
 
 The hinge loss is not strictly convex and is not even everywhere differentiable! Despite this, the fact that it is convex has made it a modern workhorse of machine learning. The support vector machine (SVM) operates by minimizing the hinge loss. The "Rectified Linear Unit" (ReLU) is a mainstay of modern deep learning--and is just another name for the hinge loss. 
 
-An even handier loss function for our purposes is the sigmoid binary cross entropy, which is defined by the formula 
+Another loss function is the sigmoid binary cross entropy, which is defined by the formula 
 [In this formula, $\sigma(s) = \frac{1}{1 + e^{-s}}$ is the logistic sigmoid function.]{.aside}
 $$
 \begin{aligned}
@@ -204,17 +233,25 @@ $$
 \end{aligned}
 $$
 
+Let's implement this function for ourselves: 
+
 ```{python}
+#---
 sig = lambda s: 1 / (1 + torch.exp(-s))
-
 binary_cross_entropy = lambda s, y: -(y * sig(s).log() + (1 - y)*(1-sig(s)).log())
+#---
+```
 
+```{python}
 fig, axarr = plot_loss(loss_fun = binary_cross_entropy, show_line = True)
 ```
 
-This function is also convex, and has the considerable benefit of being everywhere differentiable. 
+The binary cross-entropy is also convex, and has the considerable benefit of being everywhere differentiable. 
+
+### Convexity In Several Dimensions
 
 We intentionally formulated our definition of convexity for functions of many variables. Here is a convex function $f:\mathbb{R}^2 \rightarrow \mathbb{R}$. 
+
 
 ```{python}
 fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
@@ -299,6 +336,7 @@ We might ask ourselves a few questions about this problem:
 1. **Existence**: Does there exist *any* choice of $\mathbf{w}$ that achieves a minimizing value for this function? 
 2. **Uniqueness**: Is this choice of $\mathbf{w}$ unique, or are there multiple candidates?
 3. **Searchability**: are there algorithms which are guaranteed to (a) terminate and (b) not get "trapped" at a bad solution?
+4. **Performance**: If it's possible to find the best solution, can we do so efficiently using simple algorithms?
 
 Answering these questions precisely requires a bit more math: 
 
@@ -365,6 +403,7 @@ These properties of convex functions have very important implications for our fu
 
 **Searchability**: When $L$ is convex, there are also no local minimizers other than the global minimizer. Algorithmically, ***this is the most important property of convexity***. It means that if I manage to find any local minimizer at all, that point *must* be the global minimizer. 
 [If you've taken an algorithms class, one way of thinking of convexity is that it guarantees that *greedy methods work* for solving minimization problems.]{.aside}
+
 **Performance**: Convexity significantly reduces the difficulty of our task: instead of trying to find "the best" solution, it's sufficient for us to find any local optimum. This means that we can design our algorithms to be "greedy local minimizer hunters." There are lots of fast algorithms to do this. An especially important class of algorithms are *gradient descent methods*, which we'll discuss soon. 
 
 
@@ -376,10 +415,9 @@ $$
 \begin{aligned}
 \ell(s, y) &=  -y \log \sigma(s) - (1-y)\log (1-\sigma(s))\;,
 \end{aligned}
-
 $$
 
-As can be proven with calculus, this function is convex as a function of $\s$. 
+As can be proven with calculus, this function is convex as a function of $\mathbf{s}$. 
 
 So, let's do convex empirical risk minimization! We'll use the following data set. Note that this data is not linearly separable and therefore the perceptron algorithm would not converge. 
 
@@ -389,9 +427,69 @@ X, y = classification_data(noise = 0.5)
 plot_classification_data(X, y, ax)
 ```
 
-The code block below shows the training loop for a logistic regression model. This model *also* inherits from the `LinearModel` class that you previously started implementing. The training loop is also *very* similar to our training loop for the perceptron. The main difference is that the loss is calculated using the `binary_cross_entropy` function above, and the `step` function of the `GradientDescentOptimizer` works differently in a way that we will discuss in the following section. 
+
+First, we'll define a complete function for calculating the empirical risk for a given value of $\mathbf{w}$. Since we already implemented `binary_cross_entropy`, this implementation is very quick: 
 
 ```{python}
+#---
+def empirical_risk(w, X, y):
+    s = X@w
+    return binary_cross_entropy(s, y).mean()
+#---
+```
+
+Now we'll use the `minimize` function from `scipy.optimize` to find the value of $\mathbf{w}$ that makes this function smallest: [We initialize `w0` as a Numpy array for compatibility reasons with `scipy.optimize.minimize`.]{.aside}
+
+```{python}
+from scipy.optimize import minimize
+
+#---
+w0_array = np.array([1.0, 1.0, 1.0]) # initial guess for w
+result = minimize(lambda w: empirical_risk(w, X, y).item(), x0 = w0_array)
+w = result.x
+#---
+
+print(f"""Learned parameter vector w = {w}.
+The empirical risk is {result.fun:.4f}.""")
+```
+
+```{python}
+#| fig-cap: 'The separating line learned by logistic regression.'
+#| fig-cap-location: margin
+#| label: fig-LR-line
+#| code-fold: true
+
+def draw_line(w, X, y, x_min, x_max, ax, **kwargs):
+    fig, ax = plt.subplots(1, 1)
+    plot_classification_data(X, y, ax)
+    x = torch.linspace(x_min, x_max, 101)
+    y = -(w[0]*x + w[2])/w[1]
+    l = ax.plot(x, y, **kwargs)
+
+draw_line(w, X, y, x_min = -0.5, x_max = 1.5, ax = ax, color = "black", linestyle = "dashed")
+```
+
+This looks pretty good. Let's compute the accuracy. 
+
+```{python}
+#---
+s = X@w
+accuracy = (1.0*((s>0) == y)).mean()
+accuracy
+#---
+```
+
+### (Optional): A Logistic Regression Training Loop
+
+How would we do this if we didn't have access to the `minimize` function? We'll soon discuss this question much more. For now, we can take a look at the code block below, which implements such a loop using a framework very similar to the one we learned for perceptron. This model *also* inherits from the `LinearModel` class that you previously started implementing. The training loop is also *very* similar to our training loop for the perceptron. The main difference is that the loss is calculated using the `binary_cross_entropy` function above, and the `step` function of the `GradientDescentOptimizer` works differently in a way that we will discuss in the following section. 
+
+*Starting with the code block below, you won't be able to follow along in coding these notes unless you have sneakily implemented logistic regression in a `hidden` module.*
+
+```{python}
+#| fig-cap: 'Evolution of the binary cross entropy loss function in the logistic regression training loop.'
+#| fig-cap-location: margin
+#| label: fig-LR-loss-iterations
+
 from hidden.logistic import LogisticRegression, GradientDescentOptimizer
 
 # instantiate a model and an optimizer
@@ -410,37 +508,31 @@ for _ in range(100):
     # only this line actually changes the parameter value
     opt.step(X, y, lr = 0.02)
 
-plt.plot(loss_vec)
-plt.gca().set(xlabel = "Number of gradient descent iterations", ylabel = "Loss (binary cross entropy)")
+plt.plot(torch.arange(1, len(loss_vec)+1), loss_vec, color = "black")
+plt.semilogx()
+labs = plt.gca().set(xlabel = "Number of gradient descent iterations", ylabel = "Loss (binary cross entropy)")
 ```
 
-The loss quickly levels out to a constant value. Because our theory tells us that the loss function is convex, we know that the value of $\mathbf{w}$ we have found is the best possible, in the sense of minimizing the loss. 
+The loss quickly levels out to a constant value (which is the same as we learned with `scipy.optimize.minimize`). Because our theory tells us that the loss function is convex, we know that the value of $\mathbf{w}$ we have found is the best possible, in the sense of minimizing the loss. 
 
 Let's take a look at the separating line we found: 
 
 ```{python}
-def draw_line(w, x_min, x_max, ax, **kwargs):
-    w_ = w.flatten()
-    x = torch.linspace(x_min, x_max, 101)
-    y = -(w_[0]*x + w_[2])/w_[1]
-    l = ax.plot(x, y, **kwargs)
-
-draw_line(LR.w, x_min = -0.5, x_max = 1.5, ax = ax, color = "black", linestyle = "dashed")
-
-fig
+draw_line(LR.w, X, y, 
+          x_min = -0.5, 
+          x_max = 1.5, 
+          ax = ax, 
+          color = "black", 
+          linestyle = "dashed")
 ```
+
+Yep, that's the same line as we found earlier! 
 
 Although our data is not linearly separable, the separating line we have learned appears to do a reasonable job of separating the points from each other. Let's check our accuracy: 
 
 ```{python}
+#---
 (1.0*(LR.predict(X) == y)).mean()
+#---
 ```
-
-Not too bad! In the next section, we'll learn much, much more about what's behind that `opt.step()` call. 
-
-
-
-
-
-
 

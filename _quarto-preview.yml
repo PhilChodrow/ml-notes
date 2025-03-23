@@ -16,7 +16,7 @@ book:
     - part: "Machine Learning Models"
       chapters:
         - source/20-perceptron.qmd
-        - source/22-convex-erm.ipynb
+        - source/21-convex-erm.qmd
         - source/23-gradient-descent.ipynb
         - source/30-features-regularization.qmd
         - source/40-linear-regression.qmd
