@@ -28,7 +28,7 @@ book:
         - chapters/60-intro-deep.ipynb
         - chapters/61-modern-optimization.ipynb
         - chapters/70-image-classification.ipynb
-        - chapters/72-text-classification.ipynb
+        - chapters/72-text-classification.qmd
     - part: "Unsupervised Learning"
       chapters: 
         - chapters/80-unsupervised-autoencoders.ipynb
