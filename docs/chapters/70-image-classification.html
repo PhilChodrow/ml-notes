@@ -406,23 +406,26 @@ window.Quarto = {
 
 <p>In this set of lecture notes, we’ll work through an applied case study of deep learning for image classification. Like <a href="../chapters/51-vectorization.html">our last adventure with an image classification task</a>, we’ll focus on sign-language classification using convolutional kernels. This time, however, we won’t take the kernels as given. Instead, we’ll attempt to optimize the kernels as part of the learning process.</p>
 <p>Along the way, we’ll also study some of the practicalities of working with larger models in torch, including model inspection, GPU acceleration, and data set management.</p>
-<div id="cell-1" class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>pip install torchviz</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.ticker <span class="im">as</span> mtick</span>
+<div id="cell-1" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.ticker <span class="im">as</span> mtick</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.nn <span class="im">import</span> Conv2d, MaxPool2d, Parameter</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.nn.functional <span class="im">import</span> relu</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchviz <span class="im">import</span> make_dot, make_dot_from_trace</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> models</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> models</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.optim <span class="im">as</span> optim</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchsummary <span class="im">import</span> summary</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="a-note-on-chips" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="a-note-on-chips">A Note On Chips</h2>
 <div class="page-columns page-full"><p>As we’ve seen from the last several lectures, deep learning models involve a <strong>lot</strong> of linear algebra in order to compute predictions and gradients. This means that deep models, even more than many other machine learning models, strongly benefit from hardware that is good at doing linear algebra <em>fast</em>. As it happens, graphics processing units (GPUs) are very, very good at fast linear algebra.  So, it’s very helpful when running our models to have access to GPUs; using a GPU can often result in up to 10x speedups. While some folks can use GPUs on their personal laptops, another common option for learning purposes is to use a cloud-hosted GPU. My personal recommendation is Google Colab, and I’ll supply links that allow you to open lecture notes in Colab and use their GPU runtimes.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">The reason that GPUs are so good at this is that they were originally optimized for rendering complex graphics in e.g.&nbsp;animation and video games, and this involves lots of linear algebra.</span></div></div>
 <p>The following torch code checks whether there is a GPU available to Python, and if so, sets a variable called <code>device</code> to log this fact. We’ll make sure that both our data and our models fully live on the same device when doing model training.</p>
-<div id="cell-3" class="cell" data-outputid="3bed028b-b231-4983-ef62-c1cc793a8c39" data-execution_count="2">
+<div id="cell-3" class="cell" data-outputid="cbffc074-2f48-4085-d0eb-c5e4af57f2f9" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> <span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Running on </span><span class="sc">{</span>device<span class="sc">}</span><span class="ss">."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -454,14 +457,14 @@ window.Quarto = {
 <span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>X_val, y_val     <span class="op">=</span> prep_data(df_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Like last time, our data is essentially a big stack of images:</p>
-<div id="cell-7" class="cell" data-outputid="6c3978d6-74ae-4c56-fb8e-60fcf38fb0cc" data-execution_count="4">
+<div id="cell-7" class="cell" data-outputid="16ae6980-6353-49c0-cce0-bb28e165f8dc" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>X_train.size() <span class="co"># (num_images, num_color_channels, num_vertical_pixels, num_horizontal_pixels)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>torch.Size([27455, 1, 28, 28])</code></pre>
 </div>
 </div>
 <p>Here are a few excerpts from the data.</p>
-<div id="cell-9" class="cell" data-outputid="4f1952c8-85b7-4e71-c81c-4483d82f759b" data-execution_count="5">
+<div id="cell-9" class="cell" data-outputid="46261396-b8ec-4e02-ee1c-ec9a9b4bcb1f" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ALPHABET <span class="op">=</span> <span class="st">"ABCDEFGHIJKLMNOPQRSTUVWXYZ"</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> show_images(X, y, rows, cols, channel <span class="op">=</span> <span class="dv">0</span>):</span>
@@ -500,7 +503,7 @@ window.Quarto = {
 <span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here’s an example of retrieving a batch of training data from the training data loader:</p>
-<div id="cell-13" class="cell" data-outputid="1b9b70ff-bd72-40e9-ab63-87cfea1991b6" data-execution_count="7">
+<div id="cell-13" class="cell" data-outputid="a450d752-1007-47cc-8432-ec5e226a82fd" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(data_loader_train))</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X.size(), y.size())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -540,57 +543,41 @@ window.Quarto = {
 <section id="a-first-linear-model" class="level2">
 <h2 class="anchored" data-anchor-id="a-first-linear-model">A First Linear Model</h2>
 <p>Let’s implement a linear model with the multiclass cross entropy. This first model is equivalent to multiclass logistic regression.</p>
-<div id="cell-16" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LinearModel(nn.Module):</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pipeline <span class="op">=</span> nn.Sequential(</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>            nn.Flatten(),</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">28</span><span class="op">*</span><span class="dv">28</span>, <span class="dv">26</span>)</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># this is the customary name for the method that computes the scores</span></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># the loss is usually computed outside the model class during the training loop</span></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.pipeline(x)</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> predict(<span class="va">self</span>, x):</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        scores <span class="op">=</span> <span class="va">self</span>.forward(x)</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> torch.argmax(scores, dim <span class="op">=</span> <span class="dv">1</span>)</span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearModel().to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-15" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LinearModel(nn.Module):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pipeline <span class="op">=</span> nn.Sequential(</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>            nn.Flatten(),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">28</span><span class="op">*</span><span class="dv">28</span>, <span class="dv">26</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># this is the customary name for the method that computes the scores</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># the loss is usually computed outside the model class during the training loop</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.pipeline(x)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearModel().to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The <code>forward</code> method computes a matrix of scores. Each row of this matrix gives the scores for a single observation:</p>
-<div id="cell-18" class="cell" data-outputid="e4157fe5-b848-4e91-b258-69ade2f58ed1" data-execution_count="9">
+<div id="cell-17" class="cell" data-outputid="c2cf5f70-1e02-4dc2-fa6e-1cba90d6f132" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> model(X_train)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>scores</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
-<pre><code>tensor([[ 0.4748,  0.3078, -0.1046,  ...,  0.2879,  0.1001,  0.6068],
-        [ 0.3613,  0.2472, -0.0023,  ...,  0.3211, -0.0265,  0.4179],
-        [ 0.3632,  0.2652,  0.1506,  ...,  0.3265,  0.0759,  0.7127],
+<pre><code>tensor([[ 0.5114,  0.2543, -0.0080,  ..., -0.6141,  0.5227, -0.6885],
+        [ 0.4821,  0.3830, -0.0839,  ..., -0.7075,  0.4926, -0.6881],
+        [ 0.4608,  0.2377, -0.1621,  ..., -0.6940,  0.6233, -0.7923],
         ...,
-        [ 0.2790,  0.2796,  0.0923,  ...,  0.2196, -0.0338,  0.6250],
-        [ 0.5455,  0.4283, -0.0368,  ...,  0.5020, -0.0385,  0.5142],
-        [ 0.4195,  0.2938, -0.0793,  ...,  0.2966, -0.0111,  0.6632]],
+        [ 0.4388,  0.4027, -0.0278,  ..., -0.7697,  0.5440, -0.7831],
+        [ 0.6288,  0.4988, -0.0415,  ..., -0.9567,  0.4030, -0.8334],
+        [ 0.6108,  0.5235, -0.0693,  ..., -0.7299,  0.6004, -0.7167]],
        device='cuda:0', grad_fn=&lt;AddmmBackward0&gt;)</code></pre>
 </div>
 </div>
-<p>The <code>predict</code> method just computes these scores and returns the column index of the largest score in each column.</p>
-<div id="cell-20" class="cell" data-outputid="c8b2855e-c7db-4245-818a-59092fda9f8f" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>torch.argmax(scores, dim <span class="op">=</span> <span class="dv">1</span>) <span class="co"># indices of predicted letters</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
-<pre><code>tensor([ 3,  3, 25,  ..., 12,  3,  3], device='cuda:0')</code></pre>
-</div>
-</div>
 <p>It’s very useful to get in the habit of <em>inspecting</em> your models in order to understand how they are organized and how many parameters need to be trained. One convenient way to do this is with the <code>summary</code> function provided by the <code>torchsummary</code> package. This function requires that we input the dimensions of a single observation:</p>
-<div id="cell-22" class="cell" data-outputid="159eb1be-5876-46f2-c648-2394a74b6147" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchsummary <span class="im">import</span> summary</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>summary(model, input_size<span class="op">=</span>(<span class="dv">1</span>, <span class="dv">28</span>, <span class="dv">28</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-19" class="cell" data-outputid="b060cd31-ee26-4cda-84f3-be3818c7d3ee" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>summary(model, input_size<span class="op">=</span>(<span class="dv">1</span>, <span class="dv">28</span>, <span class="dv">28</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>----------------------------------------------------------------
         Layer (type)               Output Shape         Param #
@@ -610,126 +597,96 @@ Estimated Total Size (MB): 0.09
 </div>
 </div>
 <p>Even this simple multiclass logistic model has over 20,000 parameters to train! Note that the output shape matches the number of possible class labels in the data.</p>
-<p>It can also be useful to visualize the computational graph that torch constructs from the computation. Doing this requires computing the loss once in order to assemble the computational graph.</p>
-<div id="cell-24" class="cell" data-outputid="0df858c0-726b-4e4f-a766-1b69463fea93" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="op">=</span> nn.CrossEntropyLoss()</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> loss_fn(scores, y_train)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>make_dot(loss, params<span class="op">=</span><span class="bu">dict</span>(model.named_parameters()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Before we start training, let’s implement a function to evaluate the model in accuracy.</p>
+<div id="cell-21" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> accuracy(model, data_loader <span class="op">=</span> data_loader_val, multichannel <span class="op">=</span> <span class="va">False</span>, print_message <span class="op">=</span> <span class="va">True</span>):</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># count the number of total observations and correct predictions</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    total_correct <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># loop through the data loader</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> X, y <span class="kw">in</span> data_loader:</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># used for evaluating ImageNet later</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> multichannel:</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>            X <span class="op">=</span> torch.tile(X, dims <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># move the data to the device (ideally, to gpu)</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>        X, y <span class="op">=</span> X.to(device), y.to(device)</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># compute the predictions</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>        scores <span class="op">=</span> model(X)</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>        y_pred <span class="op">=</span>  torch.argmax(scores, dim <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># update the total and the number of correct predictions</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> X.size(<span class="dv">0</span>)</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>        total_correct <span class="op">+=</span> (y_pred <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>    acc <span class="op">=</span> total_correct <span class="op">/</span> total</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> acc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-22" class="cell" data-outputid="1136b62e-150d-43ad-98e3-e17f275262af" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>accuracy(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
-<div>
-<figure class="figure">
-<p><img src="70-image-classification_files/figure-html/cell-13-output-1.svg" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Before we start training, let’s implement a function to evaluate the model on validation data.</p>
-<div id="cell-26" class="cell" data-execution_count="46">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluate(model, multichannel <span class="op">=</span> <span class="va">True</span>):</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># count the number of total observations and correct predictions</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    total_correct <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># loop through the data loader</span></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> X, y <span class="kw">in</span> data_loader_val:</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># used for evaluating ImageNet later</span></span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> multichannel:</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>            X <span class="op">=</span> torch.tile(X, dims <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># move the data to the device (ideally, to gpu)</span></span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>        X, y <span class="op">=</span> X.to(device), y.to(device)</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># compute the predictions</span></span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>        scores <span class="op">=</span> model.forward(X)</span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>        y_pred <span class="op">=</span>  torch.argmax(scores, dim <span class="op">=</span> <span class="dv">1</span>)</span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># update the total and the number of correct predictions</span></span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> X.size(<span class="dv">0</span>)</span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>        total_correct <span class="op">+=</span> (y_pred <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"validation accuracy = </span><span class="sc">{</span>total_correct <span class="op">/</span> total<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="co">#--</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="cell-27" class="cell" data-outputid="1ed10e84-801a-41de-a3e3-9b05fefcd50a" data-execution_count="47">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>evaluate(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>validation accuracy = 0.945</code></pre>
+<pre><code>0.052844394868934746</code></pre>
 </div>
 </div>
 <p>Obviously our model does not do very well on the validation data, since it’s not trained yet.</p>
-<p>Let’s therefore implement a simple training loop. This loop will include provisions to train the model while also calling the previous function to update us on the accuracy on the validation set.</p>
-<div id="cell-29" class="cell" data-execution_count="48">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.optim <span class="im">as</span> optim</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(model, k_epochs <span class="op">=</span> <span class="dv">1</span>, print_every <span class="op">=</span> <span class="dv">2000</span>, evaluate_after_epoch <span class="op">=</span> <span class="va">True</span>, multichannel <span class="op">=</span> <span class="va">False</span>, <span class="op">**</span>opt_kwargs):</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># loss function is cross-entropy (multiclass logistic)</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    loss_fn <span class="op">=</span> nn.CrossEntropyLoss()</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># optimizer is SGD with momentum</span></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> optim.SGD(model.parameters(), <span class="op">**</span>opt_kwargs)</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(k_epochs):</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, data <span class="kw">in</span> <span class="bu">enumerate</span>(data_loader_train):</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>            X, y <span class="op">=</span> data</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> multichannel:</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>                X <span class="op">=</span> torch.tile(X, dims <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>            X, y <span class="op">=</span> X.to(device), y.to(device)</span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>            <span class="co"># clear any accumulated gradients</span></span>
-<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>            optimizer.zero_grad()</span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>            <span class="co"># compute the loss</span></span>
-<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>            y_pred <span class="op">=</span> model(X)</span>
-<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>            loss   <span class="op">=</span> loss_fn(y_pred, y)</span>
-<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>            <span class="co"># compute gradients and carry out an optimization step</span></span>
-<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>            loss.backward()</span>
-<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>            optimizer.step()</span>
-<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> (i <span class="op">+</span> <span class="dv">1</span>) <span class="op">%</span> print_every <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f"Epoch </span><span class="sc">{</span>epoch<span class="sc">}</span><span class="ss">, batch </span><span class="sc">{</span>i<span class="sc">:&gt;3}</span><span class="ss">, loss on batch: </span><span class="sc">{</span>loss<span class="sc">.</span>item()<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> evaluate_after_epoch:</span>
-<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Epoch </span><span class="sc">{</span>epoch<span class="sc">}</span><span class="ss">: "</span>, end <span class="op">=</span> <span class="st">""</span>)</span>
-<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>            evaluate(model)</span>
-<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>    </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Let’s therefore implement a simple training loop. This loop will include provisions to train the model while also calling the previous function to update us on the accuracy on the validation set. We’ll also measure the loss on the training and validation sets after each epoch and return those for plotting.</p>
+<div id="cell-24" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(model, k_epochs <span class="op">=</span> <span class="dv">1</span>, print_every <span class="op">=</span> <span class="dv">2000</span>, multichannel <span class="op">=</span> <span class="va">False</span>, plot_accuracy <span class="op">=</span> <span class="va">True</span>, <span class="op">**</span>opt_kwargs):</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># loss function is cross-entropy (multiclass logistic)</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    loss_fn <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># optimizer is SGD with momentum</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> optim.SGD(model.parameters(), <span class="op">**</span>opt_kwargs)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> plot_accuracy:</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        val_accuracy   <span class="op">=</span> []</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>        train_accuracy <span class="op">=</span> []</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(k_epochs):</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, data <span class="kw">in</span> <span class="bu">enumerate</span>(data_loader_train):</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>            X, y <span class="op">=</span> data</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> multichannel:</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>                X <span class="op">=</span> torch.tile(X, dims <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>            X, y <span class="op">=</span> X.to(device), y.to(device)</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># clear any accumulated gradients</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>            optimizer.zero_grad()</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>            <span class="co"># compute the loss</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>            y_pred <span class="op">=</span> model(X)</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>            loss   <span class="op">=</span> loss_fn(y_pred, y)</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>            <span class="co"># compute gradients and carry out an optimization step</span></span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>            loss.backward()</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>            optimizer.step()</span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>        train_accuracy <span class="op">+=</span> [accuracy(model, data_loader <span class="op">=</span> data_loader_train, multichannel <span class="op">=</span> multichannel, print_message <span class="op">=</span> <span class="va">False</span>)]</span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>        val_accuracy   <span class="op">+=</span> [accuracy(model, multichannel <span class="op">=</span> multichannel, print_message <span class="op">=</span> <span class="va">False</span>)]</span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> train_accuracy, val_accuracy</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we can go ahead and train our model.</p>
-<div id="cell-31" class="cell" data-outputid="4c01cdc9-7876-4825-b36e-52c6cd8ca835" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>train(model, k_epochs <span class="op">=</span> <span class="dv">30</span>, lr <span class="op">=</span> <span class="fl">0.001</span>, evaluate_after_epoch <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Epoch 0: validation accuracy = 0.106
-Epoch 1: validation accuracy = 0.154
-Epoch 2: validation accuracy = 0.271
-Epoch 3: validation accuracy = 0.285
-Epoch 4: validation accuracy = 0.348
-Epoch 5: validation accuracy = 0.385
-Epoch 6: validation accuracy = 0.363
-Epoch 7: validation accuracy = 0.406
-Epoch 8: validation accuracy = 0.403
-Epoch 9: validation accuracy = 0.439
-Epoch 10: validation accuracy = 0.439
-Epoch 11: validation accuracy = 0.461
-Epoch 12: validation accuracy = 0.464
-Epoch 13: validation accuracy = 0.484
-Epoch 14: validation accuracy = 0.459
-Epoch 15: validation accuracy = 0.497
-Epoch 16: validation accuracy = 0.491
-Epoch 17: validation accuracy = 0.505
-Epoch 18: validation accuracy = 0.492
-Epoch 19: validation accuracy = 0.510
-Epoch 20: validation accuracy = 0.505
-Epoch 21: validation accuracy = 0.517
-Epoch 22: validation accuracy = 0.520
-Epoch 23: validation accuracy = 0.522
-Epoch 24: validation accuracy = 0.533
-Epoch 25: validation accuracy = 0.525
-Epoch 26: validation accuracy = 0.529
-Epoch 27: validation accuracy = 0.530
-Epoch 28: validation accuracy = 0.535
-Epoch 29: validation accuracy = 0.534</code></pre>
+<div id="cell-26" class="cell" data-outputid="2cab23ac-d500-4ed8-d021-e762c4a066b2" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>train_accuracy, val_accuracy <span class="op">=</span> train(model, k_epochs <span class="op">=</span> <span class="dv">30</span>, lr <span class="op">=</span> <span class="fl">0.001</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>plt.plot(train_accuracy, color <span class="op">=</span> <span class="st">"black"</span>, label <span class="op">=</span> <span class="st">"Training"</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>plt.plot(val_accuracy, color <span class="op">=</span> <span class="st">"firebrick"</span>, label <span class="op">=</span> <span class="st">"Validation"</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Epoch"</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Accuracy"</span>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>plt.gca().<span class="bu">set</span>(ylim <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">1</span>))</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> plt.legend()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="70-image-classification_files/figure-html/cell-15-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>This model is able to achieve accuracy much better than random chance, and would likely improve even more if we allowed it more training epochs.</p>
@@ -741,41 +698,41 @@ Epoch 29: validation accuracy = 0.534</code></pre>
 <p><em>Image from <a href="https://d2l.ai/chapter_convolutional-neural-networks/conv-layer.html">Dive Into Deep Learning</a></em></p>
 <p>We sandwiched those convolutional layers between pooling and ReLU activation layers. This time, instead of treating these kernels as given, we are going to learn them as part of the optimization routine.</p>
 <p><em>Starting from this point in the notes, it is strongly recommended to run this code with a GPU available, such as in Google Colab</em>.</p>
-<div id="cell-34" class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span>  torch.nn <span class="im">import</span> ReLU</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ConvNet(nn.Module):</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pipeline <span class="op">=</span> torch.nn.Sequential(</span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">1</span>, <span class="dv">100</span>, <span class="dv">5</span>),</span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>            ReLU(),</span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">100</span>, <span class="dv">50</span>, <span class="dv">3</span>),</span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>            ReLU(),</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>            nn.MaxPool2d(<span class="dv">2</span>, <span class="dv">2</span>),</span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">50</span>, <span class="dv">50</span>, <span class="dv">3</span>),</span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>            ReLU(),</span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">50</span>, <span class="dv">50</span>, <span class="dv">3</span>),</span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>            ReLU(),</span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>            nn.MaxPool2d(<span class="dv">2</span>, <span class="dv">2</span>),</span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>            nn.Flatten(),</span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">450</span>, <span class="dv">512</span>),</span>
-<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>            ReLU(),</span>
-<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">512</span>, <span class="dv">128</span>),</span>
-<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>            ReLU(),</span>
-<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">128</span>, <span class="bu">len</span>(ALPHABET))</span>
-<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
-<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.pipeline(x)</span>
-<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ConvNet().to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-28" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span>  torch.nn <span class="im">import</span> ReLU</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ConvNet(nn.Module):</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pipeline <span class="op">=</span> torch.nn.Sequential(</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">1</span>, <span class="dv">100</span>, <span class="dv">5</span>),</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>            ReLU(),</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">100</span>, <span class="dv">50</span>, <span class="dv">3</span>),</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>            ReLU(),</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>            nn.MaxPool2d(<span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">50</span>, <span class="dv">50</span>, <span class="dv">3</span>),</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>            ReLU(),</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(<span class="dv">50</span>, <span class="dv">50</span>, <span class="dv">3</span>),</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>            ReLU(),</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>            nn.MaxPool2d(<span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>            nn.Flatten(),</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">450</span>, <span class="dv">512</span>),</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>            ReLU(),</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">512</span>, <span class="dv">128</span>),</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>            ReLU(),</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">128</span>, <span class="bu">len</span>(ALPHABET))</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.pipeline(x)</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ConvNet().to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>What does this model look like?</p>
-<div id="cell-36" class="cell" data-outputid="413f5e5e-8394-425c-970e-0013770958fb" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>summary(model, input_size<span class="op">=</span>(<span class="dv">1</span>, <span class="dv">28</span>, <span class="dv">28</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-30" class="cell" data-outputid="d9e82650-541b-4671-f8ea-2e8256d7fd46" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>summary(model, input_size<span class="op">=</span>(<span class="dv">1</span>, <span class="dv">28</span>, <span class="dv">28</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>----------------------------------------------------------------
         Layer (type)               Output Shape         Param #
@@ -808,32 +765,23 @@ Estimated Total Size (MB): 2.91
 ----------------------------------------------------------------</code></pre>
 </div>
 </div>
-<p>The computational graph for this model is much more complex.</p>
-<div id="cell-38" class="cell" data-outputid="6a2e8a36-9c4e-4643-cdb8-c86d715aecc0" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(data_loader_train))</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> model(X)</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="op">=</span> nn.CrossEntropyLoss()</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> loss_fn(scores, y)</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>make_dot(loss, params<span class="op">=</span><span class="bu">dict</span>(model.named_parameters()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="19">
-<div>
-<figure class="figure">
-<p><img src="70-image-classification_files/figure-html/cell-20-output-1.svg" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
 <p>This model has (many) more parameters than the logistic regression model. The increased depth, as well as the use of convolutional layers, give it <em>potential</em> to usefully leverage the spatial structure of the predictor data.</p>
 <p>Let’s see how it does! Note that the following experiment may not be reproducible; nonconvexity of the empirical risk means that the results we achieve may depend strongly on the initial guess for the parameters used by the optimizer.</p>
-<div id="cell-40" class="cell" data-outputid="90e58bde-c544-4d5d-c9cc-365d8259fc3a" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>train(model, k_epochs <span class="op">=</span> <span class="dv">5</span>,  lr <span class="op">=</span> <span class="fl">0.01</span>, evaluate_after_epoch <span class="op">=</span> <span class="va">True</span>, momentum <span class="op">=</span> <span class="fl">0.9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Epoch 0: validation accuracy = 0.346
-Epoch 1: validation accuracy = 0.775
-Epoch 2: validation accuracy = 0.849
-Epoch 3: validation accuracy = 0.877
-Epoch 4: validation accuracy = 0.878</code></pre>
+<div id="cell-32" class="cell" data-outputid="245f97d9-3b5d-4778-dd97-13166a7a7a24" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>train_accuracy, val_accuracy <span class="op">=</span> train(model, k_epochs <span class="op">=</span> <span class="dv">5</span>,  lr <span class="op">=</span> <span class="fl">0.01</span>,  momentum <span class="op">=</span> <span class="fl">0.9</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>plt.plot(train_accuracy, color <span class="op">=</span> <span class="st">"black"</span>, label <span class="op">=</span> <span class="st">"Training"</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>plt.plot(val_accuracy, color <span class="op">=</span> <span class="st">"firebrick"</span>, label <span class="op">=</span> <span class="st">"Validation"</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Epoch"</span>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Accuracy"</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>plt.gca().<span class="bu">set</span>(ylim <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">1</span>))</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> plt.legend()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="70-image-classification_files/figure-html/cell-18-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Although this model takes <em>much</em> longer to complete a single epoch, it is also able to achieve much higher validation accuracy than the pure logistic regression model (which, as you’ll recall from our previous work on this data set, leveled out around 67%).</p>
@@ -842,14 +790,14 @@ Epoch 4: validation accuracy = 0.878</code></pre>
 <h2 class="anchored" data-anchor-id="transfer-learning">Transfer Learning</h2>
 <p><em>Transfer learning</em> is a fancy phrase describing the simple technique of using a pre-existing model and tweaking it slightly to be suitable for your task. This is most frequently done with largescale models that couldn’t practically be fully trained on the available computing power. The theory is that a large, powerful model for e.g.&nbsp;image classification on some general image classification data set may have learned a useful set of hidden features that may have generic utility for other image classification tasks.</p>
 <p>Let’s use <code>ImageNet</code>, a well-known class of models trained for image classification tasks. <code>torch.models</code> allows you to easily create an instance of an ImageNet model:</p>
-<div id="cell-43" class="cell" data-execution_count="60">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> models.resnet18(weights<span class="op">=</span><span class="st">'IMAGENET1K_V1'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-34" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> models.resnet18(weights<span class="op">=</span><span class="st">'IMAGENET1K_V1'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s take a look at the structure of this model. Note that the input shape is <code>(3, 28, 28)</code> because <code>ImageNet</code> is trained on color images with three RGB color channels.</p>
-<div id="cell-45" class="cell" data-outputid="75a55380-92f7-45ef-e396-71aec1f5423f" data-execution_count="61">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>INPUT_SHAPE <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">28</span>, <span class="dv">28</span>)</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> model.to(device)</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>summary(model, INPUT_SHAPE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-36" class="cell" data-outputid="3c7a40a1-70dc-4a20-d059-572740b1ddcd" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>INPUT_SHAPE <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">28</span>, <span class="dv">28</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> model.to(device)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>summary(model, INPUT_SHAPE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>----------------------------------------------------------------
         Layer (type)               Output Shape         Param #
@@ -935,14 +883,13 @@ Estimated Total Size (MB): 45.70
 </div>
 </div>
 <p>You may notice a problem: this model is trained to classify images into one of 1000 categories, but we only have 26! This means that we need to modify the output layer. Fortunately, this is not hard to do. The output layer in <code>ImageNet</code> has name <code>fc</code>, and we can simply swap it out for a different output layer with the correct number of outputs.</p>
-<div id="cell-47" class="cell" data-execution_count="63">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>num_ftrs <span class="op">=</span> model.fc.in_features</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>model.fc <span class="op">=</span> nn.Linear(num_ftrs, <span class="dv">26</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-38" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>model.fc <span class="op">=</span> nn.Linear(model.fc.in_features, <span class="dv">26</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>If we check our model again, we’ll see that we now have the right number of outputs:</p>
-<div id="cell-49" class="cell" data-outputid="c08d031f-ef5f-4606-d86c-00914ddc2c4b" data-execution_count="65">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> model.to(device)</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>summary(model, INPUT_SHAPE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-40" class="cell" data-outputid="c379a012-556d-420a-d2ac-819410994a92" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> model.to(device)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>summary(model, INPUT_SHAPE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>----------------------------------------------------------------
         Layer (type)               Output Shape         Param #
@@ -1028,29 +975,29 @@ Estimated Total Size (MB): 43.78
 </div>
 </div>
 <p>Now we are ready to train our adapted <code>ImageNet</code> model for our task. Let’s see how we do in just two epochs:</p>
-<div id="cell-51" class="cell" data-outputid="82dfe46d-cc9b-4259-eb9e-9aedb9a3a58f" data-execution_count="67">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>train(model, k_epochs <span class="op">=</span> <span class="dv">2</span>,  lr <span class="op">=</span> <span class="fl">0.01</span>, evaluate_after_epoch <span class="op">=</span> <span class="va">True</span>, multichannel <span class="op">=</span> <span class="va">True</span>, momentum <span class="op">=</span> <span class="fl">0.9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-42" class="cell" data-outputid="a7103e5e-d2ae-4fdf-a238-c73b8002c448" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>train_accuracy, val_accuracy <span class="op">=</span> train(model, k_epochs <span class="op">=</span> <span class="dv">2</span>,  lr <span class="op">=</span> <span class="fl">0.01</span>,  multichannel <span class="op">=</span> <span class="va">True</span>, momentum <span class="op">=</span> <span class="fl">0.9</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Validation accuracy: </span><span class="sc">{</span>val_accuracy[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Epoch 0: validation accuracy = 0.975
-Epoch 1: validation accuracy = 0.974</code></pre>
+<pre><code>Validation accuracy: 0.97</code></pre>
 </div>
 </div>
 <p>After just two epochs, we have achieved much higher accuracy on our sign-language classification task than we achieved using any of our previous methods. This is because <code>ImageNet</code> is a much more expressive model with a complex architecture and a higher parameter count. Fortunately, however, we didn’t have to fully train the model from scratch; we were able to just tweak the model a little bit to customize it for our specific task.</p>
 <p>There is another variant of transfer learning in which we fix the parameters at the base layers and then only train the parameters in the output layer. This approach can be effective and can be quick to train, but also may perform worse than approaches that modify all the model parameters. We can implement this approach by first downloading a “clean” version of <code>ImageNet</code>. Then, we’ll set the <code>requires_grad</code> attribute of each parameter tensor to <code>False</code>; this will cause these layers not to be updated during optimization. This approach is often called <em>fine-tuning</em>.</p>
-<div id="cell-53" class="cell" data-execution_count="68">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> models.resnet18(weights<span class="op">=</span><span class="st">'IMAGENET1K_V1'</span>)</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="co"># no gradients for any of the model parameters, so no updates</span></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> param <span class="kw">in</span> model.parameters():</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    param.requires_grad <span class="op">=</span> <span class="va">False</span></span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters of newly constructed modules have requires_grad=True by default</span></span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>num_ftrs <span class="op">=</span> model.fc.in_features</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>model.fc <span class="op">=</span> nn.Linear(num_ftrs, <span class="dv">26</span>)</span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> model.to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-44" class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> models.resnet18(weights <span class="op">=</span><span class="st">'IMAGENET1K_V1'</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co"># no gradients for any of the model parameters, so no updates</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> param <span class="kw">in</span> model.parameters():</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    param.requires_grad <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters of newly constructed modules have requires_grad=True by default</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>num_ftrs <span class="op">=</span> model.fc.in_features</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>model.fc <span class="op">=</span> nn.Linear(num_ftrs, <span class="dv">26</span>)</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>model    <span class="op">=</span> model.to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-54" class="cell" data-outputid="ecdcd5da-c0a1-4d91-9ce0-149fada07248" data-execution_count="69">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>summary(model, INPUT_SHAPE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-45" class="cell" data-outputid="5b6ca765-c892-4847-f96d-c10d5baa50f9" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>summary(model, INPUT_SHAPE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>----------------------------------------------------------------
         Layer (type)               Output Shape         Param #
@@ -1136,14 +1083,11 @@ Estimated Total Size (MB): 43.78
 </div>
 </div>
 <p>Note that, although we have the same number of parameters as before, the number of <em>trainable</em> parameters is much smaller. This leads to somewhat faster training, albeit with much less impressive results in the validation set. Fine-tuning the final several layers, rather than just the single output layer, may lead to improved performance.</p>
-<div id="cell-56" class="cell" data-outputid="224764ad-43bf-4b18-adb7-4d12a03b80b4" data-execution_count="70">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>train(model, k_epochs <span class="op">=</span> <span class="dv">5</span>,  lr <span class="op">=</span> <span class="fl">0.01</span>, evaluate_after_epoch <span class="op">=</span> <span class="va">True</span>, multichannel <span class="op">=</span> <span class="va">True</span>, momentum <span class="op">=</span> <span class="fl">0.9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-47" class="cell" data-outputid="0f4b1d6f-8ab5-46d3-d483-b5eb530176c7" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>train_accuracy, val_accuracy <span class="op">=</span> train(model, k_epochs <span class="op">=</span> <span class="dv">5</span>,  lr <span class="op">=</span> <span class="fl">0.01</span>, multichannel <span class="op">=</span> <span class="va">True</span>, momentum <span class="op">=</span> <span class="fl">0.9</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Validation accuracy: </span><span class="sc">{</span>val_accuracy[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Epoch 0: validation accuracy = 0.450
-Epoch 1: validation accuracy = 0.470
-Epoch 2: validation accuracy = 0.483
-Epoch 3: validation accuracy = 0.479
-Epoch 4: validation accuracy = 0.484</code></pre>
+<pre><code>Validation accuracy: 0.49</code></pre>
 </div>
 </div>
 </section>
@@ -1155,27 +1099,27 @@ Epoch 4: validation accuracy = 0.484</code></pre>
 <p>One very standard technique for improving the ability of image classification models to generalize is to perform <em>data augmentation</em>. Data augmentation creates “new” data by applying simple transformations to the input images. For example, one kind of data augmentation is to <em>rotate</em> the image by a small amount.</p>
 <div class="page-columns page-full"><p>.</p><div class="no-row-height column-margin column-container"><span class="margin-aside">You can learn more about Torch’s data augmentation capabilities in <a href="https://pytorch.org/vision/stable/transforms.html">the documentation</a></span></div></div>
 <p>Here is an example of applying a data augmentation pipeline to an image. The result is a sequence of new images, which would be reasonably expected to have the same true class label as the original.</p>
-<div id="cell-58" class="cell" data-outputid="aa6d1423-96c2-47b0-9aa4-f820133f01f3" data-execution_count="71">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision.transforms <span class="im">import</span> v2</span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>transforms <span class="op">=</span> v2.Compose([</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    v2.RandomResizedCrop(size<span class="op">=</span>(<span class="dv">24</span>, <span class="dv">24</span>), antialias<span class="op">=</span><span class="va">True</span>),</span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    v2.RandomHorizontalFlip(p<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    ])</span>
-<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> <span class="dv">5</span></span>
-<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> <span class="dv">2</span></span>
-<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>ix <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(rows, cols, figsize <span class="op">=</span> (<span class="dv">2</span><span class="op">*</span>cols, <span class="dv">2</span><span class="op">*</span>rows))</span>
-<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, ax <span class="kw">in</span> <span class="bu">enumerate</span>(axarr.ravel()):</span>
-<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>    transformed <span class="op">=</span> transforms(X_train[ix])</span>
-<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>    ax.imshow(transformed.detach().cpu()[<span class="dv">0</span>], cmap <span class="op">=</span> <span class="st">"Greys_r"</span>)</span>
-<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>    ax.axis(<span class="st">"off"</span>)</span>
-<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-49" class="cell" data-outputid="d9960133-0a75-4de1-8b78-a861a413d6be" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision.transforms <span class="im">import</span> v2</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>transforms <span class="op">=</span> v2.Compose([</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    v2.RandomResizedCrop(size<span class="op">=</span>(<span class="dv">24</span>, <span class="dv">24</span>), antialias<span class="op">=</span><span class="va">True</span>),</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    v2.RandomHorizontalFlip(p<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>ix <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(rows, cols, figsize <span class="op">=</span> (<span class="dv">2</span><span class="op">*</span>cols, <span class="dv">2</span><span class="op">*</span>rows))</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, ax <span class="kw">in</span> <span class="bu">enumerate</span>(axarr.ravel()):</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>    transformed <span class="op">=</span> transforms(X_train[ix])</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>    ax.imshow(transformed.detach().cpu()[<span class="dv">0</span>], cmap <span class="op">=</span> <span class="st">"Greys_r"</span>)</span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>    ax.axis(<span class="st">"off"</span>)</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="70-image-classification_files/figure-html/cell-30-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="70-image-classification_files/figure-html/cell-27-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>

@@ -437,7 +437,7 @@ window.Quarto = {
 <div>
 <pre class="mermaid mermaid-js">flowchart LR
   input[Data matrix X] --Matrix-vector\nmultiplication--&gt; l3["Xw"]
-
+  w[w] --Matrix-vector\nmultiplication--&gt; l3["Xw"]
   y[Targets y]        --Apply\nloss--&gt; loss["ℓ(Xw, y)"]
   l3       --Apply\nloss--&gt; loss 
   loss     --Compute\naverage--&gt;L
@@ -456,7 +456,7 @@ window.Quarto = {
 <pre class="mermaid mermaid-js">flowchart LR
   input[Data matrix X] --Apply feature\nmap--&gt;l1["Φ(X)"]
   l1                   --Matrix-vector\nmultiplication--&gt; l3["Φ(X)w"]
-
+  w[w] --Matrix-vector\nmultiplication--&gt; l3["Xw"]
   y[Targets y] --Apply\nloss--&gt; loss["ℓ(Φ(X)w, y)"]
   l3           --Apply\nloss--&gt; loss 
   loss         --Compute\naverage--&gt;L
@@ -494,7 +494,8 @@ window.Quarto = {
   input[Data matrix X] --Matrix\nmultiplication--&gt; l1[XU]
   l1       --Nonlinearity--&gt; l2["ɑ(XU)"]
   l2       --Matrix-vector\nmultiplication--&gt; l3["ɑ(XU)w"]
-
+  U --Matrix-matrix\nmultiplication--&gt;l1
+  w --&gt;Matrix-vector\nmultiplication--&gt; l3
   y[Targets y]        --Apply\nloss--&gt; loss["ℓ(ɑ(XU)w, y)"]
   l3       --Apply\nloss--&gt; loss 
   loss     --Compute\naverage--&gt;L
