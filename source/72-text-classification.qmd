@@ -15,6 +15,8 @@ jupyter: python3
 
 *Major components of this set of lecture notes are based on the [Text Classification](https://pytorch.org/tutorials/beginner/text_sentiment_ngrams_tutorial.html) tutorial from the PyTorch documentation*.
 
+*To run this notebook in Google Colab, it is necessary to add the line `!pip install torchinfo`. 
+
 In this set of notes, we'll discuss the problem of *text classification*. Text classification is a common problem in which we aim to classify pieces of text into different categories. These categories might be about:
 
 - **Subject matter**: is this news article about news, fashion, finance?
@@ -27,6 +29,8 @@ We saw text classification previously when we first considered the problem of ve
 import torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
+
+# !pip install torchinfo if running in Colab
 from torchinfo import summary
 
 import pandas as pd
@@ -65,7 +69,6 @@ df  = df[["category", "headline"]]
 There are over 200,000 headlines listed here, along with the category in which they appeared on the website.
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/', height: 206}
 #---
 df.head()
 #---
@@ -76,7 +79,6 @@ Our task will be to teach an algorithm to classify headlines by predicting the c
 Training a model on this much text data can require a lot of time, so we are going to simplify the problem a little bit, by reducing the number of categories. Let's take a look at which categories we have:
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/', height: 1000}
 #---
 df.groupby("category").size()
 #---
@@ -93,7 +95,6 @@ Some of these categories are a little odd:
 Well, there are definitely some questions here! Let's just choose a few categories, and discard the rest. We're going to give each of the categories an integer that we'll use to encode the category in the target variable.
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/', height: 206}
 categories = {
     "STYLE"   : 0,
     "SCIENCE" : 1,
@@ -105,7 +106,6 @@ df.head()
 ```
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/', height: 582}
 df["category"] = df["category"].apply(categories.get)
 df
 ```
@@ -113,7 +113,6 @@ df
 The base rate on this problem is the proportion of the data set occupied by the largest label class:
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/', height: 209}
 df.groupby("category").size() / len(df)
 ```
 
@@ -138,7 +137,6 @@ tokenizer = BertTokenizer.from_pretrained("google-bert/bert-base-uncased")
 We can use this tokenizer like this:
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/'}
 #---
 tokenizer.tokenize("I love logistic regression!")
 #---
@@ -147,7 +145,6 @@ tokenizer.tokenize("I love logistic regression!")
 For the purposes of modeling, it's more convenient to assign an *integer* to each token, which we can do like this:
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/'}
 #---
 encoded = tokenizer("I love logistic regression!")
 encoded
@@ -157,7 +154,6 @@ encoded
 To undo this operation, we use the `.decode` method of the tokenizer:
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/', height: 35}
 #---
 tokenizer.decode(encoded["input_ids"])
 #---
@@ -234,14 +230,12 @@ X, y = next(iter(train_loader))
 The predictor data is now a tensor in which the entries give token indices, padded with 0s. For visualization purposes we'll show only the first 3 rows:
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/'}
 X[:3]
 ```
 
 The target data is a tensor of integer indices:
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/'}
 y[:3]
 ```
 
@@ -333,7 +327,6 @@ def accuracy(dataloader):
 ```
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/'}
 #---
 EPOCHS = 20
 for epoch in range(1, EPOCHS + 1):
@@ -342,7 +335,6 @@ for epoch in range(1, EPOCHS + 1):
 ```
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/'}
 #---
 accuracy(val_loader)
 #---
@@ -377,7 +369,6 @@ weights = pca.fit_transform(embedding_matrix)
 We'll use the Plotly package to do the plotting. Plotly works best with dataframes:
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/', height: 423}
 tokens.append(" ")
 embedding_df = pd.DataFrame({
     'word' : tokens,
@@ -391,7 +382,6 @@ embedding_df
 And, let's plot! We've used Plotly for the interactivity: hover over a dot to see the word it corresponds to.
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/', height: 542}
 fig = px.scatter(embedding_df,
                  x = "x0",
                  y = "x1",
@@ -442,7 +432,6 @@ sub_df = embedding_df[embedding_df["highlight"] > 0]
 ```
 
 ```{python}
-#| colab: {base_uri: 'https://localhost:8080/', height: 542}
 import plotly.express as px
 
 fig = px.scatter(sub_df,

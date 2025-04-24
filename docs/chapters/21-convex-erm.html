@@ -451,7 +451,7 @@ window.Quarto = {
 <div id="fig-scatter" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-cap-location="margin">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="21-convex-erm_files/figure-html/fig-scatter-output-1.png" width="588" height="423" class="figure-img">
+<img src="21-convex-erm_files/figure-html/fig-scatter-output-1.png" width="596" height="423" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;8.1: 300 data points in the 2d plane, each of which has one of two labels.
@@ -495,12 +495,12 @@ L(\mathbf{w}) = \frac{1}{n}\sum_{i = 1}^n \mathbb{1}[s_i (2y_i-1) &lt; 0]
 \ell(s, y) = \mathbb{1}[s (2y-1) &lt; 0]\;.
 \]</span></p>
 <p>Let’s implement this function in Python:</p>
-<div id="b1c4016c" class="cell" data-execution_count="2">
+<div id="dbaeb9ee" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> zero_one_loss(s, y):</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span><span class="op">*</span>(s<span class="op">*</span>(<span class="dv">2</span><span class="op">*</span>y<span class="op">-</span><span class="dv">1</span>) <span class="op">&lt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here’s a plot of this function for each of the two possible values of <span class="math inline">\(y\)</span>:</p>
-<div id="e8f093a7" class="cell" data-execution_count="3">
+<div id="6cd83f79" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt </span>
@@ -534,7 +534,7 @@ L(\mathbf{w}) = \frac{1}{n}\sum_{i = 1}^n \mathbb{1}[s_i (2y_i-1) &lt; 0]
 </details>
 </div>
 <p>The zero-one loss looks like this:</p>
-<div id="7616869d" class="cell" data-execution_count="4">
+<div id="93e467df" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plot_loss(loss_fun <span class="op">=</span> zero_one_loss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -545,7 +545,7 @@ L(\mathbf{w}) = \frac{1}{n}\sum_{i = 1}^n \mathbb{1}[s_i (2y_i-1) &lt; 0]
 </div>
 </div>
 <p>The problem with this loss function <span class="math inline">\(\ell\)</span> is that we can “draw lines under the function.” What this means is that we can pick two points on the graph of the function, connect them with a line, and find that the line lies <em>under</em> the graph of the function in some regions:</p>
-<div id="548eda56" class="cell" data-execution_count="5">
+<div id="fd79bdfd" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plot_loss(loss_fun <span class="op">=</span> zero_one_loss, show_line <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -592,7 +592,7 @@ f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) &lt; \lambda f( \mathbf{z}_1 )
 </div>
 </div>
 <p>The most familiar example of a convex function is our good friend the convex parabola:</p>
-<div id="9746d61d" class="cell" data-execution_count="6">
+<div id="fbe0586e" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">10001</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> x<span class="op">**</span><span class="dv">2</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -614,11 +614,11 @@ f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) &lt; \lambda f( \mathbf{z}_1 )
 \ell(s, y) = y \max \{0, s\} + (1 - y) \max\{0, -s\}\;.
 \]</span></p>
 <p>Let’s implement and visualize the hinge loss:</p>
-<div id="5c05482e" class="cell" data-execution_count="7">
+<div id="9e3639d8" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hinge(s, y): </span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> y <span class="op">*</span> torch.<span class="bu">max</span>(torch.zeros_like(s), s)  <span class="op">+</span> (<span class="dv">1</span><span class="op">-</span>y) <span class="op">*</span> torch.<span class="bu">max</span>(torch.zeros_like(s), <span class="op">-</span>s)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="d465093f" class="cell" data-execution_count="8">
+<div id="af025c4d" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plot_loss(loss_fun <span class="op">=</span> hinge, show_line <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -635,11 +635,11 @@ f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) &lt; \lambda f( \mathbf{z}_1 )
 \end{aligned}
 \]</span></p><div class="no-row-height column-margin column-container"><span class="margin-aside">In this formula, <span class="math inline">\(\sigma(s) = \frac{1}{1 + e^{-s}}\)</span> is the logistic sigmoid function.</span></div></div>
 <p>Let’s implement this function for ourselves:</p>
-<div id="23751319" class="cell" data-execution_count="9">
+<div id="583efdac" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sig <span class="op">=</span> <span class="kw">lambda</span> s: <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> torch.exp(<span class="op">-</span>s))</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>binary_cross_entropy <span class="op">=</span> <span class="kw">lambda</span> s, y: <span class="op">-</span>(y <span class="op">*</span> sig(s).log() <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> y)<span class="op">*</span>(<span class="dv">1</span><span class="op">-</span>sig(s)).log())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="ba03fa11" class="cell" data-execution_count="10">
+<div id="64933485" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plot_loss(loss_fun <span class="op">=</span> binary_cross_entropy, show_line <span class="op">=</span> <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -654,7 +654,7 @@ f(\lambda \mathbf{z}_1 + (1-\lambda)\mathbf{z}_2) &lt; \lambda f( \mathbf{z}_1 )
 <section id="convexity-in-several-dimensions" class="level3">
 <h3 class="anchored" data-anchor-id="convexity-in-several-dimensions">Convexity In Several Dimensions</h3>
 <p>We intentionally formulated our definition of convexity for functions of many variables. Here is a convex function <span class="math inline">\(f:\mathbb{R}^2 \rightarrow \mathbb{R}\)</span>.</p>
-<div id="8cfe0107" class="cell" data-execution_count="11">
+<div id="4261116d" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(subplot_kw<span class="op">=</span>{<span class="st">"projection"</span>: <span class="st">"3d"</span>})</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1001</span>)[:, <span class="va">None</span>]</span>
@@ -809,26 +809,26 @@ f(\mathbf{z}) &amp;= f(\lambda \mathbf{z}' + (1-\lambda)\mathbf{z}^*) &amp;\quad
 \]</span></p>
 <p>As can be proven with calculus, this function is convex as a function of <span class="math inline">\(\mathbf{s}\)</span>.</p>
 <p>So, let’s do convex empirical risk minimization! We’ll use the following data set. Note that this data is not linearly separable and therefore the perceptron algorithm would not converge.</p>
-<div id="845a177e" class="cell" data-execution_count="12">
+<div id="a3676e6d" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> classification_data(noise <span class="op">=</span> <span class="fl">0.5</span>)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>plot_classification_data(X, y, ax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="21-convex-erm_files/figure-html/cell-13-output-1.png" class="figure-img" width="588" height="423"></p>
+<p><img src="21-convex-erm_files/figure-html/cell-13-output-1.png" class="figure-img" width="591" height="423"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>First, we’ll define a complete function for calculating the empirical risk for a given value of <span class="math inline">\(\mathbf{w}\)</span>. Since we already implemented <code>binary_cross_entropy</code>, this implementation is very quick:</p>
-<div id="8054e784" class="cell" data-execution_count="13">
+<div id="a65e595e" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> empirical_risk(w, X, y):</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> X<span class="op">@</span>w</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> binary_cross_entropy(s, y).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="page-columns page-full"><p>Now we’ll use the <code>minimize</code> function from <code>scipy.optimize</code> to find the value of <span class="math inline">\(\mathbf{w}\)</span> that makes this function smallest: </p><div class="no-row-height column-margin column-container"><span class="margin-aside">We initialize <code>w0</code> as a Numpy array for compatibility reasons with <code>scipy.optimize.minimize</code>.</span></div></div>
-<div id="764ca86c" class="cell" data-execution_count="14">
+<div id="aed2fefc" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> minimize</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>w0_array <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.0</span>]) <span class="co"># initial guess for w</span></span>
@@ -838,8 +838,8 @@ f(\mathbf{z}) &amp;= f(\lambda \mathbf{z}' + (1-\lambda)\mathbf{z}^*) &amp;\quad
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"""Learned parameter vector w = </span><span class="sc">{</span>w<span class="sc">}</span><span class="ss">.</span></span>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="ss">The empirical risk is </span><span class="sc">{</span>result<span class="sc">.</span>fun<span class="sc">:.4f}</span><span class="ss">."""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Learned parameter vector w = [ 4.08418028  4.04667782 -3.96553852].
-The empirical risk is 0.1733.</code></pre>
+<pre><code>Learned parameter vector w = [ 4.45481179  4.3638264  -4.40081993].
+The empirical risk is 0.1715.</code></pre>
 </div>
 </div>
 <div id="cell-fig-LR-line" class="cell page-columns page-full" data-execution_count="15">
@@ -858,7 +858,7 @@ The empirical risk is 0.1733.</code></pre>
 <div id="fig-lr-line" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-cap-location="margin">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-lr-line-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="21-convex-erm_files/figure-html/fig-lr-line-output-1.png" width="588" height="423" class="figure-img">
+<img src="21-convex-erm_files/figure-html/fig-lr-line-output-1.png" width="591" height="423" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-lr-line-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;8.2: The separating line learned by logistic regression.
@@ -868,12 +868,12 @@ Figure&nbsp;8.2: The separating line learned by logistic regression.
 </div>
 </div>
 <p>This looks pretty good. Let’s compute the accuracy.</p>
-<div id="355b95be" class="cell" data-execution_count="16">
+<div id="5e0a2c00" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> X<span class="op">@</span>w</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>accuracy <span class="op">=</span> (<span class="fl">1.0</span><span class="op">*</span>((s<span class="op">&gt;</span><span class="dv">0</span>) <span class="op">==</span> y)).mean()</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>accuracy</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="16">
-<pre><code>tensor(0.9467)</code></pre>
+<pre><code>tensor(0.9233)</code></pre>
 </div>
 </div>
 <section id="optional-a-logistic-regression-training-loop" class="level3 page-columns page-full">
@@ -906,7 +906,7 @@ Figure&nbsp;8.2: The separating line learned by logistic regression.
 <div id="fig-lr-loss-iterations" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-cap-location="margin">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-lr-loss-iterations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="21-convex-erm_files/figure-html/fig-lr-loss-iterations-output-1.png" width="581" height="429" class="figure-img">
+<img src="21-convex-erm_files/figure-html/fig-lr-loss-iterations-output-1.png" width="588" height="429" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-lr-loss-iterations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;8.3: Evolution of the binary cross entropy loss function in the logistic regression training loop.
@@ -917,7 +917,7 @@ Figure&nbsp;8.3: Evolution of the binary cross entropy loss function in the logi
 </div>
 <p>The loss quickly levels out to a constant value (which is the same as we learned with <code>scipy.optimize.minimize</code>). Because our theory tells us that the loss function is convex, we know that the value of <span class="math inline">\(\mathbf{w}\)</span> we have found is the best possible, in the sense of minimizing the loss.</p>
 <p>Let’s take a look at the separating line we found:</p>
-<div id="aaee75c1" class="cell" data-execution_count="18">
+<div id="4274e23d" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>draw_line(LR.w, X, y, </span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>          x_min <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, </span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>          x_max <span class="op">=</span> <span class="fl">1.5</span>, </span>
@@ -927,17 +927,17 @@ Figure&nbsp;8.3: Evolution of the binary cross entropy loss function in the logi
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="21-convex-erm_files/figure-html/cell-19-output-1.png" class="figure-img" width="588" height="423"></p>
+<p><img src="21-convex-erm_files/figure-html/cell-19-output-1.png" class="figure-img" width="591" height="423"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Yep, that’s the same line as we found earlier!</p>
 <p>Although our data is not linearly separable, the separating line we have learned appears to do a reasonable job of separating the points from each other. Let’s check our accuracy:</p>
-<div id="90f0ac64" class="cell" data-execution_count="19">
+<div id="87d2fdc1" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(<span class="fl">1.0</span><span class="op">*</span>(LR.predict(X) <span class="op">==</span> y)).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="19">
-<pre><code>tensor(0.9467)</code></pre>
+<pre><code>tensor(0.9233)</code></pre>
 </div>
 </div>
 
