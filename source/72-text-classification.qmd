@@ -15,8 +15,6 @@ jupyter: python3
 
 *Major components of this set of lecture notes are based on the [Text Classification](https://pytorch.org/tutorials/beginner/text_sentiment_ngrams_tutorial.html) tutorial from the PyTorch documentation*.
 
-## Deep Text Classification and Word Embedding
-
 In this set of notes, we'll discuss the problem of *text classification*. Text classification is a common problem in which we aim to classify pieces of text into different categories. These categories might be about:
 
 - **Subject matter**: is this news article about news, fashion, finance?
@@ -408,7 +406,7 @@ We've made an embedding! We might notice that this embedding appears to be a lit
 
 Although modern methods for training word embeddings are much more complex, this example illustrates a key point: word embeddings are trained as *byproducts* of the process of training a model that learns to do something else, like text classification or predictive text generation.
 
-## Bias in Text Embeddings
+### Bias in Text Embeddings
 
 Whenever we create a machine learning model that might conceivably have impact on the thoughts or actions of human beings, we have a responsibility to understand the limitations and biases of that model. Biases can enter into machine learning models through several routes, including the data used as well as choices made by the modeler along the way. For example, in our case:
 
@@ -464,7 +462,7 @@ fig.show()
 
 What do you notice about some of the similarities represented in these embeddings? What do you wonder?
 
-## Representational Harm and Representational Bias
+### Representational Harm and Representational Bias
 
 Earlier in this course, we discussed *allocative bias*. Allocative bias occurs when different groups have inequitable opportunities to access important resources or opportunities on the basis of their identity. We discussed examples that raised questions about equitable access to personal liberty, employment, and insurance.
 
@@ -498,11 +496,11 @@ Translate these into Hungarian and back via Google Translate, and here's what yo
 
 Considering that English *has* a gender neutral pronoun (*they*), this would be an easy item to fix, which Google has thus far declined to do.
 
-## Intersections of Representational and Allocative Harms
+### Intersections of Representational and Allocative Harms
 
 In some cases, representational and allocative harms can intersect and reinforce each other. For example, modern translation systems perform impressively in certain languages but much less well in others. Some of these languages, such as Pashto and Dari, are spoken by many refugees and asylum-seekers to the US. The use of automated translation software when processing these asylum cases has drawn considerable scrutiny and [appears to have resulted in the denial of at least one case](https://restofworld.org/2023/ai-translation-errors-afghan-refugees-asylum/) due to a machine translation error.  
 
-## More on Bias in Language Models
+### More on Bias in Language Models
 
 For more on the topic of bias in language models, you may wish to read the now-infamous paper by Emily Bender, Angelina McMillan-Major, Timnit Gebru, and "Shmargret Shmitchell" (Margaret Mitchell), "[On the Dangers of Stochastic Parrots](https://faculty.washington.edu/ebender/papers/Stochastic_Parrots.pdf)." This is the paper that ultimately led to the firing of the final two authors by Google in late 2020 and early 2021.
 

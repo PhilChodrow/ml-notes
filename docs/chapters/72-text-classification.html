@@ -368,20 +368,19 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#deep-text-classification-and-word-embedding" id="toc-deep-text-classification-and-word-embedding" class="nav-link active" data-scroll-target="#deep-text-classification-and-word-embedding">Deep Text Classification and Word Embedding</a></li>
-  <li><a href="#text-vectorization" id="toc-text-vectorization" class="nav-link" data-scroll-target="#text-vectorization">Text Vectorization</a></li>
+  <li><a href="#text-vectorization" id="toc-text-vectorization" class="nav-link active" data-scroll-target="#text-vectorization">Text Vectorization</a></li>
   <li><a href="#modeling" id="toc-modeling" class="nav-link" data-scroll-target="#modeling">Modeling</a>
   <ul class="collapse">
   <li><a href="#word-embedding" id="toc-word-embedding" class="nav-link" data-scroll-target="#word-embedding">Word Embedding</a></li>
   </ul></li>
-  <li><a href="#inspecting-word-embeddings" id="toc-inspecting-word-embeddings" class="nav-link" data-scroll-target="#inspecting-word-embeddings">Inspecting Word Embeddings</a></li>
-  <li><a href="#bias-in-text-embeddings" id="toc-bias-in-text-embeddings" class="nav-link" data-scroll-target="#bias-in-text-embeddings">Bias in Text Embeddings</a></li>
-  <li><a href="#representational-harm-and-representational-bias" id="toc-representational-harm-and-representational-bias" class="nav-link" data-scroll-target="#representational-harm-and-representational-bias">Representational Harm and Representational Bias</a>
+  <li><a href="#inspecting-word-embeddings" id="toc-inspecting-word-embeddings" class="nav-link" data-scroll-target="#inspecting-word-embeddings">Inspecting Word Embeddings</a>
   <ul class="collapse">
+  <li><a href="#bias-in-text-embeddings" id="toc-bias-in-text-embeddings" class="nav-link" data-scroll-target="#bias-in-text-embeddings">Bias in Text Embeddings</a></li>
+  <li><a href="#representational-harm-and-representational-bias" id="toc-representational-harm-and-representational-bias" class="nav-link" data-scroll-target="#representational-harm-and-representational-bias">Representational Harm and Representational Bias</a></li>
   <li><a href="#bias-in-google-translate" id="toc-bias-in-google-translate" class="nav-link" data-scroll-target="#bias-in-google-translate">Bias in Google Translate</a></li>
-  </ul></li>
   <li><a href="#intersections-of-representational-and-allocative-harms" id="toc-intersections-of-representational-and-allocative-harms" class="nav-link" data-scroll-target="#intersections-of-representational-and-allocative-harms">Intersections of Representational and Allocative Harms</a></li>
   <li><a href="#more-on-bias-in-language-models" id="toc-more-on-bias-in-language-models" class="nav-link" data-scroll-target="#more-on-bias-in-language-models">More on Bias in Language Models</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -416,8 +415,6 @@ window.Quarto = {
 
 
 <p><em>Major components of this set of lecture notes are based on the <a href="https://pytorch.org/tutorials/beginner/text_sentiment_ngrams_tutorial.html">Text Classification</a> tutorial from the PyTorch documentation</em>.</p>
-<section id="deep-text-classification-and-word-embedding" class="level2">
-<h2 class="anchored" data-anchor-id="deep-text-classification-and-word-embedding">Deep Text Classification and Word Embedding</h2>
 <p>In this set of notes, we’ll discuss the problem of <em>text classification</em>. Text classification is a common problem in which we aim to classify pieces of text into different categories. These categories might be about:</p>
 <ul>
 <li><strong>Subject matter</strong>: is this news article about news, fashion, finance?</li>
@@ -425,7 +422,7 @@ window.Quarto = {
 <li><strong>Automated content moderation</strong>: is this Facebook comment a possible instance of abuse or harassment? Is this Reddit thread promoting violence? Is this email spam?</li>
 </ul>
 <p>We saw text classification previously when we first considered the problem of vectorizing pieces of text. We are now going to look at a somewhat more contemporary approach to text using <em>word embeddings</em>.</p>
-<div id="a2ee8689" class="cell" data-execution_count="1">
+<div id="a2ee8689" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch <span class="im">import</span> nn</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> Dataset, DataLoader</span>
@@ -455,14 +452,14 @@ window.Quarto = {
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>For this example, we are going to use a data set containing headlines from a large number of different news articles on the website <a href="https://www.huffpost.com/">HuffPost</a>. I retrieved this data <a href="https://www.kaggle.com/rmisra/news-category-dataset">from Kaggle</a>.</p>
-<div id="b3d1dffd" class="cell" data-execution_count="2">
+<div id="b3d1dffd" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># access the data</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/PIC16B/master/datasets/news/News_Category_Dataset_v2.json"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>df  <span class="op">=</span> pd.read_json(url, lines<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>df  <span class="op">=</span> df[[<span class="st">"category"</span>, <span class="st">"headline"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>There are over 200,000 headlines listed here, along with the category in which they appeared on the website.</p>
-<div id="9eafd4dc" class="cell" data-execution_count="3">
+<div id="9eafd4dc" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div>
@@ -510,7 +507,7 @@ window.Quarto = {
 </div>
 <p>Our task will be to teach an algorithm to classify headlines by predicting the category based on the text of the headline.</p>
 <p>Training a model on this much text data can require a lot of time, so we are going to simplify the problem a little bit, by reducing the number of categories. Let’s take a look at which categories we have:</p>
-<div id="af1022bd" class="cell" data-execution_count="4">
+<div id="af1022bd" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">"category"</span>).size()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>category
@@ -567,7 +564,7 @@ dtype: int64</code></pre>
 <li>Etc?…</li>
 </ul>
 <p>Well, there are definitely some questions here! Let’s just choose a few categories, and discard the rest. We’re going to give each of the categories an integer that we’ll use to encode the category in the target variable.</p>
-<div id="973321b1" class="cell" data-execution_count="5">
+<div id="973321b1" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>categories <span class="op">=</span> {</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"STYLE"</span>   : <span class="dv">0</span>,</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SCIENCE"</span> : <span class="dv">1</span>,</span>
@@ -620,7 +617,7 @@ dtype: int64</code></pre>
 </div>
 </div>
 </div>
-<div id="e6d8228a" class="cell" data-execution_count="6">
+<div id="e6d8228a" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"category"</span>] <span class="op">=</span> df[<span class="st">"category"</span>].<span class="bu">apply</span>(categories.get)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
@@ -699,7 +696,7 @@ dtype: int64</code></pre>
 </div>
 </div>
 <p>The base rate on this problem is the proportion of the data set occupied by the largest label class:</p>
-<div id="d8079da8" class="cell" data-execution_count="7">
+<div id="d8079da8" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">"category"</span>).size() <span class="op">/</span> <span class="bu">len</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>category
@@ -710,26 +707,25 @@ dtype: float64</code></pre>
 </div>
 </div>
 <p>If we always guessed category 1, then we would expect an accuracy of roughly 35%. So, our task is to see whether we can train a model to beat this. Towards this end, let’s perform a training-validation split.</p>
-<div id="94db219b" class="cell" data-execution_count="8">
+<div id="94db219b" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df_train, df_val <span class="op">=</span> train_test_split(df,shuffle <span class="op">=</span> <span class="va">True</span>, test_size <span class="op">=</span> <span class="fl">0.2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section>
 <section id="text-vectorization" class="level2">
 <h2 class="anchored" data-anchor-id="text-vectorization">Text Vectorization</h2>
 <p>Our next task is to <em>vectorize</em> the text headlines. One way to do this is one-hot encoding, in which we give each headline a feature for word <code>w</code> with value <code>1</code> if <code>w</code> appears in the headline. Today we’re going to do something a bit more aligned with modern practice. We’re going to use <em>tokenization</em> to break up each headline into a sequence of <em>tokens</em>, and then vectorize that sequence.</p>
 <p>Tokenization starts with a tokenizer, which we import from HuggingFace.</p>
-<div id="cc2d4b73" class="cell" data-execution_count="9">
+<div id="cc2d4b73" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> BertTokenizer.from_pretrained(<span class="st">"google-bert/bert-base-uncased"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can use this tokenizer like this:</p>
-<div id="b094d7a5" class="cell" data-execution_count="10">
+<div id="b094d7a5" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>tokenizer.tokenize(<span class="st">"I love logistic regression!"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>['i', 'love', 'log', '##istic', 'regression', '!']</code></pre>
 </div>
 </div>
 <p>For the purposes of modeling, it’s more convenient to assign an <em>integer</em> to each token, which we can do like this:</p>
-<div id="3a0bf308" class="cell" data-execution_count="11">
+<div id="3a0bf308" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>encoded <span class="op">=</span> tokenizer(<span class="st">"I love logistic regression!"</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>encoded</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
@@ -737,18 +733,18 @@ dtype: float64</code></pre>
 </div>
 </div>
 <p>To undo this operation, we use the <code>.decode</code> method of the tokenizer:</p>
-<div id="c09f3fdc" class="cell" data-execution_count="12">
+<div id="c09f3fdc" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>tokenizer.decode(encoded[<span class="st">"input_ids"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>'[CLS] i love logistic regression! [SEP]'</code></pre>
 </div>
 </div>
 <p>We’ll use this tokenizer to prepare a transformed version of our data set in consisting of the <code>input_ids</code> corresponding to each headline. We’ll write a preprocessing function which tokenizes each headline and then adds “padding” of 0s so that each tokenized headline has the same length.</p>
-<div id="55739966" class="cell" data-execution_count="13">
+<div id="55739966" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>X_train_tokenized <span class="op">=</span> tokenizer(<span class="bu">list</span>(df_train[<span class="st">"headline"</span>]))[<span class="st">"input_ids"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Our new training data is now a list of sequences of tokens. This list is “ragged” in the sense that the sequences are of different lengths. We can standardize the list by padding shorter sequences with 0s until all are the same length. We’ll use this preprocessing in the <code>__init__()</code> method of a torch <code>Dataset</code> class which will manage our data.</p>
-<div id="41cecb62" class="cell" data-execution_count="14">
+<div id="41cecb62" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>max_len <span class="op">=</span> <span class="dv">50</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pad(l, max_len):</span>
@@ -773,12 +769,12 @@ dtype: float64</code></pre>
 <span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we can create datasets and data loaders from each of the training and validation data frames.</p>
-<div id="f87d4749" class="cell" data-execution_count="15">
+<div id="f87d4749" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>train_data <span class="op">=</span> TextDataFromDF(df_train)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>val_data   <span class="op">=</span> TextDataFromDF(df_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>A single piece of our data now looks like this:</p>
-<div id="85a085cc" class="cell" data-execution_count="16">
+<div id="85a085cc" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> train_data[<span class="dv">1</span>]</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X)</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -788,7 +784,7 @@ dtype: float64</code></pre>
 </div>
 </div>
 <p>To create data loaders, we need to define a <code>collate_fn</code> function which will accept a list of individual such <code>X</code> sequences and ensure that the result is a <code>batch_size</code> <span class="math inline">\(\times\)</span> <code>max_length</code> sized 2d tensor.</p>
-<div id="46926925" class="cell" data-execution_count="17">
+<div id="46926925" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> collate(data):</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> torch.tensor([d[<span class="dv">0</span>] <span class="cf">for</span> d <span class="kw">in</span> data])</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> torch.tensor([d[<span class="dv">1</span>] <span class="cf">for</span> d <span class="kw">in</span> data])</span>
@@ -798,11 +794,11 @@ dtype: float64</code></pre>
 <span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>val_loader <span class="op">=</span> DataLoader(val_data, batch_size<span class="op">=</span><span class="dv">8</span>, shuffle<span class="op">=</span><span class="va">True</span>, collate_fn <span class="op">=</span> collate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s take a look at a batch of data now:</p>
-<div id="9f043ab9" class="cell" data-execution_count="18">
+<div id="9f043ab9" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(train_loader))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The predictor data is now a tensor in which the entries give token indices, padded with 0s. For visualization purposes we’ll show only the first 3 rows:</p>
-<div id="a2e3a0a3" class="cell" data-execution_count="19">
+<div id="a2e3a0a3" class="cell" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>X[:<span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="19">
 <pre><code>tensor([[  101, 29270,  2225,  2003,  3098,  2538, 11623,  3769,  1011,  2039,
@@ -823,7 +819,7 @@ dtype: float64</code></pre>
 </div>
 </div>
 <p>The target data is a tensor of integer indices:</p>
-<div id="16563bfe" class="cell" data-execution_count="20">
+<div id="16563bfe" class="cell" data-execution_count="21">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>y[:<span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="20">
 <pre><code>tensor([0, 0, 2])</code></pre>
@@ -839,7 +835,7 @@ dtype: float64</code></pre>
 <p><em>Image credit: <a href="https://towardsdatascience.com/creating-word-embeddings-coding-the-word2vec-algorithm-in-python-using-deep-learning-b337d0ba17a8">Towards Data Science</a></em></p>
 <p>Word embeddings are often produced as intermediate stages in many machine learning algorithms. In our case, we’re going to add an embedding layer at the very base of our model. We’ll allow the user to flexibly specify the number of dimensions.</p>
 <p>We’ll typically expect pretty low-dimensional embeddings for this lecture, but state-of-the-art embeddings will typically have a much higher number of dimensions. For example, the <a href="http://projector.tensorflow.org/">Embedding Projector demo</a> supplied by TensorFlow uses a default dimension of 200.</p>
-<div id="30e9e202" class="cell" data-execution_count="21">
+<div id="30e9e202" class="cell" data-execution_count="22">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TextClassificationModel(nn.Module):</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,vocab_size, embedding_dim, max_len, num_class):</span>
@@ -854,14 +850,14 @@ dtype: float64</code></pre>
 <span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s learn and train a model!</p>
-<div id="bf9c6acb" class="cell" data-execution_count="22">
+<div id="bf9c6acb" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>vocab_size <span class="op">=</span> <span class="bu">len</span>(tokenizer.vocab)</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>embedding_dim <span class="op">=</span> <span class="dv">10</span></span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>num_class <span class="op">=</span> <span class="bu">len</span>(categories)</span>
 <span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> TextClassificationModel(vocab_size, embedding_dim, max_len, num_class).to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="696713ae" class="cell" data-execution_count="23">
+<div id="696713ae" class="cell" data-execution_count="24">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>summary(model, input_Size <span class="op">=</span> (<span class="dv">8</span>, max_len))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="23">
 <pre><code>=================================================================
@@ -877,7 +873,7 @@ Non-trainable params: 0
 =================================================================</code></pre>
 </div>
 </div>
-<div id="b5b4ff06" class="cell" data-execution_count="24">
+<div id="b5b4ff06" class="cell" data-execution_count="25">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">.1</span>)</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="op">=</span> torch.nn.CrossEntropyLoss()</span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -916,7 +912,7 @@ Non-trainable params: 0
 <span id="cb33-36"><a href="#cb33-36" aria-hidden="true" tabindex="-1"></a>            total_count <span class="op">+=</span> y.size(<span class="dv">0</span>)</span>
 <span id="cb33-37"><a href="#cb33-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total_acc<span class="op">/</span>total_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="494a111c" class="cell" data-execution_count="25">
+<div id="494a111c" class="cell" data-execution_count="26">
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>EPOCHS <span class="op">=</span> <span class="dv">20</span></span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>):</span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    train(train_loader)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -943,7 +939,7 @@ Non-trainable params: 0
 | epoch  20 | train accuracy    0.996 | time:  0.57s</code></pre>
 </div>
 </div>
-<div id="f9777f28" class="cell" data-execution_count="26">
+<div id="f9777f28" class="cell" data-execution_count="27">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>accuracy(val_loader)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="26">
 <pre><code>0.8334612432847276</code></pre>
@@ -955,21 +951,21 @@ Non-trainable params: 0
 <section id="inspecting-word-embeddings" class="level2">
 <h2 class="anchored" data-anchor-id="inspecting-word-embeddings">Inspecting Word Embeddings</h2>
 <p>Recall from our discussion of image classification that the intermediate layers learned by the model can help us understand the representations that the model uses to construct its final outputs. In the case of word embeddings, we can simply extract this matrix from the corresponding layer of the model:</p>
-<div id="080e1c2a" class="cell" data-execution_count="27">
+<div id="080e1c2a" class="cell" data-execution_count="28">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>embedding_matrix <span class="op">=</span> model.embedding.cpu().weight.data.numpy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s also extract the words from our vocabulary:</p>
-<div id="d4665f8a" class="cell" data-execution_count="28">
+<div id="d4665f8a" class="cell" data-execution_count="29">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>tokens <span class="op">=</span> <span class="bu">list</span>(tokenizer.vocab.keys())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The embedding matrix itself has 3 columns, which is too many for us to conveniently visualize. So, instead we are going to use our friend PCA to extract a 2-dimensional representation that we can plot.</p>
-<div id="6efb0c2f" class="cell" data-execution_count="29">
+<div id="6efb0c2f" class="cell" data-execution_count="30">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="dv">2</span>)</span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> pca.fit_transform(embedding_matrix)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We’ll use the Plotly package to do the plotting. Plotly works best with dataframes:</p>
-<div id="8b796088" class="cell" data-execution_count="30">
+<div id="8b796088" class="cell" data-execution_count="31">
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>tokens.append(<span class="st">" "</span>)</span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>embedding_df <span class="op">=</span> pd.DataFrame({</span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'word'</span> : tokens,</span>
@@ -1066,7 +1062,7 @@ Non-trainable params: 0
 </div>
 </div>
 <p>And, let’s plot! We’ve used Plotly for the interactivity: hover over a dot to see the word it corresponds to.</p>
-<div id="ae1e23ed" class="cell" data-execution_count="31">
+<div id="ae1e23ed" class="cell" data-execution_count="32">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> px.scatter(embedding_df,</span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>                 x <span class="op">=</span> <span class="st">"x0"</span>,</span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>                 y <span class="op">=</span> <span class="st">"x1"</span>,</span>
@@ -1114,16 +1110,15 @@ if (outputEl) {{
 </div>
 <p>We’ve made an embedding! We might notice that this embedding appears to be a little bit “stretched out” in three main directions. Each one corresponds to one of the three classes in our training data.</p>
 <p>Although modern methods for training word embeddings are much more complex, this example illustrates a key point: word embeddings are trained as <em>byproducts</em> of the process of training a model that learns to do something else, like text classification or predictive text generation.</p>
-</section>
-<section id="bias-in-text-embeddings" class="level2">
-<h2 class="anchored" data-anchor-id="bias-in-text-embeddings">Bias in Text Embeddings</h2>
+<section id="bias-in-text-embeddings" class="level3">
+<h3 class="anchored" data-anchor-id="bias-in-text-embeddings">Bias in Text Embeddings</h3>
 <p>Whenever we create a machine learning model that might conceivably have impact on the thoughts or actions of human beings, we have a responsibility to understand the limitations and biases of that model. Biases can enter into machine learning models through several routes, including the data used as well as choices made by the modeler along the way. For example, in our case:</p>
 <ol type="1">
 <li><strong>Data</strong>: we used data from a popular news source.</li>
 <li><strong>Modeler choice</strong>: we only used data corresponding to a certain subset of labels.</li>
 </ol>
 <p>With these considerations in mind, let’s see what kinds of words our model associates with female and male genders.</p>
-<div id="48aee81a" class="cell" data-execution_count="32">
+<div id="48aee81a" class="cell" data-execution_count="33">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>feminine <span class="op">=</span> [<span class="st">"she"</span>, <span class="st">"her"</span>, <span class="st">"woman"</span>, <span class="st">"female"</span>]</span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>masculine <span class="op">=</span> [<span class="st">"he"</span>, <span class="st">"him"</span>, <span class="st">"man"</span>, <span class="st">"male"</span>]</span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1148,7 +1143,7 @@ if (outputEl) {{
 <span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
 <span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>sub_df <span class="op">=</span> embedding_df[embedding_df[<span class="st">"highlight"</span>] <span class="op">&gt;</span> <span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="9f2b8029" class="cell" data-execution_count="33">
+<div id="9f2b8029" class="cell" data-execution_count="34">
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.express <span class="im">as</span> px</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> px.scatter(sub_df,</span>
@@ -1195,8 +1190,8 @@ if (outputEl) {{
 </div>
 <p>What do you notice about some of the similarities represented in these embeddings? What do you wonder?</p>
 </section>
-<section id="representational-harm-and-representational-bias" class="level2">
-<h2 class="anchored" data-anchor-id="representational-harm-and-representational-bias">Representational Harm and Representational Bias</h2>
+<section id="representational-harm-and-representational-bias" class="level3">
+<h3 class="anchored" data-anchor-id="representational-harm-and-representational-bias">Representational Harm and Representational Bias</h3>
 <p>Earlier in this course, we discussed <em>allocative bias</em>. Allocative bias occurs when different groups have inequitable opportunities to access important resources or opportunities on the basis of their identity. We discussed examples that raised questions about equitable access to personal liberty, employment, and insurance.</p>
 <p><em>Representational bias</em> refers to the systematic cultural representation of marginalized groups in harmful ways, or of denying them cultural representation at all. The perpetuation of <em>harmful stereotypes</em> is perhaps the most well-known form of representational harm. <em>Erasure</em> is another form of representational harm in which representations or topics of interest to marginalized groups are suppressed.</p>
 <p>Here’s a very recent example (from Margaret Mitchell) illustrating how representational gender bias shows up in ChatGPT:</p>
@@ -1208,6 +1203,7 @@ I replicated this (my screenshot below).<br>Really great example of gender bias,
 </blockquote>
 <script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 <p>Another form of representational harm in ML systems is the famous historical tendency of Google Search to surface demeaning and offensive search results related to people of color. This tendency was studied by Dr.&nbsp;Safiya Noble in her book <em>Algorithms of Oppression</em>. In one of Dr.&nbsp;Nobel’s most famous examples, top results for the phrase “black girls” in 2011 consisted of links to porn sites, which did not hold true of searches for “white girls” or “black men.” As late as 2016, an image search for “gorillas” would surface pictures of Black individuals. You can find a brief synopsis of some of Dr.&nbsp;Noble’s findings <a href="https://time.com/5209144/google-search-engine-algorithm-bias-racism/">here</a> (content warning: highly sexually explicit language). Google has since taken steps to improve these specific examples.</p>
+</section>
 <section id="bias-in-google-translate" class="level3">
 <h3 class="anchored" data-anchor-id="bias-in-google-translate">Bias in Google Translate</h3>
 <p>It is well-documented that machine learning algorithms trained on natural text can inherit biases present in those texts. One of the most direct ways in which we can observe such bias is in Google Translate. Some languages, such as Hungarian, do not possess gendered pronouns. When Google Translate attempts to render these pronouns into a gendered language like English, assumptions are made, as pointed out in <a href="https://twitter.com/DoraVargha/status/1373211762108076034?ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1373211762108076034%7Ctwgr%5E%7Ctwcon%5Es1_&amp;ref_url=https%3A%2F%2Fd-7356743851859968838.ampproject.net%2F2103240330002%2Fframe.html">this Tweet by Dora Vargha</a>. Let’s demonstrate with the following English sentences.</p>
@@ -1220,16 +1216,16 @@ I replicated this (my screenshot below).<br>Really great example of gender bias,
 </blockquote>
 <p>Considering that English <em>has</em> a gender neutral pronoun (<em>they</em>), this would be an easy item to fix, which Google has thus far declined to do.</p>
 </section>
-</section>
-<section id="intersections-of-representational-and-allocative-harms" class="level2">
-<h2 class="anchored" data-anchor-id="intersections-of-representational-and-allocative-harms">Intersections of Representational and Allocative Harms</h2>
+<section id="intersections-of-representational-and-allocative-harms" class="level3">
+<h3 class="anchored" data-anchor-id="intersections-of-representational-and-allocative-harms">Intersections of Representational and Allocative Harms</h3>
 <p>In some cases, representational and allocative harms can intersect and reinforce each other. For example, modern translation systems perform impressively in certain languages but much less well in others. Some of these languages, such as Pashto and Dari, are spoken by many refugees and asylum-seekers to the US. The use of automated translation software when processing these asylum cases has drawn considerable scrutiny and <a href="https://restofworld.org/2023/ai-translation-errors-afghan-refugees-asylum/">appears to have resulted in the denial of at least one case</a> due to a machine translation error.</p>
 </section>
-<section id="more-on-bias-in-language-models" class="level2">
-<h2 class="anchored" data-anchor-id="more-on-bias-in-language-models">More on Bias in Language Models</h2>
+<section id="more-on-bias-in-language-models" class="level3">
+<h3 class="anchored" data-anchor-id="more-on-bias-in-language-models">More on Bias in Language Models</h3>
 <p>For more on the topic of bias in language models, you may wish to read the now-infamous paper by Emily Bender, Angelina McMillan-Major, Timnit Gebru, and “Shmargret Shmitchell” (Margaret Mitchell), “<a href="https://faculty.washington.edu/ebender/papers/Stochastic_Parrots.pdf">On the Dangers of Stochastic Parrots</a>.” This is the paper that ultimately led to the firing of the final two authors by Google in late 2020 and early 2021.</p>
 
 
+</section>
 </section>
 
 <p><br> <br> <span style="color:grey;">© Phil Chodrow, 2025</span></p></main> <!-- /main -->
