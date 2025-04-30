@@ -15,7 +15,7 @@ jupyter: python3
 
 *Major components of this set of lecture notes are based on the [Text Classification](https://pytorch.org/tutorials/beginner/text_sentiment_ngrams_tutorial.html) tutorial from the PyTorch documentation*.
 
-*To run this notebook in Google Colab, it is necessary to add the line `!pip install torchinfo`. 
+*To run this notebook in Google Colab, it is necessary to add the line `!pip install torchinfo`.* 
 
 In this set of notes, we'll discuss the problem of *text classification*. Text classification is a common problem in which we aim to classify pieces of text into different categories. These categories might be about:
 
