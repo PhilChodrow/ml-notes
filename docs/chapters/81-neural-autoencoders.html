@@ -363,8 +363,9 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#learning-a-circle" id="toc-learning-a-circle" class="nav-link active" data-scroll-target="#learning-a-circle">Learning a Circle</a></li>
-  <li><a href="#example-2-image-embedding" id="toc-example-2-image-embedding" class="nav-link" data-scroll-target="#example-2-image-embedding">Example 2: Image Embedding</a></li>
+  <li><a href="#manifold-learning-learning-a-circle" id="toc-manifold-learning-learning-a-circle" class="nav-link active" data-scroll-target="#manifold-learning-learning-a-circle">Manifold Learning: Learning a Circle</a></li>
+  <li><a href="#image-embedding" id="toc-image-embedding" class="nav-link" data-scroll-target="#image-embedding">Image Embedding</a></li>
+  <li><a href="#variational-autoencoder" id="toc-variational-autoencoder" class="nav-link" data-scroll-target="#variational-autoencoder">Variational Autoencoder</a></li>
   </ul>
 </nav>
     </div>
@@ -408,8 +409,8 @@ window.Quarto = {
 <pre><code>Running on cpu.</code></pre>
 </div>
 </div>
-<section id="learning-a-circle" class="level2">
-<h2 class="anchored" data-anchor-id="learning-a-circle">Learning a Circle</h2>
+<section id="manifold-learning-learning-a-circle" class="level2">
+<h2 class="anchored" data-anchor-id="manifold-learning-learning-a-circle">Manifold Learning: Learning a Circle</h2>
 <p>Let’s start by attempting to learn a circular structure in noisy circular data:</p>
 <div id="cell-3" class="cell" data-execution_count="168">
 <details class="code-fold">
@@ -538,8 +539,8 @@ Epoch 9000, loss: 0.0021929796785116196</code></pre>
 </div>
 <p>We can see that the encoder approximated the circular structure of the data relatively well for most of the data domain, with only a gap in a small part of the learned curve. As we might expect, the learned curve is not a perfect circle due to the noisiness of the data and the limited flexibility of our model.</p>
 </section>
-<section id="example-2-image-embedding" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="example-2-image-embedding">Example 2: Image Embedding</h2>
+<section id="image-embedding" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="image-embedding">Image Embedding</h2>
 <div class="page-columns page-full"><p></p><div class="no-row-height column-margin column-container"><span class="margin-aside"><em>Major components of the code in this section are adapted from <a href="https://medium.com/@rekalantar/variational-auto-encoder-vae-pytorch-tutorial-dce2d2fe0f5f">“Variational Autoencoder: PyTorch Tutorial”</a> by Reza Kalantar.</em></span></div></div>
 <p>Let’s consider the problem of embedding images in a low-dimensional space. Our aim is to learn a low-dimensional representation of a complex image data set that represents similarities between the images in some way.</p>
 <p>Image embedding via autoencoders was a state-of-the-art technique for image generation before the advent of diffusion methods.</p>
@@ -582,7 +583,7 @@ Epoch 9000, loss: 0.0021929796785116196</code></pre>
 <p>The data also comes with true labels for the digits, which we will ignore for our purposes today.</p>
 <p>This data excerpt places the images somewhat randomly. Can we find a low-dimensional representation of the data that would, for example, place the 0s together, the 9s together, etc? Maybe this representation would even place 3s near 8s and 9s near 4s, since these digits are orthographically somewhat similar.</p>
 <p>Our aim is to learn an underlying low-dimensional structure to this data using a neural autoencoder. Here is the neural network we’ll use. This autoencoder is somewhat more complex than the other encoders we’ve studied, but it operates on the same principle: use an encoder to learn a low-dimensional code, alongside a decoder which reconstructs approximate original data points from the low-dimensional code.</p>
-<div id="cell-21" class="cell" data-execution_count="383">
+<div id="cell-21" class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AutoEncoder(nn.Module):</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_dim<span class="op">=</span><span class="dv">784</span>, device<span class="op">=</span>device):</span>
@@ -607,14 +608,8 @@ Epoch 9000, loss: 0.0021929796785116196</code></pre>
 <span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>            nn.Sigmoid()</span>
 <span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>            )</span>
 <span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>     </span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> encode(<span class="va">self</span>, x):</span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.encoder(x)</span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> decode(<span class="va">self</span>, x):</span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.decoder(x)</span>
-<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
-<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.decode(<span class="va">self</span>.encode(x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.decoder(<span class="va">self</span>.encoder(x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>For data that has a natural minimum and maximum value, it is often more appropriate to use a cross-entropy loss function than a square-error loss function.</p>
 <div id="cell-23" class="cell" data-execution_count="337">
@@ -757,7 +752,10 @@ Epoch 9000, loss: 0.0021929796785116196</code></pre>
 </div>
 </div>
 </div>
-<div id="cell-37" class="cell" data-execution_count="363">
+</section>
+<section id="variational-autoencoder" class="level2">
+<h2 class="anchored" data-anchor-id="variational-autoencoder">Variational Autoencoder</h2>
+<div id="cell-38" class="cell" data-execution_count="363">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> VariationalAutoEncoder(nn.Module):</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_dim<span class="op">=</span><span class="dv">784</span>, hidden_dim<span class="op">=</span><span class="dv">400</span>, latent_dim<span class="op">=</span><span class="dv">200</span>, device<span class="op">=</span>device):</span>
@@ -805,14 +803,14 @@ Epoch 9000, loss: 0.0021929796785116196</code></pre>
 <span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x_hat, mean, logvar</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The loss function and training loops are slightly more complicated due to the need to incorporate the distributional representations of the data into the loss function.</p>
-<div id="cell-39" class="cell" data-execution_count="364">
+<div id="cell-40" class="cell" data-execution_count="364">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> loss_function(x, x_hat, mean, log_var):</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    reproduction_loss <span class="op">=</span> nn.functional.binary_cross_entropy(x_hat, x, reduction<span class="op">=</span><span class="st">'sum'</span>)</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    KLD <span class="op">=</span> <span class="op">-</span> <span class="fl">0.5</span> <span class="op">*</span> torch.<span class="bu">sum</span>(<span class="dv">1</span><span class="op">+</span> log_var <span class="op">-</span> mean.<span class="bu">pow</span>(<span class="dv">2</span>) <span class="op">-</span> log_var.exp())</span>
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> reproduction_loss <span class="op">+</span> KLD</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-40" class="cell" data-execution_count="365">
+<div id="cell-41" class="cell" data-execution_count="365">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(model, optimizer, epochs, device):</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
@@ -834,11 +832,11 @@ Epoch 9000, loss: 0.0021929796785116196</code></pre>
 <span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"</span><span class="ch">\t</span><span class="st">Epoch"</span>, epoch <span class="op">+</span> <span class="dv">1</span>, <span class="st">"</span><span class="ch">\t</span><span class="st">Average Loss: "</span>, overall_loss<span class="op">/</span>(batch_idx<span class="op">*</span>batch_size))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-41" class="cell" data-execution_count="366">
+<div id="cell-42" class="cell" data-execution_count="366">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>VAE <span class="op">=</span> VariationalAutoEncoder().to(device)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(VAE.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-42" class="cell" data-execution_count="367">
+<div id="cell-43" class="cell" data-execution_count="367">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>train(VAE, optimizer, epochs<span class="op">=</span><span class="dv">20</span>, device<span class="op">=</span>device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    Epoch 1     Average Loss:  182.350444947308
@@ -867,7 +865,7 @@ Epoch 9000, loss: 0.0021929796785116196</code></pre>
 </div>
 </div>
 <p>How does the latent space look under the variational autoencoder?</p>
-<div id="cell-44" class="cell" data-execution_count="374">
+<div id="cell-45" class="cell" data-execution_count="374">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>plot_latent_space(VAE, scale <span class="op">=</span> <span class="fl">1.5</span>, n <span class="op">=</span> <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
