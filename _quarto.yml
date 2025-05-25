@@ -8,6 +8,7 @@ project:
 
 book: 
   title: "Machine Learning"
+  google-analytics: "G-ZLTPD14PN2"
   author: "Phil Chodrow"
   date: "01/15/2024"
   body-footer: |
@@ -28,6 +29,7 @@ format:
     callout-appearance: simple
     fig-cap-location: margin
     highlight-style: atom-one
+
     
 
 # jupyter: conda-env-ml-0451-py
