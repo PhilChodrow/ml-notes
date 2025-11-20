@@ -1,0 +1,287 @@
+---
+code-fold: true
+code-summary: "Show code"
+jupyter: python3
+---
+
+# Data, Signal, and Noise
+
+In these notes, we'll expand on the following idea: 
+
+> Machine learning is the science and practice of building algorithms that distinguish between signal and noise in real-world data. 
+
+Consider the following simple data set:
+
+```{python}
+import torch 
+from matplotlib import pyplot as plt
+plt.style.use("seaborn-v0_8-whitegrid")
+
+scatterplot_kwargs = dict(color = "black", label = "data", facecolors = "none", s = 40, alpha = 0.6)
+
+n_points = 20
+x = torch.linspace(0, 10, n_points)
+y = 2.0 * x + 1.0 + torch.randn(n_points) * 3.0
+
+y_pred = 2.0 * x + 1.0  # underlying pattern (signal)
+
+
+fig, ax = plt.subplots(figsize = (6, 4))
+ax.scatter(x.numpy(), y.numpy(), **scatterplot_kwargs)
+ax.plot(x.numpy(), y_pred.numpy(), color = "black", linestyle = "--", label = r"$y = f(x) = 2x + 1$")
+ax.set(xlabel = r"$x$", ylabel = r"$y$")
+plt.legend()
+plt.show()
+```
+
+We can think of this data as consisting of two components: a **signal** expressed by a relationship $y \approx f(x)$ (in this case $f(x) = 2x + 1$), and some **noise** that partially obscures this relationship. Schematically, we can write this relationship as: 
+
+$$
+\begin{aligned}
+    y_i = f(x_i) + \epsilon_i\;,
+\end{aligned}
+$${#eq-signal-plus-noise}
+
+which says that the $i$th value of the target is equal to some function $f(x_i)$ of the input variable $x_i$, plus some random noise term $\epsilon_i$. 
+
+## Overfitting
+
+It's important to emphasize here that the thing we want to learn is *not* the individual targets $y_i$, but rather the underlying function $f(x)$. To see why, let's consider an example of what goes wrong if we try to learn the targets $y_i$ exactly. This is called *interpolation*. 
+
+```{python}
+from scipy import interpolate
+# Create an interpolating function
+f_interp = interpolate.interp1d(x.numpy(), y.numpy(), kind='cubic')
+x_dense = torch.linspace(0, 10, 100)
+y_interp = f_interp(x_dense.numpy())
+
+fig, ax = plt.subplots(figsize = (6, 4))
+ax.scatter(x.numpy(), y.numpy(), **scatterplot_kwargs)
+ax.plot(x_dense.numpy(), y_interp, color = "red", linestyle = "--", label = "interpolating fit", zorder = -10)
+ax.set(xlabel = r"$x$", ylabel = r"$y$")
+plt.legend()
+plt.show()
+```
+
+The problem here with interpolation is that while we have perfectly fit our training data, we have not learned the underlying pattern $f(x)$. If we were to generate new data from the same process, we would likely find that our interpolating function doesn't actually make very good predictions about that data at all: 
+
+```{python}
+# Generate new data
+y_new = 2.0 * x_dense + 1.0 + torch.randn(100) * 3.0
+fig, ax = plt.subplots(figsize = (6, 4))
+ax.scatter(x_dense.numpy(), y_new.numpy(), **scatterplot_kwargs)
+ax.plot(x_dense.numpy(), y_interp, color = "red", linestyle = "--", label = "interpolating fit", zorder = -10)
+ax.set(xlabel = r"$x$", ylabel = r"$y$")
+plt.legend()
+plt.show()
+```
+
+We observe a number of irrelevant fluctuations in the interpolating fit that do not correspond to the underlying pattern. This phenomenon is called **overfitting**: by trying to fit the noise in our training data, we have failed to learn the true signal. We'll learn how to quantify overfitting once we begin to study measures of model quality. 
+
+## Modeling the Noise
+
+If we want to learn the signal $f$ in @eq-signal-plus-noise, it's helpful to learn how to talk mathematically about the noise term $\epsilon_i$. To do this, we need to step briefly into the language of probability theory. Our standing assumption will be that the nois terms $\epsilon_i$ are *random variables* drawn from some probability distribution. This means that each time we observe a new data point, we get a different value of $\epsilon_i$ drawn from the same distribution.
+
+The noise distribution we will usually consider is the normal distribution, also called the normal distribution. 
+
+
+A random variable $\epsilon$ has a normal distribution with mean $\mu$ and standard deviation $\sigma$ if the probability that $\epsilon$ has a value between $a$ and $b$ is given by:
+
+$$
+\begin{aligned}
+    \mathbb{P}(a \leq \epsilon \leq b) = \int_a^b p_\epsilon(x;\mu, \sigma) \, dx\;,
+\end{aligned}
+$$
+
+where 
+
+$$
+\begin{aligned}
+p_\epsilon(x;\mu, \sigma) = \frac{1}{\sigma \sqrt{2 \pi}} \exp\left(-\frac{(x - \mu)^2}{2\sigma^2}\right)\;.
+\end{aligned}
+$$
+
+
+
+```{python}
+a = -0.2
+b = 0.05
+
+mu = 0.0
+sigma = 0.25
+
+x_vals = torch.linspace(-1, 1, 100)
+
+def normal_pdf(x, mu, sigma):
+    return (1 / (sigma * torch.sqrt(torch.tensor(2 * 3.141592653589793)))) * \
+            torch.exp(-0.5 * ((x - mu) / sigma) ** 2)
+
+pdf_vals = normal_pdf(x_vals, mu, sigma)
+fig, ax = plt.subplots(figsize = (6, 4))
+ax.plot(x_vals.numpy(), pdf_vals.numpy(), label='PDF of Normal Distribution')
+ax.fill_between(x_vals.numpy(), pdf_vals.numpy(), where=(x_vals.numpy() >= a) & (x_vals.numpy() <= b), color='lightblue', alpha=0.5, label=r'Area: $P({:.1f} \leq \epsilon \leq {:.1f})$'.format(a, b))
+ax.set(xlabel = r"$x$", ylabel = r"$p_\epsilon(x; \mu, \sigma)$")
+plt.legend()
+plt.show()
+```
+
+Here, $p_\epsilon(x;\mu, \sigma)$ is called the *probability density function* (PDF) of the normal distribution with mean $\mu$ and standard deviation $\sigma$. The mean $\mu$ indicates the "center" of the distribution, while the standard deviation $\sigma$ indicates how "spread out" the distribution is.
+
+```{python}
+#| column: margin
+#| fig-cap: "Normal distribution PDFs for different values."
+#| label: fig-normal-pdfs
+
+fig, ax = plt.subplots(figsize = (3, 2))
+
+for mu, sigma in [(0, 1), (0, 2), (2, 1)]:
+    x_vals = torch.linspace(mu - 4*sigma, mu + 4*sigma, 100)
+    pdf_vals = normal_pdf(x_vals, mu, sigma)
+
+    ax.plot(x_vals.numpy(), pdf_vals.numpy(), label=f'μ={mu}, σ={sigma}')
+
+ax.set_title('Normal Distribution PDFs')
+ax.set_xlabel('x')
+ax.set_ylabel('Probability Density')
+ax.legend()
+```
+
+We use the shorthand notation $\epsilon \sim \mathcal{N}(\mu, \sigma^2)$ to indicate that the random variable $\epsilon$ has a normal distribution with mean $\mu$ and standard deviation $\sigma$.
+
+We can generate random samples from a normal distribution using PyTorch's `torch.normal` function. If we make a histogram of these samples, we see that they approximately agree with the PDF of the normal distribution:
+
+```{python}
+#| column: margin
+#| fig-cap: "Histogram of samples from a normal distribution compared to its PDF."
+#| label: fig-normal-histogram-comparison
+mu = 0.0
+sigma = 1.0
+samples = torch.normal(mu, sigma, size=(1000,))
+
+x_vals = torch.linspace(mu - 4*sigma, mu + 4*sigma, 100)
+
+pdf_vals = normal_pdf(x_vals, mu, sigma)
+
+fig, ax = plt.subplots(figsize = (3, 2))
+ax.hist(samples.numpy(), bins=30, density=True, alpha=0.6, color='steelblue', label='Sampled Data')
+ax.plot(x_vals.numpy(), pdf_vals.numpy(), label='PDF of Normal Distribution', color='black')
+ax.set(xlabel = r"$x$", ylabel = r"$p_\epsilon(x; \mu, \sigma)$")
+plt.show()
+```
+
+## Properties of the Normal Distribution
+
+The normal distribution has a number of useful properties for modeling noise in data. Here are a few: 
+
+1. **Translation**: If $\epsilon$ is normally distributed with mean $\mu$ and standard deviation $\sigma$, then the random variable $\epsilon + c$ (where $c$ is a constant) is normally distributed with mean $\mu + c$ and standard deviation $\sigma$. In other words, if $\epsilon \sim \mathcal{N}(\mu, \sigma^2)$, then $\epsilon + c \sim \mathcal{N}(\mu + c, \sigma^2)$.
+2. **Scaling**: If $\epsilon$ is normally distributed with mean $\mu$ and standard deviation $\sigma$, then the random variable $a \epsilon$ (where $a$ is a constant) is normally distributed with mean $a \mu$ and standard deviation $|a| \sigma$. In other words, if $\epsilon \sim \mathcal{N}(\mu, \sigma^2)$, then $a \epsilon \sim \mathcal{N}(a \mu, (a \sigma)^2)$.
+
+The *expectation* or *mean* of a continuous-valued random variable $\epsilon$ with probability density function $p_\epsilon(x)$ is defined as:
+
+$$
+\begin{aligned}
+    \mathbb{E}[\epsilon] = \int_{-\infty}^{\infty} x \, p_\epsilon(x) \, dx\;.
+\end{aligned}
+$$
+
+For a normally distributed random variable with mean $\mu$ and standard deviation $\sigma$, it is possible to prove that $\mathbb{E}[\epsilon] = \mu$.
+
+The *variance* of a continuous-valued random variable $\epsilon$ with probability density function $p_\epsilon(x)$ is defined as:
+
+$$
+\begin{aligned}
+    \text{Var}(\epsilon) = \mathbb{E}[(\epsilon - \mathbb{E}[\epsilon])^2] = \int_{-\infty}^{\infty} (x - \mathbb{E}[\epsilon])^2 \, p_\epsilon(x) \, dx\;.
+\end{aligned}
+$$
+
+We can interpret the variance as a measure of how far away $\epsilon$ "usually, on average" lies from its mean value. For a normally distributed random variable with mean $\mu$ and standard deviation $\sigma$, it is possible to prove that $\text{Var}(\epsilon) = \sigma^2$.
+
+## Normal Noise
+
+Using these properties, let's return now to our signal-plus-noise paradigm: 
+
+$$
+\begin{aligned}
+    y_i = f(x_i) + \epsilon_i\;,
+\end{aligned}
+$$
+
+If we assume that $\epsilon_i \sim \mathcal{N}(0, \sigma^2)$ (i.e., that the noise terms are independent and identically distributed normal random variables with mean zero and standard deviation $\sigma$), then we can use the properties of the normal distribution to deduce that
+
+$$
+\begin{aligned}
+    y_i &\sim \mathcal{N}(f(x_i), \sigma^2)\;.
+\end{aligned}
+$${#eq-normal-noise}
+
+So, we are modeling each data point $y_i$ as a normal random variable whose mean is given by the underlying signal $f(x_i)$, and whose standard deviation is given by the noise level $\sigma$. 
+
+## Data Generating Distributions
+
+We can think of @eq-normal-noise as defining a *data generating distribution* for the target variable $y_i$ given the input variable $x_i$. In other words, for each value of $x_i$, we have a corresponding probability distribution for the possible values of $y_i$ that we might observe. The shape of this distribution is determined by the underlying signal function $f(x_i)$ and the noise level $\sigma$. Given a data generating distribution, we can simulate new data points by picking $x_i$s in some way and then sampling corresponding $y_i$s from the distribution. 
+
+```{python}
+#| fig-cap: "Two different data sets from the same data-generating distribution, with $f(x) = 2x + 1$."
+
+fig, axarr = plt.subplots(1, 2, figsize = (8, 4))
+
+n_points = 20
+sigma = 1.0
+x = torch.linspace(0, 1, n_points)
+sig = 0.3
+
+for i in range(2): 
+    ax = axarr[i]
+    y = 2.0 * x + 1.0 + torch.randn(n_points) * sig
+    ax.scatter(x.numpy(), y.numpy(), **scatterplot_kwargs)
+
+axarr[0].set_title("Data Set 1")
+axarr[1].set_title("Data Set 2")
+for ax in axarr:
+    ax.set(xlabel = r"$x$", ylabel = r"$y$")
+```
+
+## Likelihood
+
+We've now seen that under the assumption that $y_i = f(x_i) + \epsilon_i$, where $\epsilon_i \sim \mathcal{N}(0, \sigma^2)$, we can model each data point $y_i$ as a normal random variable with mean $f(x_i)$ and standard deviation $\sigma$: $y_i \sim \mathcal{N}(f(x_i), \sigma^2)$. With this model, a common approach to assessing the "fit" of our choice of the function $f$ is to compute the *likelihood* of the observed data under this model. The likelihood for independent and identically-distributed noise terms is 
+
+$$
+\begin{aligned}
+    L = \prod_{i = 1}^n p_{y}(y_i; f(x_i), \sigma^2)
+\end{aligned}
+$$
+
+where $p_{y}(y_i; f(x_i), \sigma^2)$ is the probability density function of the normal distribution with mean $f(x_i)$ and standard deviation $\sigma$, evaluated at the observed value $y_i$. It's very standard to work with the *log-likelihood* instead of the likelihood itself, since the log-likelihood turns products into sums:
+
+$$
+\begin{aligned}
+    \mathcal{L} = \log L = \sum_{i = 1}^n \log p_{y}(y_i; f(x_i), \sigma^2)\;.
+\end{aligned}
+$$
+
+To see how the likelihood can give us a tool to assess model fit, we can compute the likelihood of our observed data for different choices of the function $f$.
+
+```{python}
+
+f_1 = lambda x: 2.0 * x + 1.0
+f_2 = lambda x: 0.5 * x + 2.0
+
+lik_1 = normal_pdf(y, f_1(x), sig).log().sum()
+lik_2 = normal_pdf(y, f_2(x), sig).log().sum()
+
+fig, ax = plt.subplots(figsize = (6, 4))
+
+ax.scatter(x.numpy(), y.numpy(), **scatterplot_kwargs)
+ax.plot(x.numpy(), f_1(x).numpy(), color = "firebrick", linestyle = "--", label = r"$f_1(x) = 2x + 1$")
+ax.plot(x.numpy(), f_2(x).numpy(), color = "steelblue", linestyle = "--", label = r"$f_2(x) = 0.5x + 2$")
+ax.set(xlabel = r"$x$", ylabel = r"$y$")
+plt.legend()
+plt.title(f"Likelihoods: L1 = {lik_1:.2f}, L2 = {lik_2:.2f}")
+plt.show()
+```
+
+The model which visually fits the data has a much higher log-likelihood, suggesting that given our assumption about normally-distributed noise, it is a better model of the observed data.
+
+Soon, we'll see how to use the likelihood as a tool to *learn* the function $f$ from data.
+
+

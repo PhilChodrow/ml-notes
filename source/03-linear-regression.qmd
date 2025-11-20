@@ -1,0 +1,209 @@
+---
+code-fold: true
+code-summary: "Show code"
+jupyter: python3
+---
+
+# [Last time...](/02-signal-and-noise)
+
+...we introduced the idea that the data we observe is composed of *signal* mixed with *noise*. In the case of trying to predict a continuous target $y$ from a feature $x$, we wrote this as
+
+$$
+\begin{aligned}
+    y_i \approx f(x_i) + \epsilon_i\;,
+\end{aligned}
+$$
+
+where $f(x)$ is a function $\mathbb{R} \to \mathbb{R}$ that describes the signal, and $\epsilon_i$ is a random variable that describes the noise on data point $i$. We also introduced the normal distribution as a common model for the noise term $\epsilon_i$; our assumption was that each $\epsilon_i$ is an independent draw from a normal distribution with mean zero and standard deviation $\sigma$.
+
+::: {.column-margin}
+
+Recall that to say that random variable $\epsilon$ has a *normal* distribution means that 
+$$
+\begin{aligned}
+    \mathbb{P}(a \leq \epsilon \leq b) = \int_a^b p_\epsilon(x;\mu, \sigma) \, dx\;,
+\end{aligned}
+$$
+
+where 
+
+$$
+\begin{aligned}
+p_\epsilon(x;\mu, \sigma) = \frac{1}{\sigma \sqrt{2 \pi}} \exp\left(-\frac{(x - \mu)^2}{2\sigma^2}\right)\;.
+\end{aligned}
+$$
+
+:::
+
+Under these assumptions, we saw that $y_i$ is a normal random variable with mean $f(x_i)$ and standard deviation $\sigma$. We introduced the *likelihood function* and the *log-likelihood function* as tools for quantifying the fit of a candidate model $\hat{f}(x)$ to a data set $\{(x_i, y_i)\}_{i=1}^n$: 
+
+$$
+\begin{aligned}
+    \mathcal{L} = \sum_{i = 1}^n \log p_\epsilon(y_i; \hat{f}(x_i), \sigma)\;.
+\end{aligned}
+$${#eq-log-likelihood}
+
+## Least-Squares Regression
+
+We can use the log-likelihood from @eq-log-likelihood to learn a model $\hat{f}$ by systematically searching for an $\hat{f}$ that maximizes $\mathcal{L}$. This approach is known as the method of *maximum likelihood estimation* (MLE). Conventionally in machine learning, we instead minimize the *negative* log-likelihood, which comes to the same thing. 
+
+Under the assumption of independent, identical, normally-distributed noise, the log-likelihood takes a particularly simple form: 
+
+$$
+\begin{aligned}
+    \mathcal{L} &= \sum_{i = 1}^n \log p_\epsilon(y_i; \hat{f}(x_i), \sigma) \\
+    &= \sum_{i = 1}^n \log \left( \frac{1}{\sigma \sqrt{2 \pi}} \exp\left(-\frac{(y_i - \hat{f}(x_i))^2}{2\sigma^2}\right) \right) \\
+    &= \sum_{i = 1}^n \left( -\log(\sigma \sqrt{2 \pi}) - \frac{(y_i - \hat{f}(x_i))^2}{2\sigma^2} \right) \\
+    &= -n \log(\sigma \sqrt{2 \pi}) - \frac{1}{2\sigma^2} \sum_{i = 1}^n (y_i - \hat{f}(x_i))^2 \\ 
+    &= -C_1 - C_2 \sum_{i = 1}^n (y_i - \hat{f}(x_i))^2\;,
+\end{aligned}
+$$
+
+where $C_1$ and $C_2$ are constants that don't depend in any way on our choice of model $\hat{f}$. So, to maximize the log-likelihood, we can equivalently minimize the quantity $\sum_{i = 1}^n (y_i - \hat{f}(x_i))^2$. It is conventional to normalize by the number of data points $n$, giving us the *mean squared error* (MSE) loss function:
+
+$$
+\begin{aligned}
+    \text{MSE} = \frac{1}{n} \sum_{i = 1}^n (y_i - \hat{f}(x_i))^2\;.
+\end{aligned}
+$$
+
+Another helpful way to write this is 
+
+$$
+\begin{aligned}
+    \text{MSE} &= \frac{1}{n} \sum_{i = 1}^n (y_i - \hat{y}_i)^2 \\ 
+    & \text{where} \\ 
+              \hat{y}_i &= f(x_i)\;.
+\end{aligned}
+$$
+
+Since we want to make the log-likelihood large, it suffices to make the MSE small. We have, at least, derived the *least-squares regression problem*: 
+
+$$
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\begin{aligned}
+    \hat{f} = \argmin_{f} \quad \frac{1}{n} \sum_{i = 1}^n (y_i - f(x_i))^2\;.
+\end{aligned}
+$${#eq-least-squares}
+
+That is, our guess $\hat{f}$ for the signal function $f$ is the function that minimizes the mean squared error between the predicted values $\hat{y}_i = f(x_i)$ and the observed values $y_i$.
+
+## Linear Regression
+
+### One Dimension
+
+@eq-least-squares is a very helpful framework for thinking about prediction problems, but it has a major drawback: there's just too many possible functions $f$ for us to reasonably search over! In order to make progress, we need to constrain the set of possible functions $f$ in some way. Our assumption will be that $f$ is a *linear function* of its inputs. If we have only one feature $x \in \mathbb{R}$, then this means that $f$ is of the form 
+
+$$
+\begin{aligned}
+    f(x) = wx + b\;,
+\end{aligned}
+$$
+
+for some choice of parameters $w, b \in \mathbb{R}$. Here, $w$ is known as the *weight* or *slope*, and $b$ is known as the *bias* or *intercept*. This is a reasonable model for data that displays linear trend.  
+
+```{python}
+#| column: margin
+#| fig-cap: "Example data displaying a linear trend with one feature."
+
+import torch 
+from matplotlib import pyplot as plt
+plt.style.use("seaborn-v0_8-whitegrid")
+
+scatterplot_kwargs = dict(color = "black", label = "data", facecolors = "none", s = 40, alpha = 0.6)
+
+n_points = 20
+x = torch.linspace(0, 10, n_points)
+y = 2.0 * x + 1.0 + torch.randn(n_points) * 2.0
+
+# y_pred = 2.0 * x + 1.0  # underlying pattern (signal)
+
+
+fig, ax = plt.subplots(figsize = (6, 4))
+ax.scatter(x.numpy(), y.numpy(), **scatterplot_kwargs)
+# ax.plot(x.numpy(), y_pred.numpy(), color = "black", linestyle = "--", label = r"$y = f(x) = 2x + 1$")
+ax.set(xlabel = r"$x$", ylabel = r"$y$")
+plt.legend()
+plt.show()
+```
+
+With the assumption of linear structure, our least-squares regression problem from @eq-least-squares becomes
+
+$$
+\begin{aligned}
+    \hat{w}, \hat{b} = \argmin_{w, b} \quad \frac{1}{n} \sum_{i = 1}^n (y_i - (wx_i + b))^2\;.
+\end{aligned}
+$${#eq-linear-regression-1d}
+
+It is possible to solve @eq-linear-regression-1d using calculus. There is a critical point where the derivatives with respect to $w$ and $b$ are both zero: 
+
+[The *partial derivative* notation $\frac{\partial}{\partial w}$ means "take the derivative with respect to variable $w$, treating any other variables as constants."]{.aside}
+
+$$
+\begin{aligned}
+    \frac{\partial}{\partial w} \left( \frac{1}{n} \sum_{i = 1}^n (y_i - (wx_i + b))^2 \right) &= 0 \\ 
+    \frac{\partial}{\partial b} \left( \frac{1}{n} \sum_{i = 1}^n (y_i - (wx_i + b))^2 \right) &= 0\;.
+\end{aligned}
+$$
+
+Starting with the first equation, we have that 
+
+$$
+\begin{aligned}
+    \frac{\partial}{\partial w} \left( \frac{1}{n} \sum_{i = 1}^n (y_i - (wx_i + b))^2 \right) &= \frac{1}{n} \sum_{i = 1}^n 2 (y_i - (wx_i + b)) (-x_i) \\ 
+    &= -\frac{2}{n} \sum_{i = 1}^n x_i y_i + \frac{2}{n} \sum_{i = 1}^n x_i (wx_i + b) \\ 
+    &= -\frac{2}{n} \sum_{i = 1}^n x_i y_i + \frac{2w}{n} \sum_{i = 1}^n x_i^2 + \frac{2b}{n} \sum_{i = 1}^n x_i\;.
+\end{aligned}
+$$
+
+Setting this expression equal to $0$ and solving for $w$ yields 
+
+$$
+\begin{aligned}
+    \hat{w} = \frac{\sum_{i = 1}^n {x_iy_i - b\sum_{i=1}^n x_i}}{\sum_{i=1}^n x_i^2}
+\end{aligned}
+$$
+
+Now moving on to the derivative with respect to $b$, we have 
+
+$$
+\begin{aligned}
+    \frac{\partial}{\partial b} \left( \frac{1}{n} \sum_{i = 1}^n (y_i - (wx_i + b))^2 \right) = \frac{1}{n} \sum_{i = 1}^n 2 (y_i - (wx_i + b)) (-1) = -\frac{2}{n} \sum_{i = 1}^n y_i + \frac{2w}{n} \sum_{i = 1}^n x_i + 2b\;.
+\end{aligned}
+$$
+
+from which we obtain 
+
+#### Implementation
+
+Because we can actually obtain a math formula for $\hat{w}$ and $\hat{b}$, we can implement least-squares linear regression in one dimension without the need for any iterative algorithms: 
+
+```{python}
+#| column: margin
+#| fig-cap: "Least-squares linear regression fit to data with one feature."
+
+def linear_regression_1d(x, y):
+    n_points = x.shape[0]
+    w_hat = (torch.sum(x * y) - (torch.sum(x) * torch.sum(y)) / n_points) / (torch.sum(x**2) - (torch.sum(x)**2) / n_points)
+    b_hat = (torch.sum(y) - w_hat * torch.sum(x)) / n_points
+    return w_hat, b_hat
+
+def linear_predict_1d(x, w, b):
+    return w * x + b
+
+w_hat, b_hat = linear_regression_1d(x, y)
+y_pred = linear_predict_1d(x, w_hat, b_hat)
+
+fig, ax = plt.subplots(figsize = (6, 4))
+ax.scatter(x, y, **scatterplot_kwargs)
+ax.plot(x, y_pred, color = "firebrick", label = r"Least-squares linear regression predictor")
+ax.set(xlabel = r"$x$", ylabel = r"$y$")
+plt.legend()
+plt.show()
+```
+
+Our mathematical framework of least-squares regression, which we obtained from an assumption about normally-distributed noise, has led us to a simple algorithm that appears to provide a reasonable fit for linear data. 
+
+
+
